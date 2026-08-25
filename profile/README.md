@@ -34,7 +34,7 @@ subscriptions, no one else's servers.
         <img src="https://raw.githubusercontent.com/getmaipai/.github/main/brand/maipai-desktop-icon-light.png" alt="MaiPai Desktop" width="72">
       </picture>
     </td>
-    <td><b>MaiPai Desktop</b><br>The desktop app for MaiPai Home, integrated with your dock and your computer.</td>
+    <td><b>MaiPai Desktop</b><br>The desktop app for MaiPai Home, integrated with your dock and your computer. It can control MaiPai Bot too.</td>
   </tr>
   <tr>
     <td align="center">
@@ -43,7 +43,7 @@ subscriptions, no one else's servers.
         <img src="https://raw.githubusercontent.com/getmaipai/.github/main/brand/maipai-go-icon-light.png" alt="MaiPai Go" width="72">
       </picture>
     </td>
-    <td><b>MaiPai Go</b><br>Brings it all to your TV and your phone.</td>
+    <td><b>MaiPai Go</b><br>The TV and phone app for MaiPai Home, so everything comes with you around the house or away from it.</td>
   </tr>
   <tr>
     <td align="center">
