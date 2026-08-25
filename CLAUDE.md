@@ -128,6 +128,11 @@ These apply to docs, UI copy, comments, commit messages, changelogs, issues.
 - The `release` skill in the maipai plugin runs the whole ceremony: checks,
   clean-clone build, changelog from commits since the last tag, screenshot
   regeneration, docs drift check, tag, GitHub release.
+- **Release notes are the changelog, nothing more.** The only preamble is
+  one short quoted line of links (install guide for new users, the update
+  page for existing ones, what any attached files are), then "What
+  changed". No instruction blocks in release notes, and no workflow ever
+  writes a release body: notes own the page.
 - Downloadable model packs and large binaries ship as release assets, not
   tracked files.
 
