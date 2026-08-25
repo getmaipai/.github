@@ -11,8 +11,8 @@ product, with the product's glyph inside the smile. All PNGs are transparent.
 - `<kind>`: `icon` (mark only) or `logo` (mark + wordmark)
 - `<background>`: `light` (dark glyph/text, for light backgrounds) or `dark`
   (white glyph/text, for dark backgrounds). The master `brand-icon` is solid
-  purple and works on both, so it carries no suffix. `home-logo-dark-glow` is
-  a neon treatment for hero/banner use.
+  purple and works on both, so it carries no suffix. `home-logo-light` uses a
+  soft glow treatment around its accents; it still targets light backgrounds.
 
 ## Product colors
 
@@ -31,4 +31,3 @@ product, with the product's glyph inside the smile. All PNGs are transparent.
   palette and iconography).
 - App icons, favicons, DMG art, and docs-site logos are derived from these
   masters during each product's build/asset pass; don't hand-redraw variants.
-- Known gap: no `maipai-home-logo-light` master exists yet.
