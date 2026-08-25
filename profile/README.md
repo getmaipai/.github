@@ -9,6 +9,8 @@
 
 <h3 align="center">Private, local AI that's actually yours.</h3>
 
+<p align="center"><a href="https://getmaipai.github.io/"><b>getmaipai.github.io</b></a></p>
+
 <p align="center">
 Your own AI at home, a robot companion, and apps to reach them anywhere, all on your own hardware, never the cloud.
 </p>
@@ -50,7 +52,7 @@ Your own AI at home, a robot companion, and apps to reach them anywhere, all on 
         <img src="https://raw.githubusercontent.com/getmaipai/.github/main/brand/maipai-bot-icon-light.png" alt="MaiPai Bot" width="72">
       </picture>
     </td>
-    <td><b>MaiPai Bot</b><br>A robot friend with its own onboard AI: it sees, hears, talks, thinks, moves, self-charges, guards your home in sentry mode, and remembers the family it lives with.</td>
+    <td><b>MaiPai Bot</b><br>A robot friend with its own onboard AI: it sees, hears, talks, thinks, moves, self-charges, and guards your home in sentry mode. It recognizes each person by face and voice, keeps its own memories of people, facts, and experiences, and learns and evolves with your family.</td>
   </tr>
 </table>
 

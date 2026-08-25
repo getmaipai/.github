@@ -22,6 +22,5 @@ Mac and Windows app for your MaiPai Home and Bot, right on your desktop, integra
 iPhone and Apple TV app for your MaiPai Home and Bot: your own AI, media, and robot companion, wherever you are.
 
 **bot (MaiPai Bot):**
-A robot friend with its own onboard AI: it sees, hears, talks, thinks,
-moves, self-charges, and remembers the family it lives with - for
-companionship, privacy, and independence.
+A robot friend with its own onboard AI: it sees, hears, talks, thinks, moves, self-charges, and guards your home in sentry mode. It recognizes each person by face and voice, keeps its own memories of people, facts, and experiences, and learns and evolves with your family.
+
