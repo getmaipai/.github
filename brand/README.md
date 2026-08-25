@@ -10,14 +10,14 @@ product, with the product's glyph inside the smile. All PNGs are transparent.
 - `<product>`: `brand` (the org/master mark), `home`, `desktop`, `go`, `bot`
 - `<kind>`: `icon` (mark only) or `logo` (mark + wordmark)
 - `<background>`: `light` (dark glyph/text, for light backgrounds) or `dark`
-  (white glyph/text, for dark backgrounds). The master `brand-icon` is solid
-  purple and works on both, so it carries no suffix.
+  (white glyph/text, for dark backgrounds). Every mark, including the org
+  `brand` mark, has both variants.
 
 ## Product colors
 
 | Product | Accent | Inner glyph |
 |---|---|---|
-| Brand (org) | Purple | none (solid mark) |
+| Brand (org) | Purple | AI brain (purple-to-blue halves, lens center, teal sparkles) |
 | Home | Cyan | house |
 | Desktop | Pink | monitor + cursor |
 | Go | Green | wifi |
