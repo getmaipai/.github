@@ -10,8 +10,9 @@ product, with the product's glyph inside the smile. All PNGs are transparent.
 - `<product>`: `brand` (the org/master mark), `home`, `desktop`, `go`, `bot`
 - `<kind>`: `icon` (mark only) or `logo` (mark + wordmark)
 - `<background>`: `light` (dark glyph/text, for light backgrounds) or `dark`
-  (white glyph/text, for dark backgrounds). Every mark, including the org
-  `brand` mark, has both variants.
+  (white glyph/text, for dark backgrounds). The org `brand-icon` works on
+  both backgrounds and carries no suffix; the brand wordmark logo has both
+  variants.
 
 ## Product colors
 
