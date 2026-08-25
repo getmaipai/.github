@@ -1,0 +1,13 @@
+{
+  "name": "maipai",
+  "owner": {
+    "name": "JesseWebDotCom"
+  },
+  "plugins": [
+    {
+      "name": "maipai",
+      "source": "./plugin",
+      "description": "MaiPai org shared skills: release ceremony, docs refresh, verification contract."
+    }
+  ]
+}
