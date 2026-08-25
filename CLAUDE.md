@@ -16,6 +16,10 @@ contradicts this one, the repo file wins for that repo, but flag the conflict.
 MaiPai's promise: private, local AI that's actually yours. Nothing leaves the
 home. Every technical and product decision honors that.
 
+Product descriptions come verbatim from [brand/COPY.md](brand/COPY.md), the
+single source for pitch copy (repo description fields, org profile, READMEs,
+docs). Logos come from [brand/](brand/), never redrawn.
+
 ## Git workflow
 
 - **All work lands directly on `main`. Never open pull requests.** The remote is
