@@ -155,6 +155,34 @@ These apply to docs, UI copy, comments, commit messages, changelogs, issues.
   or repurpose a field or endpoint the clients rely on without a versioned
   path and a migration note in the changelog.
 
+## Trademarks and platform references
+
+Standing editorial rules for any mention of third-party platforms (YouTube,
+TikTok, Plex, Spotify, Reddit, and the rest) anywhere: code, docs, UI copy,
+READMEs, release notes, commit messages, issues.
+
+- **Names only, descriptively.** Third-party names may be used to state
+  compatibility ("connects to YouTube"), never in product or feature branding,
+  app names, icons, or logos. No platform logos or brand assets in any repo,
+  ever.
+- **Every product README carries the standard disclaimer block**, kept
+  word-for-word consistent across repos: MaiPai is open-source software for
+  personal, self-hosted, non-commercial use by you and your household; it is
+  not affiliated with, endorsed by, or sponsored by any platform it can
+  connect to; all product names and trademarks belong to their respective
+  owners; you are responsible for complying with the terms and laws that
+  apply to you and the services you access. The release skill checks the
+  block is present and current before cutting a release.
+- **Banned vocabulary in all copy:** "bypass", "free <platform> content",
+  "ad-free <platform>", "without limits", "avoid paying", or any phrasing
+  that pitches a MaiPai feature as a way around another service's rules or
+  pricing. Describe what MaiPai is (a private family hub for your own media
+  and accounts), not what it gets around.
+- **Integrations are described, not branded:** "YouTube integration" as a
+  descriptive phrase is fine; "MaiPaiTube" or platform-styled UI is not.
+- When writing anything that touches these rules and the right wording is
+  unclear, flag it for Jesse instead of improvising.
+
 ## Licensing
 
 - **Every repo carries a LICENSE from its first commit: AGPL-3.0.** It fits
