@@ -192,6 +192,16 @@ READMEs, release notes, commit messages, issues.
   Colors as plain colors are fine (red exists); what's banned is using a
   brand's color-plus-shape combination where users would read it as that
   brand.
+- **How strict: conventions are free, signatures are not.** UI patterns found
+  across three or more competing apps (thumbnail card grids, focus/hover
+  autoplay previews, duration badges, watched-progress bars, category
+  shelves, vertical short-video feeds, "continue watching" rows) are industry
+  conventions: use them freely. An element that lives in one app and evokes
+  it is a signature: skip it. Two tests: the convention test above, and the
+  squint test (if a glance from the couch could mistake the screen for the
+  other app, it's too close; if it just reads "a streaming app", it's fine).
+  The craft rule: copy the function, restyle the form in MaiPai's own
+  palette, shapes, and type.
 - When writing anything that touches these rules and the right wording is
   unclear, flag it for Jesse instead of improvising.
 
