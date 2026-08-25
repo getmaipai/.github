@@ -10,9 +10,7 @@
 <h3 align="center">Private, local AI that's actually yours.</h3>
 
 <p align="center">
-Your own AI at home, a robot companion, and apps to reach them anywhere, all
-on your own hardware, never the cloud - for protection, privacy, and
-independence.
+Your own AI at home, a robot companion, and apps to reach them anywhere, all on your own hardware, never the cloud.
 </p>
 
 ---
@@ -34,7 +32,7 @@ independence.
         <img src="https://raw.githubusercontent.com/getmaipai/.github/main/brand/maipai-desktop-icon-light.png" alt="MaiPai Desktop" width="72">
       </picture>
     </td>
-    <td><b>MaiPai Desktop</b><br>Mac and Windows app for your MaiPai Home and Bot, right on your desktop, integrated with your dock and your computer - for protection, privacy, and independence.</td>
+    <td><b>MaiPai Desktop</b><br>Mac and Windows app for your MaiPai Home and Bot, right on your desktop, integrated with your dock and your computer.</td>
   </tr>
   <tr>
     <td align="center">
@@ -43,7 +41,7 @@ independence.
         <img src="https://raw.githubusercontent.com/getmaipai/.github/main/brand/maipai-go-icon-light.png" alt="MaiPai Go" width="72">
       </picture>
     </td>
-    <td><b>MaiPai Go</b><br>iPhone and Apple TV app for your MaiPai Home and Bot: your own AI, media, and robot companion, wherever you are - for protection, privacy, and independence.</td>
+    <td><b>MaiPai Go</b><br>iPhone and Apple TV app for your MaiPai Home and Bot: your own AI, media, and robot companion, wherever you are.</td>
   </tr>
   <tr>
     <td align="center">
@@ -52,7 +50,7 @@ independence.
         <img src="https://raw.githubusercontent.com/getmaipai/.github/main/brand/maipai-bot-icon-light.png" alt="MaiPai Bot" width="72">
       </picture>
     </td>
-    <td><b>MaiPai Bot</b><br>A robot friend with its own onboard AI: it sees, hears, talks, thinks, moves, self-charges, and remembers the family it lives with - for companionship, privacy, and independence.</td>
+    <td><b>MaiPai Bot</b><br>A robot friend with its own onboard AI: it sees, hears, talks, thinks, moves, self-charges, guards your home in sentry mode, and remembers the family it lives with.</td>
   </tr>
 </table>
 
