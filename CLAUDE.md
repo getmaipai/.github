@@ -106,8 +106,7 @@ These apply to docs, UI copy, comments, commit messages, changelogs, issues.
   `example.com`, and people/persona names ONLY from the roster below.
 - **Persona roster** (use for demo households, docs examples, fixtures):
   alfred, astro, atlas, bramble, bruno, clover, cosmo, daisy, ember, indigo,
-  iris, juniper, lucia, marlow, marsh, mopey, nadia, nova, oliver, pippa,
-  pixel, quill, raven, riff, rivet, rover, sage, serena, sprout, tempo,
+  iris, juniper, lucia, marlow, marsh, mopey, nadia, nova, oliver, pippa, quill, raven, riff, rivet, rover, sage, serena, sprout, tempo,
   velvet, vincent, willow.
 - Homelab details (hosts, containers, IPs, topology) live only in Jesse's
   private homelab repo, referenced but never embedded here.
