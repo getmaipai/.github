@@ -202,6 +202,18 @@ READMEs, release notes, commit messages, issues.
   other app, it's too close; if it just reads "a streaming app", it's fine).
   The craft rule: copy the function, restyle the form in MaiPai's own
   palette, shapes, and type.
+- **Section and feature naming in our UIs:** generic descriptive names
+  (Trending, Popular, Subscriptions, Continue watching) are always fine, and
+  so is honestly labeling a source section with the platform's name
+  ("YouTube", with a generic glyph). Prefer plain English over a platform's
+  branded jargon for features: "Short videos", not "Shorts". Platform
+  taxonomy displayed as data (their category names on their content) is data,
+  not branding.
+- **Trademark and copyright symbols:** don't sprinkle them. Third-party names
+  appear unmarked in running text; the README disclaimer block covers
+  attribution once. Our own marks carry no ™ for now, and never ® (that
+  requires an actual registration). Copyright is the "Copyright (c) <years>
+  Jesse Torres" line in each LICENSE; no per-file headers, no © elsewhere.
 - When writing anything that touches these rules and the right wording is
   unclear, flag it for Jesse instead of improvising.
 
