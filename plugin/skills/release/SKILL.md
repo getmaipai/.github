@@ -38,13 +38,13 @@ quality gate. Never cut one without Jesse asking for it.
 
 - Commit `release: vX.Y.Z` (changelog + docs + screenshots together).
 - Tag `vX.Y.Z`, push main + tag.
-- `gh release create vX.Y.Z --notes-file <notes>`. The notes follow the
-  standing template: an "Install or update" section with the one-line
-  installers first (most users never download release files), then "What
-  are the files below?" explaining the optional Desktop installers and the
-  unsigned-build first-launch steps, then "What changed" with the new
-  changelog section. The Desktop Build workflow attaches installers but
-  NEVER writes the release body; the notes own the page.
+- `gh release create vX.Y.Z --notes-file <notes>`. Release notes stay
+  focused on what changed. The only preamble is ONE short quoted line of
+  links: install guide for new users, the update page for existing ones,
+  and what the attached Desktop files are (with the two unsigned-launch
+  hints inline). Then the changelog section. The Desktop Build workflow
+  attaches installers but NEVER writes the release body; the notes own the
+  page.
 - If this repo deploys somewhere (the hub follows release tags), remind Jesse
   the deploy is now available, but never deploy without his word.
 
