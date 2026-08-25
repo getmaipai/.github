@@ -8,6 +8,11 @@ process is deliberately lightweight.
 - **Want to change code?** Open an issue first to talk it over before
   investing time. Development happens directly on `main` by the maintainer,
   so unsolicited pull requests may sit or be reworked.
+- **Code contributions require a copyright assignment.** MaiPai keeps a
+  single copyright holder so the project stays free to dual-license its own
+  work. If a change of yours is accepted, you'll be asked to sign a short
+  assignment first; without one, the fix gets reimplemented from your issue
+  description and you'll be credited in the changelog.
 - **Docs feedback is gold.** If a user guide page confused you, that's a bug:
   say which page and where you got lost.
 

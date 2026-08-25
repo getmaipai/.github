@@ -168,6 +168,16 @@ These apply to docs, UI copy, comments, commit messages, changelogs, issues.
 - READMEs state the license in one line at the bottom, linking to LICENSE.
 - Never vendor code whose license is incompatible with AGPL-3.0; when in
   doubt, flag it to Jesse before adding the dependency.
+- **Copyright stays 100% with Jesse (dual-licensing and sale stay possible):**
+  - Every LICENSE carries the line "Copyright (c) 2026 Jesse Torres" (update
+    the year range at each release that touches it).
+  - **Never merge an outside contribution without a signed copyright
+    assignment.** No exceptions, however small the patch. A drive-by fix
+    without paperwork gets reimplemented from the issue description instead
+    of merged.
+  - Because Jesse is sole copyright holder, he is not bound by the AGPL
+    himself: commercial licenses can be sold separately, and the project can
+    be sold outright (already-published versions remain AGPL forever).
 
 ## READMEs
 
