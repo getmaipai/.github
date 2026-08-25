@@ -179,6 +179,30 @@ These apply to docs, UI copy, comments, commit messages, changelogs, issues.
     himself: commercial licenses can be sold separately, and the project can
     be sold outright (already-published versions remain AGPL forever).
 
+## Third-party code and assets (download, don't vendor)
+
+Our repos contain our work. Other people's work arrives through a manager or
+a download, never by copying it into the tree.
+
+- **Code dependencies** come via the package manager (bun, uv, Swift PM) with
+  a lockfile. Never copy a library's source into the repo.
+- **Third-party models, binaries, and datasets** (wakeword base models,
+  transcoders, reference data) are fetched by the app on demand: pinned
+  version, pinned URL, checksum verified, with a clear failure message when
+  offline. The hub's self-healing download system is the pattern.
+- **Only artifacts we created may be tracked**: the MaiPai-trained wakeword
+  model yes, upstream base models no. Even our own large artifacts ship as
+  release assets rather than tracked files (see Releases).
+- **Exceptions are allowed but expensive on purpose:** a copied snippet or
+  file requires AGPL-compatible licensing, a NOTICE entry, a source comment
+  saying where it came from, and a justification in the repo's dev docs. If
+  that feels like too much ceremony for the snippet, that's the point:
+  download it, depend on it, or reimplement it.
+
+Why this is a hard rule: it keeps the copyright story clean (sole ownership,
+dual-licensing stays possible), keeps repos small, and means upstream fixes
+arrive by bumping a version instead of hand-merging vendored copies.
+
 ## READMEs
 
 Every repo follows the README skeleton in [docs/STYLE.md](docs/STYLE.md):
