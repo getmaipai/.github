@@ -34,7 +34,7 @@ subscriptions, no one else's servers.
         <img src="https://raw.githubusercontent.com/getmaipai/.github/main/brand/maipai-desktop-icon-light.png" alt="MaiPai Desktop" width="72">
       </picture>
     </td>
-    <td><b>MaiPai Desktop</b><br>Pins your home companion to the top of your computer screen.</td>
+    <td><b>MaiPai Desktop</b><br>The desktop app for MaiPai Home, integrated with your dock and your computer.</td>
   </tr>
   <tr>
     <td align="center">
