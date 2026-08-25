@@ -217,6 +217,34 @@ READMEs, release notes, commit messages, issues.
 - When writing anything that touches these rules and the right wording is
   unclear, flag it for Jesse instead of improvising.
 
+## Safety invariants (generation features)
+
+MaiPai gives adults full control of their own local AI. Two things are not
+controls, they are architecture:
+
+- **Child-safety protections on generation and chat are non-removable.** No
+  admin setting, config flag, environment variable, or "advanced mode" may
+  disable or weaken them, including for the household's own admin. Code
+  review treats any change that makes them bypassable as a correctness bug
+  of the highest severity. These protections and their design may be
+  documented publicly; they are a feature, not a liability.
+- **Child profiles are restricted by default.** Unrestricted generation and
+  chat are unlocked per-user by an adult, never inherited, never the default
+  for a new profile. Safe-by-default, adult-opt-in.
+- No feature is built whose purpose is generating imagery of identifiable
+  real people.
+
+Marketing and copy rule (all tiers, all repos): never pitch generation
+features as "uncensored", "unfiltered", "no restrictions", or any
+filter-bypass framing. The honest pitch is the one we mean: your hardware,
+your rules; no cloud company deciding for your family; parents decide what
+kids can access.
+
+Licensing note: no acceptable-use restrictions get added to our license
+(added restrictions are incompatible with AGPL-3.0). The README disclaimer
+and the models' own licenses carry use responsibility, which rests with the
+user.
+
 ## Licensing
 
 - **Every repo carries a LICENSE from its first commit: AGPL-3.0.** It fits
