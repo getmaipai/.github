@@ -34,7 +34,7 @@ subscriptions, no one else's servers.
         <img src="https://raw.githubusercontent.com/getmaipai/.github/main/brand/maipai-desktop-icon-light.png" alt="MaiPai Desktop" width="72">
       </picture>
     </td>
-    <td><b>MaiPai Desktop</b><br>Mac and Windows app for MaiPai: your private AI chatbot and robot companion, right on your desktop, integrated with your dock and your computer.</td>
+    <td><b>MaiPai Desktop</b><br>Mac and Windows app for your MaiPai Home and Bot, right on your desktop, integrated with your dock and your computer.</td>
   </tr>
   <tr>
     <td align="center">
@@ -43,7 +43,7 @@ subscriptions, no one else's servers.
         <img src="https://raw.githubusercontent.com/getmaipai/.github/main/brand/maipai-go-icon-light.png" alt="MaiPai Go" width="72">
       </picture>
     </td>
-    <td><b>MaiPai Go</b><br>iPhone and Apple TV app for MaiPai: your private AI chatbot and robot companion, wherever you are.</td>
+    <td><b>MaiPai Go</b><br>iPhone and Apple TV app for your MaiPai Home and Bot, wherever you are.</td>
   </tr>
   <tr>
     <td align="center">

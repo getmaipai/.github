@@ -15,12 +15,11 @@ offline, for real self-reliance, all on your own hardware, for your whole
 home.
 
 **desktop (MaiPai Desktop, part of the home repo):**
-Mac and Windows app for MaiPai: your private AI chatbot and robot companion,
-right on your desktop, integrated with your dock and your computer.
+Mac and Windows app for your MaiPai Home and Bot, right on your desktop,
+integrated with your dock and your computer.
 
 **go (MaiPai Go):**
-iPhone and Apple TV app for MaiPai: your private AI chatbot and robot
-companion, wherever you are.
+iPhone and Apple TV app for your MaiPai Home and Bot, wherever you are.
 
 **bot (MaiPai Bot):**
 A robot friend with its own onboard AI and a personality all its own. It
