@@ -25,7 +25,7 @@ subscriptions, no one else's servers.
         <img src="https://raw.githubusercontent.com/getmaipai/.github/main/brand/maipai-home-icon-light.png" alt="MaiPai Home" width="72">
       </picture>
     </td>
-    <td><b>MaiPai Home</b><br>Your family's own AI hub. Chat, music, videos, books, podcasts, image making and more, private to your household.</td>
+    <td><b>MaiPai Home</b><br>Protect your privacy and your data, save money, and escape the algorithm. Run your own AI, music, videos, podcasts, maps, books, and more, online or offline, for real self-reliance, all on your own hardware, for your whole home.</td>
   </tr>
   <tr>
     <td align="center">
@@ -34,7 +34,7 @@ subscriptions, no one else's servers.
         <img src="https://raw.githubusercontent.com/getmaipai/.github/main/brand/maipai-desktop-icon-light.png" alt="MaiPai Desktop" width="72">
       </picture>
     </td>
-    <td><b>MaiPai Desktop</b><br>The desktop app for MaiPai Home, integrated with your dock and your computer. It can control MaiPai Bot too.</td>
+    <td><b>MaiPai Desktop</b><br>Mac and Windows app for MaiPai: your private AI chatbot and robot companion, right on your desktop, integrated with your dock and your computer.</td>
   </tr>
   <tr>
     <td align="center">
@@ -43,7 +43,7 @@ subscriptions, no one else's servers.
         <img src="https://raw.githubusercontent.com/getmaipai/.github/main/brand/maipai-go-icon-light.png" alt="MaiPai Go" width="72">
       </picture>
     </td>
-    <td><b>MaiPai Go</b><br>The TV and phone app for MaiPai Home, so everything comes with you around the house or away from it.</td>
+    <td><b>MaiPai Go</b><br>iPhone and Apple TV app for MaiPai: your private AI chatbot and robot companion, wherever you are.</td>
   </tr>
   <tr>
     <td align="center">
@@ -52,7 +52,7 @@ subscriptions, no one else's servers.
         <img src="https://raw.githubusercontent.com/getmaipai/.github/main/brand/maipai-bot-icon-light.png" alt="MaiPai Bot" width="72">
       </picture>
     </td>
-    <td><b>MaiPai Bot</b><br>A robot companion for the house (in the workshop).</td>
+    <td><b>MaiPai Bot</b><br>A robot friend with its own onboard AI and a personality all its own. It sees, hears, talks, thinks, and moves independently. Self-charging, so it's always ready. Holds real conversations, learns and grows from experience, and remembers the family it lives with.</td>
   </tr>
 </table>
 
