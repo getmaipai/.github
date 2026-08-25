@@ -180,6 +180,18 @@ READMEs, release notes, commit messages, issues.
   and accounts), not what it gets around.
 - **Integrations are described, not branded:** "YouTube integration" as a
   descriptive phrase is fine; "MaiPaiTube" or platform-styled UI is not.
+- **No borrowed trade dress.** A platform's distinctive visual identity is as
+  off-limits as its logo: signature brand colors used as identifiers
+  (YouTube's red on a play control, Spotify's green on anything audio,
+  Netflix-red accents on a video shelf), containered icon shapes (the rounded
+  red play-button tile), typography lockups, or screen layouts recognizable
+  as a specific app's look. MaiPai surfaces use MaiPai's own palette and
+  iconography everywhere, including for integration tiles: an integration is
+  represented by a generic glyph (a play triangle, a music note) in MaiPai
+  colors plus its written name, never by an imitation of the platform's mark.
+  Colors as plain colors are fine (red exists); what's banned is using a
+  brand's color-plus-shape combination where users would read it as that
+  brand.
 - When writing anything that touches these rules and the right wording is
   unclear, flag it for Jesse instead of improvising.
 
