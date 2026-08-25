@@ -11,8 +11,7 @@ product, with the product's glyph inside the smile. All PNGs are transparent.
 - `<kind>`: `icon` (mark only) or `logo` (mark + wordmark)
 - `<background>`: `light` (dark glyph/text, for light backgrounds) or `dark`
   (white glyph/text, for dark backgrounds). The master `brand-icon` is solid
-  purple and works on both, so it carries no suffix. `home-logo-light` uses a
-  soft glow treatment around its accents; it still targets light backgrounds.
+  purple and works on both, so it carries no suffix.
 
 ## Product colors
 
