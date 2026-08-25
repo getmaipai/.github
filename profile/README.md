@@ -25,7 +25,7 @@ subscriptions, no one else's servers.
         <img src="https://raw.githubusercontent.com/getmaipai/.github/main/brand/maipai-home-icon-light.png" alt="MaiPai Home" width="72">
       </picture>
     </td>
-    <td><b>MaiPai Home</b><br>Protect your privacy and your data, save money, and escape the algorithm. Run your own AI, music, videos, podcasts, maps, books, and more, online or offline, for real self-reliance, all on your own hardware, for your whole home.</td>
+    <td><b><a href="https://github.com/getmaipai/home">MaiPai Home</a></b><br>Protect your privacy and your data, save money, and escape the algorithm. Run your own AI, music, videos, podcasts, maps, books, and more, online or offline, for real self-reliance, all on your own hardware, for your whole home.</td>
   </tr>
   <tr>
     <td align="center">
