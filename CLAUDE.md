@@ -69,11 +69,23 @@ home. Every technical and product decision honors that.
   seeded demo household (see Privacy). If a screenshot is stale, fix the
   script, not the image.
 
-## Writing style
+## Writing style (AI writing standards)
 
-- **No em dashes (U+2014) in any prose we write**: docs, UI copy, comments,
-  commit messages. Use a comma, colon, parentheses, or a period. En dashes
-  only for numeric ranges.
+Everything we write should read like a sharp human wrote it, not a model.
+These apply to docs, UI copy, comments, commit messages, changelogs, issues.
+
+- **No em dashes (U+2014), ever.** Use a comma, colon, parentheses, or a
+  period. En dashes only for numeric ranges. This is the number one
+  machine-generated tell.
+- **No AI filler vocabulary:** delve, seamless, robust, leverage, empower,
+  elevate, streamline, game-changer, "in today's world", "it's important to
+  note". Say the plain thing instead.
+- **No "not just X, it's Y" constructions**, no rhetorical questions as
+  transitions, no exclamation points in technical prose.
+- **Bullets are for lists of things, not for prose.** If the bullets read as
+  sentences that flow, write a paragraph.
+- Prefer concrete over abstract: "boots in 4 seconds" beats "highly
+  performant". Numbers, names, and file paths beat adjectives.
 - User-facing copy passes the dad test: would a busy parent with basic tech
   knowledge understand it on first read, without feeling stupid?
 - **End every reply to Jesse with a status block**: Done (what shipped, and
@@ -142,6 +154,28 @@ home. Every technical and product decision honors that.
   update on different schedules. **API changes are additive**: never remove
   or repurpose a field or endpoint the clients rely on without a versioned
   path and a migration note in the changelog.
+
+## Licensing
+
+- **Every repo carries a LICENSE from its first commit: AGPL-3.0.** It fits
+  the MaiPai promise (anyone who runs or hosts a modified version must share
+  their changes) and it applies to private repos too, so nothing scrambles
+  for a license on the day it goes public.
+- **Every repo with third-party components carries a NOTICE file** listing
+  required attributions. The release skill checks NOTICE against dependency
+  changes since the last tag; new components with attribution requirements
+  get added before the release cuts.
+- READMEs state the license in one line at the bottom, linking to LICENSE.
+- Never vendor code whose license is incompatible with AGPL-3.0; when in
+  doubt, flag it to Jesse before adding the dependency.
+
+## READMEs
+
+Every repo follows the README skeleton in [docs/STYLE.md](docs/STYLE.md):
+logo + one-line promise, user-voice pitch, generated screenshot strip, Get
+started link, the three doc links (User / Developer / API), license line.
+READMEs are user-tier writing: the dad test applies, and the AI writing
+standards above apply everywhere.
 
 ## Stack
 

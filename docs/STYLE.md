@@ -47,7 +47,15 @@ Audience: developers, including future Claude sessions.
 3. Screenshot strip (generated).
 4. Get started: link to `user/getting-started`.
 5. Three doc links, clearly labeled: User guide / Developer guide / API.
-6. License.
+6. License line: "AGPL-3.0, see LICENSE".
+
+## AI writing standards
+
+The full list lives in [CLAUDE.md](../CLAUDE.md) and applies to every tier:
+no em dashes, no AI filler vocabulary (delve, seamless, robust, leverage,
+and friends), no "not just X, it's Y" constructions, bullets only for real
+lists, concrete beats abstract. If a sentence sounds like a press release,
+rewrite it like you'd say it to a neighbor.
 
 ## Names and examples
 
