@@ -42,12 +42,43 @@ Audience: developers, including future Claude sessions.
 
 ## READMEs (every repo, same skeleton)
 
-1. Logo + product name + one-line promise, written in user-tier voice.
-2. One-paragraph pitch (what it is, who it's for, the privacy promise).
-3. Screenshot strip (generated).
-4. Get started: link to `user/getting-started`.
-5. Three doc links, clearly labeled: User guide / Developer guide / API.
-6. License line: "AGPL-3.0, see LICENSE".
+Modeled on how the most-starred self-hosted projects do it (Home Assistant,
+Ollama, Jellyfin, Immich, Audiobookshelf): a README is a calm signpost, not
+the manual and not a brochure. Restraint signals credibility; the biggest
+projects have the shortest, plainest READMEs.
+
+Skeleton, in order:
+
+1. Logo (theme-aware picture element) + one-line identity as an `h3`:
+   category plus differentiator ("A private, self-hosted AI hub for
+   families.").
+2. One row of plain text links: Documentation · Install · Releases.
+3. The canonical pitch paragraph (verbatim from brand/COPY.md) plus the
+   privacy promise stated as fact, not slogan.
+4. Features: one-line bullets, bold keyword only, no adjectives like
+   "blazing", 10 to 15 items max.
+5. Getting started: ONE command per OS if it truly is one command,
+   otherwise a single sentence linking to the install docs. Surface the one
+   or two real gotchas (backups!) as a short warning block.
+6. Status: honest maturity note ("pre-1.0, runs our own household daily,
+   expect rough edges").
+7. Documentation links (user / developer / API), issues pointer.
+8. Development: a short paragraph at the bottom; users never scroll there.
+9. License line, then the standard disclaimer block.
+
+Hard limits (the calm budget):
+
+- **Total: about 100 to 150 lines**, user-facing content in the first 60.
+- **Images: at most 2** (the logo plus optionally ONE composed hero
+  screenshot). Screenshot galleries live on the docs site, never in the
+  README.
+- **Badges: 4 or fewer, informational only** (license, release, chat).
+  Marketing badges ("Private!", "Blazing fast!") are banned; zero badges is
+  fine.
+- **No emoji in headings.** No self-praise headings ("Why is this so
+  awesome?"). No star-history charts.
+- If a section runs longer than its docs page would, move it to docs and
+  leave one sentence.
 
 ## AI writing standards
 
