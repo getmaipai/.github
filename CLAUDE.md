@@ -72,6 +72,14 @@ docs). Logos come from [brand/](brand/), never redrawn.
 - **Screenshots are generated, never hand-taken:** a scripted run against a
   seeded demo household (see Privacy). If a screenshot is stale, fix the
   script, not the image.
+- **Every screenshot gets looked at before it is used, anywhere.** Open the
+  image (Read it) and confirm it shows what it claims: the intended screen,
+  with real content, no spinner, skeleton, empty state, error banner, or
+  wrong route. A picture of a loading spinner where the Videos app should
+  be is not a screenshot of the Videos app. This applies to docs, READMEs,
+  issues, and screenshots shown to Jesse in chat. A shot that is wrong gets
+  its capture fixed (wait for content, seed data, add an action) and is
+  re-taken; it is never embedded, posted, or described as if it were right.
 
 ## Writing style (AI writing standards)
 
