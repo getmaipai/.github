@@ -194,9 +194,16 @@ Windows account. Both are fixed; these rules keep them fixed.
   grant, an app password) over a person's real password. Every stored
   credential has a status, an expiry, and a one-click revoke in the admin
   UI, and the app notices and reports when it stops working.
-- **The person's own session, never a shared identity.** Do not route a
-  household through one user's password. A user signs in once inside a
-  MaiPai-owned surface; the app keeps that session, not the password.
+- **Identity is per-person; a shared session may only be a doorkey.**
+  Personalization - history, resume, recommendations, a person's own feed -
+  is never pooled into one account: it stays per MaiPai user, enforced at the
+  query level. A household MAY share ONE playback/fetch session (ideally a
+  dedicated account, not a real person's) purely to get past a per-IP block,
+  because that session carries no identity and shapes no one's suggestions.
+  The test: if the shared thing would change what another person sees or
+  recommends, it is identity and must be per-person; if it only unlocks a
+  fetch, it may be shared. A person may always connect their own, and their
+  playback uses it in preference to the shared one.
 
 ## Issues
 
