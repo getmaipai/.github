@@ -60,6 +60,12 @@ docs). Logos come from [brand/](brand/), never redrawn.
 - **Docs update in the same commit as the change they describe.** A commit
   that changes behavior while the docs still describe the old behavior is
   incomplete.
+- **Never put owner-specific notes in the docs.** Anything that exists only
+  because of Jesse's own setup or inventory ("check whether your drive is
+  SATA or NVMe", "note it for the hardware record", "tell us which one
+  worked", his hosts, his parts' quirks) stays out of every tier. Docs
+  address a reader who has the product or bought the listed parts. Owner
+  reminders go in the session status block or a GitHub issue.
 - **Three tiers**, per [docs/STYLE.md](docs/STYLE.md):
   - `user/`: for dads with basic tech knowledge. Grade-6 reading level, no
     jargon, one action per step, screenshots over prose.
