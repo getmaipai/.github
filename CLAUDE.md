@@ -60,6 +60,10 @@ docs). Logos come from [brand/](brand/), never redrawn.
 - **Docs update in the same commit as the change they describe.** A commit
   that changes behavior while the docs still describe the old behavior is
   incomplete.
+- **Build guides use the final parts, never interim ones.** A step uses the
+  part, cable, or mount the finished product uses, so nothing is redone
+  later. An interim part appears only with a stated reason on the page and
+  a note on what replaces it and when.
 - **Never put owner-specific notes in the docs.** Anything that exists only
   because of Jesse's own setup or inventory ("check whether your drive is
   SATA or NVMe", "note it for the hardware record", "tell us which one
