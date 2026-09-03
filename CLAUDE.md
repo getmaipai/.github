@@ -52,6 +52,45 @@ docs). Logos come from [brand/](brand/), never redrawn.
   (fresh clone in a temp dir must build and boot) to catch works-on-my-machine
   and over-eager gitignore mistakes.
 
+## Testing standards
+
+Tests are how a change proves it works and stays working. The rules are the
+same in every repo; the tools differ per language, and you use the repo's, not
+your own.
+
+- **Use the framework the repo already uses. Never stand up a second one.**
+  Python repos use **pytest** (async tests via the repo's existing marker,
+  e.g. `pytestmark = pytest.mark.asyncio`); TypeScript repos use **`bun:test`**
+  (`import { describe, expect, test } from 'bun:test'`). Do not add jest,
+  vitest, unittest, a shell-script harness, or a hand-rolled runner beside the
+  one that is there. If a repo has no tests yet, match the language's standard
+  (pytest / bun:test) before inventing anything.
+- **Match the existing test files, not just the framework.** Before writing a
+  test, read a nearby test in the same area and copy its structure: the same
+  helpers and fixtures, the same way it builds the system under test, the same
+  naming and assertion style. A new private harness or a bespoke way to drive
+  the code is itself a smell, even when it is pytest underneath. Reuse the
+  real construction path the app uses (the Bot's `build_dialogue`, Home's real
+  handlers) rather than a parallel one that can drift from production.
+- **Deterministic and offline by default.** A unit test does not call a live
+  model, a network service, or real hardware; it drives the code with a
+  scripted stand-in and asserts behavior. Slow, live, or hardware-in-the-loop
+  checks are separate, explicitly-run benches, never part of the per-commit
+  suite. The Bot's split is the pattern: a small deterministic suite in
+  `check.sh` on every commit, and a large model-driven bench run on demand.
+- **Every real failure becomes a permanent regression test, first.** A bug
+  found in a running product is reproduced as a failing test before it is
+  fixed, in the exact words or inputs that broke it, and the test stays
+  forever. This is the one rule that turns "I test and tell you what broke"
+  into a suite that catches it next time.
+- **A test asserts behavior a person cares about**, not the shape of the
+  implementation. Name it for the promise it checks. If the assertion would
+  still pass while the feature is visibly broken, it is testing the wrong
+  thing.
+- **`scripts/check.sh` runs the suite and must pass before every commit.** A
+  test you added is not done until the whole suite is green; a test you had to
+  weaken to pass is a finding to raise, not a step to skip.
+
 ## Documentation
 
 - **Claude writes all documentation prose.** Jesse gives feedback,
