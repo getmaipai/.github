@@ -27,8 +27,7 @@ Electron + electron-builder, unsigned phase-1 builds (ad-hoc signed on arm64).
 ## TV / Phone (MaiPai Go)
 
 SwiftUI (tvOS + iOS), project generated with xcodegen, built locally with
-`scripts/build_local.sh` style tooling, sideloaded via a self-hosted tvOS
-sideloading tool on the homelab. Never built
+`scripts/build_local.sh` style tooling, sideloaded via atvloadly. Never built
 on GitHub Actions (macOS minutes bill 10x).
 
 ## Robot (MaiPai Bot)
