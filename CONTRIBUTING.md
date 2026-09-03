@@ -1,6 +1,6 @@
 # Contributing to MaiPai
 
-Thanks for your interest! MaiPai is maintained by a solo developer, so the
+Thanks for your interest. MaiPai is maintained by a solo developer, so the
 process is deliberately lightweight.
 
 - **Found a bug or have an idea?** Open a GitHub Issue on the relevant repo.

@@ -98,7 +98,7 @@ Skeleton, in order:
    "blazing", 10 to 15 items max.
 5. Getting started: ONE command per OS if it truly is one command,
    otherwise a single sentence linking to the install docs. Surface the one
-   or two real gotchas (backups!) as a short warning block.
+   or two real gotchas (backups) as a short warning block.
 6. Status: honest maturity note ("pre-1.0, runs our own household daily,
    expect rough edges").
 7. Documentation links (user / developer / API), issues pointer.
@@ -112,7 +112,7 @@ Hard limits (the calm budget):
   screenshot). Screenshot galleries live on the docs site, never in the
   README.
 - **Badges: 4 or fewer, informational only** (license, release, chat).
-  Marketing badges ("Private!", "Blazing fast!") are banned; zero badges is
+  Marketing badges ("Private", "Blazing fast") are banned; zero badges is
   fine.
 - **No emoji in headings.** No self-praise headings ("Why is this so
   awesome?"). No star-history charts.
@@ -121,11 +121,53 @@ Hard limits (the calm budget):
 
 ## AI writing standards
 
-The full list lives in [CLAUDE.md](../CLAUDE.md) and applies to every tier:
-no em dashes, no AI filler vocabulary (delve, seamless, robust, leverage,
-and friends), no "not just X, it's Y" constructions, bullets only for real
-lists, concrete beats abstract. If a sentence sounds like a press release,
-rewrite it like you'd say it to a neighbor.
+The full list lives in [CLAUDE.md](../CLAUDE.md) and applies to every tier: no em dashes, no AI filler vocabulary (delve, seamless, robust, leverage, and friends), no "not just X, it's Y" constructions, bullets only for real lists, concrete beats abstract. If a sentence sounds like a press release, rewrite it like you'd say it to a neighbor. <!-- prose-lint: allow -->
+
+## Platform screenshot pipeline (`home`, `bot`, `go`, `catalog`)
+
+One pipeline and one look for the hub, the robot app, Go, and store cards,
+on top of the general screenshot rules in [`CLAUDE.md`](../CLAUDE.md) >
+Documentation. Full source: platform plan section 2.3.
+
+- **Fixed viewports**: phone, tablet, desktop, TV, and the Apple sizes.
+- **Fixed themes**: the default theme in light and dark, plus High
+  Contrast. Never per-theme baselines beyond those three.
+- Shell visible in every shot; a generated manifest per shot records the
+  capture script, viewport, theme, and date.
+- **AI reviews every screenshot, twice.** In a session, open each image
+  before using it anywhere and confirm it shows the intended screen with
+  real content and no spinner, skeleton, empty state, error, or wrong
+  route (this is the org rule in [`CLAUDE.md`](../CLAUDE.md), restated
+  here because the platform pipeline generates far more screenshots than a
+  single-app repo does). In the pipeline itself, every screenshot carries
+  a declared expectation beside its capture script, and a vision-model
+  check (the hub's `vision` role, or the dev machine's) answers it and
+  fails the build on a miss. The verdict is written into the screenshot's
+  manifest with the model and date. A wrong shot gets its capture fixed
+  and re-taken, never embedded or described as right.
+- Catalog store images get the same check in CI.
+- Clipping fails the build: horizontal overflow, text outside its box,
+  overlaps, undersized targets, anything wider than the viewport. See
+  [UI.md](UI.md) > Responsive layout.
+
+## Build docs (the robot): Instructables style
+
+Build guides are project-specific write-ups, not general tutorials: link
+out for generic how-tos (how to solder, what a GPIO pin is) rather than
+re-explaining them, and keep one page per build stage. Every stage page
+ends in a check that proves the stage actually worked before moving to the
+next one. Final parts only, per the org rule in [`CLAUDE.md`](../CLAUDE.md)
+> Documentation; no owner-specific notes.
+
+## Docs upkeep and the drift check
+
+Docs update in the same commit as the behavior they describe. The release
+skill's drift check refuses a release whose docs, screenshots, privacy
+table, or settings reference are older than the code they describe. Every
+product keeps the user-tier privacy page with the generated "what leaves
+the house" table (see [`CLAUDE.md`](../CLAUDE.md) > Privacy architecture).
+Docs sites are Astro Starlight per repo; the catalog's site lists every
+package README so the store and the docs are one source.
 
 ## Names and examples
 

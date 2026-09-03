@@ -6,12 +6,22 @@ contradicts this one, the repo file wins for that repo, but flag the conflict.
 
 ## The products
 
+The platform is being rebuilt fresh on the design in `home/spec/design/`
+(seeded from the platform plan). `home` and `bot` are new repos on that
+design; the pre-rebuild code is archived read-only as `home-legacy` and
+`bot-legacy`, kept only as a reference to copy hard-won logic from, never a
+requirement of feature scope. Build order: hub first, robot for parity, Go
+last.
+
 | Repo | Product | What it is |
 |---|---|---|
-| `home` | MaiPai Home | The self-hosted family AI hub (backend + web frontend + desktop + firmware) |
-| `go` | MaiPai Go | Apple TV and iPhone client. Ground-up rewrite in progress, planned first |
-| `bot` | MaiPai Bot | Robot companion. Pre-hardware, design phase |
-| `.github` | (this repo) | Org standards, shared Claude plugin, org profile |
+| `home` | MaiPai Home | The self-hosted family AI hub: the platform and the household's master (identity, people, memory, the turn engine, settings, the package host, the shell). Every feature ships as a catalog package. |
+| `bot` | MaiPai Bot | Robot companion. Pairs with the hub like a pod (a full replica, the hub as its brain when reachable), stands alone complete when not. Bench-proven, rebuilt fresh on the platform design. |
+| `catalog` | MaiPai Catalog | The public package catalog: every skill, app, companion, integration, model, wake word, voice, and theme, signed and indexed. Hub and robot install from it. |
+| `go` | MaiPai Go | Apple TV and iPhone client. Renders the same UI schema natively. Built last, once the hub and robot have packages with schema pages. |
+| `.github` | (this repo) | Org standards, `@maipai/standards` tooling, the shared Claude plugin, org profile |
+| `home-legacy` | (archived) | The pre-rebuild hub. Read-only reference for the narrow copy-from list (resolvers, sync, limiters, drivers, measurements), never for feature scope or UI. |
+| `bot-legacy` | (archived) | The pre-rebuild robot. Same read-only role as `home-legacy`. |
 
 MaiPai's promise: private, local AI that's actually yours. Nothing leaves the
 home. Every technical and product decision honors that.
@@ -20,10 +30,54 @@ Product descriptions come verbatim from [brand/COPY.md](brand/COPY.md), the
 single source for pitch copy (repo description fields, org profile, READMEs,
 docs). Logos come from [brand/](brand/), never redrawn.
 
+## Platform principles
+
+These hold across `home`, `bot`, `catalog`, and `go`. Full detail in the
+platform plan; this is the standing summary every session should carry.
+
+1. **Simplify: centralize and reuse.** One definition, one implementation,
+   one store. A second copy of anything is wrong even when it is faster.
+2. **The robot is complete without a hub**, disconnected for an hour or never
+   paired. Its own people, settings, memories, companions, packages, and the
+   integrations it can hold itself. Nothing on it is a stub.
+3. **No data debt.** Every record either product writes is the shared spec
+   shape, with id, provenance, and clock stamp, from the first boot. Pairing
+   later is a transfer, never a translation.
+4. **One definition, one place.** A settings key, a record type, a package's
+   config, an integration's shape, a companion's metadata: each is declared
+   exactly once, and every renderer draws from the declaration.
+5. **Repos only when necessary.** A new repo needs a different release
+   cadence, a different committer audience, or a different visibility.
+6. **Prebuilt over hand-built.** One component library, one icon set, one
+   engine, maintained parts assembled by us, and the org standards enforced
+   by lint and tests, never by memory.
+7. **Hub first, robot for parity, Go last.** Every hub step is in family use
+   before its robot counterpart; nothing early may close the door on the
+   later clients.
+8. **Every feature is reviewed and rebuilt, never carried.** No existing app,
+   skill, or screen is a requirement by virtue of existing in the legacy
+   code. Each is re-examined (does the family use it, does it fit a package,
+   what is the right design now), then rebuilt as designed, redesigned,
+   merged, or dropped, with a one-line verdict recorded in the fresh repo's
+   dev docs before it is built. "Copy from legacy" applies only to hard-won
+   logic (resolvers, sync, limiters, drivers, measurements), never to
+   feature scope or UI.
+
+**Shared record changes go through the spec first.** Anything in
+`home/spec/` (Person, Setting, Memory, the manifest and recipe shapes, the
+link API, the UI schema) is edited in the spec, then implemented on the hub,
+then on the robot. A hub-only or robot-only patch to a spec-shaped record is
+a bug: the shapes drift and the round-trip fixtures catch it.
+
 ## Git workflow
 
 - **All work lands directly on `main`. Never open pull requests.** The remote is
   publishing and backup, not a review step.
+- **The one carve-out: `catalog` accepts community pull requests**, gated on
+  the signed copyright assignment and CI (manifest lint, permission diff,
+  banned-API scan, recipe conformance, licence check, the scorecard). This
+  is how outside contributors submit packages. Maintainers still land their
+  own work directly on `main`, same as every other repo.
 - **Never create a branch or worktree** unless Jesse explicitly asks, or a
   second session is actively editing the same repo in parallel. If one was
   needed, merge it and delete it before the session ends. A branch that
@@ -138,11 +192,8 @@ These apply to docs, UI copy, comments, commit messages, changelogs, issues.
 - **No em dashes (U+2014), ever.** Use a comma, colon, parentheses, or a
   period. En dashes only for numeric ranges. This is the number one
   machine-generated tell.
-- **No AI filler vocabulary:** delve, seamless, robust, leverage, empower,
-  elevate, streamline, game-changer, "in today's world", "it's important to
-  note". Say the plain thing instead.
-- **No "not just X, it's Y" constructions**, no rhetorical questions as
-  transitions, no exclamation points in technical prose.
+- **No AI filler vocabulary:** delve, seamless, robust, leverage, empower, elevate, streamline, game-changer, "in today's world", "it's important to note". Say the plain thing instead. <!-- prose-lint: allow -->
+- **No "not just X, it's Y" constructions**, no rhetorical questions as transitions, no exclamation points in technical prose. <!-- prose-lint: allow -->
 - **Bullets are for lists of things, not for prose.** If the bullets read as
   sentences that flow, write a paragraph.
 - Prefer concrete over abstract: "boots in 4 seconds" beats "highly
@@ -541,3 +592,30 @@ standards above apply everywhere.
 
 See [STACK.md](STACK.md). New work uses the standard stack; a deviation needs
 a written justification in that repo's dev docs.
+
+## Platform standards (`home`, `bot`, `catalog`, `go`)
+
+Beyond the rules above, the platform rebuild carries its own standards docs,
+all pinned by the [`@maipai/standards`](standards/) tooling core
+(std-v0.1.0):
+
+- [docs/PACKAGES.md](docs/PACKAGES.md): package definition of done, supply
+  chain, review, the CLA.
+- [docs/UI.md](docs/UI.md): the shell contract, the kit, patterns,
+  responsive rules, PWA, tabs, icons.
+- [docs/SETTINGS.md](docs/SETTINGS.md): the settings standard (one
+  definition, the generic renderer, three disclosure levels).
+- [docs/ENGINEERING.md](docs/ENGINEERING.md): tokens, accessibility, copy,
+  i18n, logging, tracing, errors, performance budgets, privacy, security,
+  kid-safe, licensing, versioning, naming, every standard a package
+  inherits.
+- [docs/STYLE.md](docs/STYLE.md): documentation and screenshot standards
+  (extended for the platform's screenshot pipeline and build-doc format).
+- [docs/UPDATES.md](docs/UPDATES.md): updates, notifications of updates, and
+  install.
+- [docs/BACKUPS.md](docs/BACKUPS.md): backups, integrated and scheduled.
+- [docs/NOTIFICATIONS.md](docs/NOTIFICATIONS.md): the notification system.
+
+A repo's own `CLAUDE.md` may add specifics; it never restates or weakens a
+platform standard. `@maipai/standards` `check.sh` core is what actually
+enforces the enforceable half (see [standards/README.md](standards/README.md)).

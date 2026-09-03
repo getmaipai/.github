@@ -24,3 +24,6 @@ iPhone and Apple TV app for your MaiPai Home and Bot: your own AI, media, and ro
 **bot (MaiPai Bot):**
 A robot friend with its own onboard AI: it sees, hears, talks, thinks, moves, self-charges, and guards your home in sentry mode. It recognizes each person by face and voice, keeps its own memories of people, facts, and experiences, and learns and evolves with your family.
 
+**catalog (MaiPai Catalog):**
+Every skill, app, companion, integration, and model for your hub and robot, in one signed catalog you review and install with one click.
+
