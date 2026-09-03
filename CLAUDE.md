@@ -7,11 +7,16 @@ contradicts this one, the repo file wins for that repo, but flag the conflict.
 ## The products
 
 The platform is being rebuilt fresh on the design in `home/spec/design/`
-(seeded from the platform plan). `home` and `bot` are new repos on that
-design; the pre-rebuild code is archived read-only as `home-legacy` and
-`bot-legacy`, kept only as a reference to copy hard-won logic from, never a
-requirement of feature scope. Build order: hub first, robot for parity, Go
-last.
+(seeded from the platform plan). On 2026-09-03, `home` and `bot` were reset
+to a clean history to start over on that design: the pre-rebuild code is
+not on GitHub at all, only a full local git mirror of each
+(`legacy-backups/home-legacy.git`, `legacy-backups/bot-legacy.git`, next to
+the working checkouts on the dev machine, never pushed anywhere), kept
+only as a reference to copy hard-won logic from, never a requirement of
+feature scope. `home`'s 21 pre-rebuild releases were deleted from GitHub;
+their metadata (tags, notes, asset lists with sha256, no binaries) is
+backed up alongside the mirror. Build order: hub first, robot for parity,
+Go last.
 
 | Repo | Product | What it is |
 |---|---|---|
@@ -20,8 +25,6 @@ last.
 | `catalog` | MaiPai Catalog | The public package catalog: every skill, app, companion, integration, model, wake word, voice, and theme, signed and indexed. Hub and robot install from it. |
 | `go` | MaiPai Go | Apple TV and iPhone client. Renders the same UI schema natively. Built last, once the hub and robot have packages with schema pages. |
 | `.github` | (this repo) | Org standards, `@maipai/standards` tooling, the shared Claude plugin, org profile |
-| `home-legacy` | (archived) | The pre-rebuild hub. Read-only reference for the narrow copy-from list (resolvers, sync, limiters, drivers, measurements), never for feature scope or UI. |
-| `bot-legacy` | (archived) | The pre-rebuild robot. Same read-only role as `home-legacy`. |
 
 MaiPai's promise: private, local AI that's actually yours. Nothing leaves the
 home. Every technical and product decision honors that.
