@@ -110,6 +110,13 @@ reading would have answered is a round trip that did not need to happen.
   The `maipai` plugin's `block-blind-staging.sh` hook enforces this
   mechanically (`plugin/hooks/README.md`); it denies the blind form when no
   recent `git status` exists to point to, not the command itself.
+- **Run a code review before committing code** (not a doc-only change): the
+  `code-review` skill, at least medium effort, on the diff about to be
+  committed. This is not a "remember to do it" rule: the `maipai` plugin's
+  `require-review-before-commit.sh` hook enforces it mechanically
+  (`plugin/hooks/README.md`), the same shape as the blind-staging gate,
+  because a session remembering to review its own work does not survive a
+  fresh session picking the task back up.
 - **Push at natural boundaries** (end of a work session, or when Jesse says
   ship), never reflexively after every commit.
 - **Deploys and releases are always explicit.** Cutting a release or rolling

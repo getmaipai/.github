@@ -1,6 +1,6 @@
 # maipai plugin hooks
 
-Mechanical enforcement for two things the plugin's skills could only ask
+Mechanical enforcement for things the plugin's skills could only ask
 nicely for before. Hooks load at session start; editing these requires a
 Claude Code restart to take effect (`claude --debug` to confirm they
 loaded, `/hooks` to review what is active).
@@ -23,6 +23,42 @@ loaded, `/hooks` to review what is active).
 
 Both use `git rev-parse --git-dir` from the command's own `cwd`, so they
 work correctly from a worktree, not just the main checkout.
+
+## Review before committing code
+
+Jesse's rule (2026-09-04): "I have to remember to tell you that" was the
+tell that self-discipline within one session doesn't survive a fresh one.
+This is the same mechanical pattern as git hygiene above, applied to code
+review instead of staging.
+
+- **`require-review-before-commit.sh`** (PreToolUse, `Bash`): denies a
+  `git commit` whose committed files include anything beyond `*.md`,
+  `LICENSE`, or `NOTICE` unless the `code-review` skill has run in this
+  repo within the last 30 minutes. Checks `--cached` plus, when the
+  command carries a `-a`/`--all`/an `-a`-flag-cluster (`-am`, `-av`...),
+  unstaged tracked changes too: a first cut checked only `--cached`, so a
+  bare `git commit -am` with nothing pre-staged sailed through with an
+  empty diff every time, caught by a code review of this hook itself
+  (2026-09-04) before it ever shipped. `--amend` is exempt (it repeats
+  history rather than adding unreviewed work). Soft gate, same shape as
+  `block-blind-staging.sh`: the denial names the exact next step.
+- **`mark-review-checked.sh`** (PostToolUse, `Skill`): stamps
+  `<git-dir>/maipai-review-checked` whenever the `code-review` skill is
+  invoked (`tool_input.skill == "code-review"`). Originally matched
+  `ReportFindings` instead; that same first review caught this too: when
+  `code-review` runs as a forked/background agent (the normal way a
+  session invokes it), its own loaded instructions explicitly forbid
+  calling `ReportFindings`, so the flag would never have been stamped and
+  the gate would have blocked every code commit forever. Stamping at
+  invocation, not at "findings read and addressed", is a real limit: there
+  is no tool call available to hook that fires only once a multi-agent
+  review's parallel findings have all landed (those arrive as
+  task-notifications, not tool calls). Same honesty level as
+  `mark-git-status-checked.sh`. Never blocks.
+
+This does not cover `catalog`'s community-PR path (that CI, not this
+hook, is the review gate there) or the cloud `ultra` review (separately
+billed and user-triggered, not something a session runs on its own).
 
 ## Session-start context
 
