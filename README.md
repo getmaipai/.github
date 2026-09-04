@@ -11,6 +11,9 @@ The MaiPai org's shared home:
 - **[docs/STYLE.md](docs/STYLE.md)**: the three-tier documentation style guide.
 - **[SECURITY.md](SECURITY.md)** / **[CONTRIBUTING.md](CONTRIBUTING.md)**:
   org-default community health files (apply to every repo without one).
-- **[plugin/](plugin/)**: the `maipai` Claude Code plugin with the shared
-  skills (`release`, `update-docs`, `verify`). Install once:
-  `/plugin marketplace add getmaipai/.github` then `/plugin install maipai`.
+- **[plugin/](plugin/)**: the `maipai` Claude Code plugin: shared skills
+  (`release`, `update-docs`, `verify`, `new-package`, `standards-check`,
+  `verify-screenshots`) and hooks (a blind-staging gate, session-start
+  repo context; see [plugin/hooks/README.md](plugin/hooks/README.md)).
+  Install once: `/plugin marketplace add getmaipai/.github` then
+  `/plugin install maipai`.

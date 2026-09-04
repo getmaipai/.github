@@ -36,6 +36,12 @@ quality gate. Never cut one without Jesse asking for it.
 
 ## 4. Ship
 
+- **Changelog gate**: refuse to tag if `CHANGELOG.md` has no entry for this
+  version, or the entry is empty, restates commit subjects verbatim instead
+  of explaining them, or fails the org prose lint (no em dashes, no filler,
+  plain language a user or a future you would actually understand). This is
+  the one check a clean-clone build cannot catch; do it by reading the entry
+  before tagging, every time.
 - Commit `release: vX.Y.Z` (changelog + docs + screenshots together).
 - Tag `vX.Y.Z`, push main + tag.
 - `gh release create vX.Y.Z --notes-file <notes>`. Release notes stay

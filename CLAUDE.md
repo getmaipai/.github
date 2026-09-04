@@ -90,6 +90,14 @@ a bug: the shapes drift and the round-trip fixtures catch it.
   per logical change. No checkpoint commits, no WIP commits: if work is
   unfinished at session end, the honest state is a dirty tree plus a status
   note, not a commit.
+- **Never stage or commit blindly.** Run `git status` (and `git diff` for
+  what actually changed) first, then stage specific files by name. Never
+  `git add -A`, `git add .`, or `git commit -a` without having just looked
+  at what that would sweep in: a parallel session's in-progress work in a
+  shared checkout, a stray file, or something that should stay uncommitted.
+  The `maipai` plugin's `block-blind-staging.sh` hook enforces this
+  mechanically (`plugin/hooks/README.md`); it denies the blind form when no
+  recent `git status` exists to point to, not the command itself.
 - **Push at natural boundaries** (end of a work session, or when Jesse says
   ship), never reflexively after every commit.
 - **Deploys and releases are always explicit.** Cutting a release or rolling

@@ -128,6 +128,22 @@ package or node reads. `min_app` states the hub and robot versions, and
 that needs a newer platform than the device has. Migrations ship with the
 package that needs them.
 
+## Data safety: schema versions
+
+Applies to core's database and every package's own SQLite file (4.9: one
+database per package). Two rules, both non-negotiable:
+
+- **Any commit that adds, removes, or renames a persisted table or column
+  bumps a schema version in that same commit**, even when no migration
+  needs to run. The version lives beside the schema, not inferred from
+  migration file names.
+- **The app refuses to open a database stamped with a newer schema
+  version than its own**, rather than opening it anyway and silently
+  writing data the older code does not understand. This is what makes a
+  rollback (2.4: re-point to the previous release) actually safe: without
+  it, a rollback can open a database a newer version already wrote to and
+  corrupt or silently drop data.
+
 ## Documentation
 
 Per package: user-tier `README.md` (its store card), `CHANGELOG.md`,

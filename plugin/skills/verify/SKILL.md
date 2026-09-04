@@ -5,8 +5,8 @@ description: The MaiPai verification contract - what "verified" means before any
 
 # Verify before commit
 
-Org rule: never commit unverified work to `main`. "Verified" means both gates
-below pass.
+Org rule: never commit unverified work to `main`. "Verified" means all three
+gates below pass.
 
 ## Gate 1: checks
 
@@ -28,6 +28,16 @@ Static success is not verification. Pick what applies:
 - **Bot**: tests pass; hardware-dependent behavior is flagged as untestable
   until hardware exists.
 - **Docs-only**: build the docs site; check the changed pages render.
+
+## Gate 3: what the diff removes, not just what it claims
+
+A fix that stops the reported symptom by deleting a check, loosening a
+condition, widening a permission, or dropping a case is not a fix; it is
+the same bug wearing the report's exact fingerprint. Before calling
+something verified, read the diff once specifically for what it takes
+away (a validation, a test, an error path, a scope restriction) and
+confirm each removal is intentional and correct, not the shortest path to
+a green run.
 
 ## Report
 

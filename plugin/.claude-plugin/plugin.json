@@ -1,7 +1,7 @@
 {
   "name": "maipai",
-  "description": "MaiPai org shared skills: release ceremony, docs refresh, verification contract, platform package scaffolding, standards pin check, screenshot verification.",
-  "version": "0.2.0",
+  "description": "MaiPai org shared skills: release ceremony, docs refresh, verification contract, platform package scaffolding, standards pin check, screenshot verification. Hooks: a blind-staging gate and session-start repo context.",
+  "version": "0.3.0",
   "author": {
     "name": "JesseWebDotCom"
   }
