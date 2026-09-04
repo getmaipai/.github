@@ -1,0 +1,40 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://getmaipai.github.io/.github/standards/schemas/logging-line.schema.json",
+  "title": "LoggingLine",
+  "description": "One structured JSON log line. Packages log only through host.log, which stamps and redacts before a line ever reaches this shape; a raw log call never bypasses it. See platform plan 2.1 and docs/ENGINEERING.md > Logging.",
+  "type": "object",
+  "additionalProperties": false,
+  "required": ["level", "timestamp", "message"],
+  "properties": {
+    "level": {
+      "type": "string",
+      "enum": ["debug", "info", "warn", "error"]
+    },
+    "timestamp": { "type": "string", "format": "date-time" },
+    "package_id": {
+      "type": ["string", "null"],
+      "default": null,
+      "description": "The package that logged this line, or null for a core-emitted line."
+    },
+    "context": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "turn_id": { "type": "string" },
+        "op": { "type": "string" }
+      },
+      "description": "The turn or op context this line belongs to, for the Developer tools timeline."
+    },
+    "message": {
+      "type": "string",
+      "description": "Redacted by host.log before this line exists; never a secret, token, PII value, or transcript."
+    },
+    "fields": {
+      "type": "object",
+      "additionalProperties": true,
+      "default": {},
+      "description": "Structured extras, also redacted by host.log."
+    }
+  }
+}

@@ -1,5 +1,5 @@
 #!/usr/bin/env bash
-# @maipai/standards std-v0.1.0 - shared check.sh core.
+# @maipai/standards std-v0.2.0 - shared check.sh core.
 #
 # Pinned by every getmaipai repo's scripts/check.sh (called after the repo's
 # own build/lint/test steps). Runs the checks that are the same everywhere:
@@ -36,9 +36,9 @@ echo "== standards: licence check"
 bash "$HERE/licence-check.sh" "$REPO_ROOT" || STATUS=1
 
 if [ "$STATUS" -eq 0 ]; then
-  echo "== standards core passed (std-v0.1.0)"
+  echo "== standards core passed (std-v0.2.0)"
 else
-  echo "== standards core FAILED (std-v0.1.0)"
+  echo "== standards core FAILED (std-v0.2.0)"
 fi
 
 exit "$STATUS"

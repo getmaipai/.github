@@ -1,0 +1,8 @@
+{
+  "id": "chat_first_token",
+  "description": "First token latency for a Chat reply on the reference hub.",
+  "metric": "first_token_ms",
+  "threshold": 1500,
+  "unit": "ms",
+  "reference_machine": "msi_hub"
+}

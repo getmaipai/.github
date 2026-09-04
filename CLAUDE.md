@@ -600,7 +600,7 @@ a written justification in that repo's dev docs.
 
 Beyond the rules above, the platform rebuild carries its own standards docs,
 all pinned by the [`@maipai/standards`](standards/) tooling core
-(std-v0.1.0):
+(std-v0.2.0):
 
 - [docs/PACKAGES.md](docs/PACKAGES.md): package definition of done, supply
   chain, review, the CLA.

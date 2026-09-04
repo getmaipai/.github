@@ -1,0 +1,11 @@
+{
+  "trace_id": "trace-a1b2c3",
+  "span_id": "span-0001",
+  "parent_span_id": null,
+  "name": "wakeword.detect",
+  "node": "bot",
+  "start": "2026-09-04T01:00:00.000Z",
+  "end": "2026-09-04T01:00:00.250Z",
+  "status": "ok",
+  "attributes": { "confidence": 0.98 }
+}

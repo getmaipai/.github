@@ -1,0 +1,40 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://getmaipai.github.io/.github/standards/schemas/trace-span.schema.json",
+  "title": "TraceSpan",
+  "description": "One span in a trace. One trace id runs from wake word through the router, a package, and an integration to the reply, shown as a timeline in Developer tools. See platform plan 2.1 and docs/ENGINEERING.md > Debugging and diagnostics.",
+  "type": "object",
+  "additionalProperties": false,
+  "required": ["trace_id", "span_id", "name", "node", "start"],
+  "properties": {
+    "trace_id": { "type": "string", "minLength": 1 },
+    "span_id": { "type": "string", "minLength": 1 },
+    "parent_span_id": { "type": ["string", "null"], "default": null },
+    "name": {
+      "type": "string",
+      "description": "e.g. wakeword.detect, router.route, skill.handle:bedtime-reminder, integration.call:home_assistant."
+    },
+    "node": {
+      "type": "string",
+      "enum": ["home", "bot"],
+      "description": "Which node emitted this span. A cross-node call (5.3) gets a span on each side sharing the trace_id."
+    },
+    "start": { "type": "string", "format": "date-time" },
+    "end": {
+      "type": ["string", "null"],
+      "format": "date-time",
+      "default": null,
+      "description": "Null while the span is still open."
+    },
+    "status": {
+      "type": "string",
+      "enum": ["ok", "error"],
+      "default": "ok"
+    },
+    "attributes": {
+      "type": "object",
+      "additionalProperties": true,
+      "default": {}
+    }
+  }
+}

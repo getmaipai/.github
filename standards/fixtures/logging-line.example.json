@@ -1,0 +1,8 @@
+{
+  "level": "info",
+  "timestamp": "2026-09-04T01:00:00Z",
+  "package_id": "bedtime-reminder",
+  "context": { "turn_id": "turn-8901", "op": "handle" },
+  "message": "scheduled a reminder",
+  "fields": { "when": "21:00" }
+}

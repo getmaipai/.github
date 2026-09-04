@@ -1,0 +1,7 @@
+{
+  "code": "timeout",
+  "message": "Package handle() exceeded its timeout_ms.",
+  "spoken_fallback": "That's taking too long, so I stopped.",
+  "ui_message": "This took too long and was stopped. Try again.",
+  "retriable": true
+}

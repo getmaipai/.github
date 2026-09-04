@@ -1,0 +1,9 @@
+{
+  "id": "weather-lookup",
+  "destination": "weather.example.com",
+  "when": "each time the family asks for weather",
+  "what": "the household's approximate location and the request",
+  "who": "the weather service",
+  "opt_in": true,
+  "retention": "unknown, see the service's own policy"
+}

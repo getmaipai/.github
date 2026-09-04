@@ -5,9 +5,9 @@ repo pins by tag and calls from its own `scripts/check.sh`. The prose half
 (what the rules say and why) lives in [`../CLAUDE.md`](../CLAUDE.md) and the
 `docs/` tree beside it; this package is what actually runs.
 
-Current version: **std-v0.1.0** (see [`VERSION`](VERSION)).
+Current version: **std-v0.2.0** (see [`VERSION`](VERSION)).
 
-## What v0.1 ships
+## What v0.1 shipped
 
 - `bin/check-core.sh`: the shared `check.sh` core. Runs gitleaks, the PII
   wordlist scan, the prose lint, and the licence check, in that order, and
@@ -24,11 +24,38 @@ Current version: **std-v0.1.0** (see [`VERSION`](VERSION)).
 - `bin/licence-check.sh`: confirms `LICENSE` is AGPL-3.0 with a copyright
   line.
 
+## What v0.2 added
+
+The five cross-cutting schemas platform plan 2.1 lists, each a JSON Schema
+2020-12 file under `schemas/`, with generated Zod (`gen/ts/`) and Pydantic
+v2 (`gen/py/`) bindings, fixture-tested the same way `home/spec/` tests
+its own schemas (`fixtures/`, `tests/ts/`, `tests/py/`):
+
+- `error-entry.schema.json` (`ErrorEntry`): the shape of one code in an
+  error catalogue. `home/spec/errors/errors.json` is the populated
+  catalogue for the platform, conforming to this; this package doesn't
+  hold catalogue data itself, only the shape.
+- `logging-line.schema.json` (`LoggingLine`): one structured log line.
+- `trace-span.schema.json` (`TraceSpan`): one span in a trace, the
+  Developer-tools timeline's unit.
+- `budget.schema.json` (`Budget`): one performance budget declaration
+  against a named reference machine.
+- `privacy-row.schema.json` (`PrivacyRow`): one row of a "what leaves the
+  house" table; a package's manifest `data_sources[]` is an array of
+  these.
+
+These are meant to be imported cross-repo by `$ref` (a consumer's own
+schema references e.g.
+`https://getmaipai.github.io/.github/standards/schemas/privacy-row.schema.json`),
+not copied. `home/spec/schemas/manifest.schema.json` does exactly that for
+`PrivacyRow`; see `home/spec/README.md`'s "Cross-repo schemas" section for
+how its codegen resolves it, including a real gotcha (a blanket JSON
+Schema resolver over the whole document breaks an unrelated schema's
+internal `oneOf`) worth reading before repeating the pattern elsewhere.
+
 Later versions add: the kit lint, the screenshot pipeline pieces (viewport
-matrix, overflow and clipping checks, the vision-review runner), the
-cross-cutting schemas (`logging.json`, `trace.json`, `errors.json`,
-`budgets.json`, `privacy.json`), and the design tokens' source, per the
-platform plan chapter 2.1.
+matrix, overflow and clipping checks, the vision-review runner), and the
+design tokens' source, per the platform plan chapter 2.1.
 
 ## How a repo pins this
 
@@ -38,7 +65,7 @@ steps first, then calls the core:
 ```bash
 STANDARDS_DIR="${MAIPAI_STANDARDS_DIR:-../.github}"
 if [ ! -d "$STANDARDS_DIR/standards" ]; then
-  echo "missing @maipai/standards checkout at $STANDARDS_DIR (pin std-v0.1.0)"
+  echo "missing @maipai/standards checkout at $STANDARDS_DIR (pin std-v0.2.0)"
   exit 1
 fi
 bash "$STANDARDS_DIR/standards/bin/check-core.sh" "$(pwd)"
@@ -64,6 +91,9 @@ moving this one.
 
 ## Testing this package
 
-There is no separate test suite yet: `bin/check-core.sh` run against this
-repo itself is the test (see `scripts/check.sh` at the repo root). A
-deliberate em dash in any tracked `.md` file must fail it.
+`bin/check-core.sh` run against this repo itself proves the shell tooling
+(see `scripts/check.sh` at the repo root; a deliberate em dash in any
+tracked `.md` file must fail it). The v0.2 schemas have their own suite:
+`bun test` and `uv run pytest tests/py -q`, round-tripping every fixture
+in `fixtures/` through both generated model sets, the same proof
+`home/spec/` uses for its own schemas.
