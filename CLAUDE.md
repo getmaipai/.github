@@ -53,7 +53,14 @@ platform plan; this is the standing summary every session should carry.
    cadence, a different committer audience, or a different visibility.
 6. **Prebuilt over hand-built.** One component library, one icon set, one
    engine, maintained parts assembled by us, and the org standards enforced
-   by lint and tests, never by memory.
+   by lint and tests, never by memory. The same rule past the UI: a native
+   capability the mandated engine already has, or a maintained library for
+   a solved problem, beats hand-rolled logic doing the identical job. A
+   large system prompt standing in for a real technique (activation
+   steering instead of a paragraph of personality prose, a text-
+   normalization library instead of asking the model to spell out numbers
+   reliably) is hand-built too, and loses to the prebuilt answer on the
+   same terms: slower, more tokens, less predictable.
 7. **Hub first, robot for parity, Go last.** Every hub step is in family use
    before its robot counterpart; nothing early may close the door on the
    later clients.
