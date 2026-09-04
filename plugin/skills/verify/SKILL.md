@@ -28,6 +28,17 @@ Static success is not verification. Pick what applies:
 - **Bot**: tests pass; hardware-dependent behavior is flagged as untestable
   until hardware exists.
 - **Docs-only**: build the docs site; check the changed pages render.
+- **Anything graphical**: actually look at it (screenshot per the org
+  screenshot rules, or a live browser/simulator pass), not just a green
+  build. A UI change is not exercised until someone (you) has seen the
+  pixels.
+
+**Never ask Jesse to do Gate 2 for you.** "Can you check if this looks
+right" or "can you try this" before you have tried it yourself is not a
+verification report, it is skipping the gate and handing it to him. Run
+it, look at it, then report what you saw. If a specific piece truly needs
+his hardware, device, or judgment, say precisely which piece and why the
+rest is already verified.
 
 ## Gate 3: what the diff removes, not just what it claims
 

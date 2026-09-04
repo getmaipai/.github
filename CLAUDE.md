@@ -125,6 +125,17 @@ reading would have answered is a round trip that did not need to happen.
 - "Verified" also means **exercised for real**: the feature was hit in the
   running app, the build installed on the target device, or the tests cover
   the change. "It compiles" is not verified.
+- **Never hand Jesse something to check that you have not checked yourself
+  first.** This applies to every kind of change, functional or graphical:
+  run the app, drive the flow, look at the screenshot, read the log,
+  whatever proves it. A change is not "done, can you confirm" until you
+  already have; if you genuinely cannot verify something yourself (real
+  hardware only Jesse has, a judgment call that is his to make), say
+  exactly that and why, rather than silently skipping the check.
+- **Never ask Jesse to run a command you can run yourself.** If a command
+  is runnable from here, run it. Ask him to run something only when it
+  truly requires his own session, device, or credentials (an interactive
+  login, a physical action).
 - At release time, the release skill additionally does a **clean-clone build**
   (fresh clone in a temp dir must build and boot) to catch works-on-my-machine
   and over-eager gitignore mistakes.
