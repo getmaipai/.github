@@ -1,12 +1,16 @@
 ---
 name: release
 description: Cut a MaiPai release - checks, clean-clone build, changelog from commits, screenshot regeneration, docs drift check, semver tag, GitHub release. Use when Jesse says release, cut a release, or ship a version.
+disable-model-invocation: true
 ---
 
 # Cut a release
 
 Releases are the only thing users (and the hub deployer) touch, so this is the
-quality gate. Never cut one without Jesse asking for it.
+quality gate. Never cut one without Jesse asking for it. `disable-model-
+invocation: true` above makes that a mechanical property, not just a written
+rule: Claude cannot self-invoke this skill from its own judgment, only when
+Jesse's own message asks for one, matching the description's trigger.
 
 ## 1. Preflight
 

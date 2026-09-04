@@ -72,6 +72,18 @@ link API, the UI schema) is edited in the spec, then implemented on the hub,
 then on the robot. A hub-only or robot-only patch to a spec-shaped record is
 a bug: the shapes drift and the round-trip fixtures catch it.
 
+**Resolve design ambiguity before asking, when it is genuinely
+resolvable.** When the platform plan, a spec, or a standard is silent or
+seems to conflict with itself, that is usually not a question for Jesse:
+it is a research task. Dispatch the `design-resolver` agent (`plugin/
+agents/design-resolver.md`, opus) to read every relevant passage, find the
+pattern, and come back with a concrete decision and its reasoning, before
+reaching for a clarifying question. Escalate to Jesse only for what the
+agent itself reports as genuinely low-confidence, or for what was already
+his call to begin with (releases, deploys, go/no-go, review verdicts, a
+real-world fact only he knows). A clarifying question that a closer
+reading would have answered is a round trip that did not need to happen.
+
 ## Git workflow
 
 - **All work lands directly on `main`. Never open pull requests.** The remote is
