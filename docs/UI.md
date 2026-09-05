@@ -86,6 +86,64 @@ labels and audio cues, a parental gate before anything leaves the
 household or grants a permission, copy at reading age 9). No per-package
 work.
 
+**Toast, confirmation, sheet, and the notification center, decided
+(2026-09-05, researched against Synology, Home Assistant, and Discord's
+own real patterns rather than invented from scratch):** five different
+"something is telling you something" shapes exist and each has exactly
+one job.
+
+A *toast* is a courtesy echo of an action the household member just took
+themselves, self-dismissing, never blocking, and never the only place
+the outcome is recorded - it always writes to the notification center
+too, so nothing is lost because a toast was missed while looking away.
+`tv: none` (it never appears there, per the TV rule above); on TV the
+same event surfaces only through the center.
+
+A *confirmation* is an inline card in the flow, never a floating dialog
+- `PeoplePage`'s existing Remove pattern (names the count, states what
+is lost, offers Cancel and confirm without leaving the list) is the
+model, not an exception to standardize away later. It is the only
+pattern for "are you sure" before a destructive-but-recoverable action,
+chosen specifically because it never traps focus or hides what the
+person was already looking at. `tv: page` (promoted to full-page focus
+on TV, the same way any floating pattern is there).
+
+A *sheet or full dialog* is reserved for a genuinely separate task that
+needs its own real estate and real focus (a multi-field form: authoring
+a household command, editing a person's role). None exists in the kit
+today because nothing built so far has actually needed one - a generic
+Dialog component gets built the first time a real caller needs it, not
+speculatively ahead of one.
+
+The *notification center* (`getmaipai/.github/docs/NOTIFICATIONS.md`)
+is the durable, thirty-day record: every notification writes here
+regardless of which other channel also fired, so toast, Telegram, and a
+future push channel are courtesy layers on top of it, never a
+substitute for it. It is a non-blocking panel, not a modal - it never
+traps focus, matching the same "inline over floating" preference the
+confirmation pattern above already takes. A notification type marked
+non-configurable (`getmaipai/.github/docs/NOTIFICATIONS.md`'s `locked`
+declarations - a safety alert to a parent, a security action awaiting
+confirmation) still writes here and still respects its declared level's
+delivery rule; "non-configurable" means the household can't reroute or
+silence it, never that the UI shows it any less prominently than a
+routine one. `tv: page` (the doc's own "TV overlay" channel: a
+full-screen take, never a corner toast, since TV has no toast surface
+and no hover to reveal a panel).
+
+Two things researched specifically because they'd be easy to get wrong
+by assuming rather than checking: Home Assistant's "critical" alert is a
+flag the *sender* sets on the notification payload, never a per-person
+override a user can promote a normal notification into after the fact
+- a locked/immediate notification's urgency is declared once, at the
+source, the same way `NOTIFICATIONS.md`'s own `level` field already
+works. And Discord's "Suppress @everyone" needs an explicit, separate
+toggle even when a channel or server is otherwise muted - a broad
+"mute everything" control must never silently cover a locked type; if
+MaiPai ever builds a household-wide mute, it has to name and skip every
+locked notification explicitly, not fall through to muting them by
+omission.
+
 ## Responsive layout, PWA, tabs, icons
 
 - Four surfaces, one set of breakpoints owned by the kit (phone under 640,
