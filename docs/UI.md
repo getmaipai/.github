@@ -62,6 +62,20 @@ bad example, the TV column, and the lint that guards it. The full pattern
 table is platform plan section 6.4; new patterns are added to the kit
 first, never invented inline in a package.
 
+**Batch actions, in one rule:** every list of things a household can
+delete offers a multi-select and a batch delete, and a list whose whole
+contents are safely disposable (memories, notifications, history) also
+offers a clear-all. One item at a time is the exception, not the
+default: a parent tidying up a year of memories one row at a time is a
+product that does not respect them. The kit owns the pattern (a
+selection mode, a count of what is selected, one confirmation naming the
+number, per-item results when some are refused), so a package never
+builds its own. Partial success is reported, never swallowed: selecting
+five and having one refused deletes the other four and says why the
+fifth was kept. Destructive batches follow the same confirmation rule as
+any single destructive action, and a clear-all always names what it is
+about to remove.
+
 **TV, in one rule:** every pattern is marked `tv: page | none | native`.
 Toasts, sheets, tooltips, hover, drag, nested tabs, breadcrumbs, the right
 pane, and free text entry do not exist on TV.
