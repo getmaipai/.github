@@ -21,7 +21,7 @@ class TraceSpan(BaseModel):
     parent_span_id: str | None = None
     name: str = Field(
         ...,
-        description='e.g. wakeword.detect, router.route, skill.handle:bedtime-reminder, integration.call:home_assistant.',
+        description='e.g. wakeword.detect, router.route, plugin.handle:bedtime-reminder, integration.call:home_assistant.',
     )
     node: Literal['home', 'bot'] = Field(
         ...,

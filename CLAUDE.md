@@ -22,7 +22,7 @@ Go last.
 |---|---|---|
 | `home` | MaiPai Home | The self-hosted family AI hub: the platform and the household's master (identity, people, memory, the turn engine, settings, the package host, the shell). Every feature ships as a catalog package. |
 | `bot` | MaiPai Bot | Robot companion. Pairs with the hub like a pod (a full replica, the hub as its brain when reachable), stands alone complete when not. Bench-proven, rebuilt fresh on the platform design. |
-| `catalog` | MaiPai Catalog | The public package catalog: every skill, app, companion, integration, model, wake word, voice, and theme, signed and indexed. Hub and robot install from it. |
+| `catalog` | MaiPai Catalog | The public package catalog: every plugin, app, companion, integration, model, wake word, voice, and theme, signed and indexed. Hub and robot install from it. |
 | `go` | MaiPai Go | Apple TV and iPhone client. Renders the same UI schema natively. Built last, once the hub and robot have packages with schema pages. |
 | `.github` | (this repo) | Org standards, `@maipai/standards` tooling, the shared Claude plugin, org profile |
 
@@ -65,7 +65,7 @@ platform plan; this is the standing summary every session should carry.
    before its robot counterpart; nothing early may close the door on the
    later clients.
 8. **Every feature is reviewed and rebuilt, never carried.** No existing app,
-   skill, or screen is a requirement by virtue of existing in the legacy
+   plugin, or screen is a requirement by virtue of existing in the legacy
    code. Each is re-examined (does the family use it, does it fit a package,
    what is the right design now), then rebuilt as designed, redesigned,
    merged, or dropped, with a one-line verdict recorded in the fresh repo's

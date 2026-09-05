@@ -10,11 +10,11 @@ export const TraceSpan = z
     trace_id: z.string().min(1),
     span_id: z.string().min(1),
     parent_span_id: z.union([z.string(), z.null()]).default(null),
-    /**e.g. wakeword.detect, router.route, skill.handle:bedtime-reminder, integration.call:home_assistant.*/
+    /**e.g. wakeword.detect, router.route, plugin.handle:bedtime-reminder, integration.call:home_assistant.*/
     name: z
       .string()
       .describe(
-        "e.g. wakeword.detect, router.route, skill.handle:bedtime-reminder, integration.call:home_assistant.",
+        "e.g. wakeword.detect, router.route, plugin.handle:bedtime-reminder, integration.call:home_assistant.",
       ),
     /**Which node emitted this span. A cross-node call (5.3) gets a span on each side sharing the trace_id.*/
     node: z

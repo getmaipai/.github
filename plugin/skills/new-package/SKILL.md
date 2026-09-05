@@ -1,6 +1,6 @@
 ---
 name: new-package
-description: Scaffold a new getmaipai/catalog package (skill, app, companion, integration, model, wakeword, voice, or theme) with a conforming manifest and the bronze-tier definition of done. Use when starting a new package, or when a legacy feature's review verdict (PACKAGES.md) is "rebuild" or "redesign" and it is time to build it.
+description: Scaffold a new getmaipai/catalog package (plugin, app, companion, integration, model, wakeword, voice, or theme) with a conforming manifest and the bronze-tier definition of done. Use when starting a new package, or when a legacy feature's review verdict (PACKAGES.md) is "rebuild" or "redesign" and it is time to build it.
 ---
 
 # Scaffold a new catalog package
@@ -24,12 +24,12 @@ content still need real work.
    in it).
 3. **Pick the tier.** Tier 0 (a recipe or a prompt body) unless the logic
    genuinely cannot be expressed as `fetch` / `pick` / `format` / `action` /
-   `remember` / `schedule`. Most skills, and every robot skill by default,
-   are Tier 0.
+   `remember` / `schedule`. Most plugins, and every robot plugin by
+   default, are Tier 0.
 
 ## Scaffold
 
-Directory: `catalog/<kind-plural>/<category>/<id>/` (skills) or
+Directory: `catalog/<kind-plural>/<category>/<id>/` (plugins) or
 `catalog/<kind-plural>/<id>/` (apps, companions, integrations, models,
 wakewords, voices, themes). Files:
 

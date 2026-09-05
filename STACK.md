@@ -40,7 +40,7 @@ Astro Starlight, living inside each product repo under `docs/`, published via
 GitHub Pages. Three content tiers (`user/`, `dev/`, `api/`) per
 [docs/STYLE.md](docs/STYLE.md).
 
-## Packages (`catalog`, and Tier 1 skills on `home`/`bot`)
+## Packages (`catalog`, and Tier 1 plugins on `home`/`bot`)
 
 | Layer | Standard |
 |---|---|

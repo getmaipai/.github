@@ -1,10 +1,15 @@
 # Packages: definition of done, supply chain, review, CLA
 
-Everything on the hub and robot beyond core is a package: `skill`, `app`,
+Everything on the hub and robot beyond core is a package: `plugin`, `app`,
 `companion`, `integration`, `model`, `wakeword`, `voice`, `theme`, and
 `module` (declarative kinds). One package is one directory with one
 manifest, one format for every kind. Full manifest and file layout in the
 platform plan section 5.1; this doc is the standard a package is held to.
+A `plugin` is a self-contained, permissioned, installable capability
+(Claude's and, as of 2026, OpenAI's own sense of the word) - deliberately
+not called a `skill`, which `home`'s own dev docs reserve for a real but
+not-yet-built separate primitive: plain instructions, no permissions of
+their own, closer to Claude's actual Skill shape.
 
 ## Definition of done
 
@@ -33,14 +38,14 @@ standard in [`CLAUDE.md`](../CLAUDE.md).
 
 - **Tier 0, declarative**: a prompt body, or a recipe interpreted natively
   by the TypeScript and Python interpreters in `home/spec/`. No process.
-  Most skills, and every robot skill by default.
+  Most plugins, and every robot plugin by default.
 - **Tier 1, code**: TypeScript under Deno (see [STACK.md](../STACK.md)), for
   what a recipe cannot express. `runtime: wasm` (Extism) is reserved for
   later.
 
 ## Supply chain and the store
 
-- **Repo layout** (`getmaipai/catalog`, public): `skills/<category>/<id>/`,
+- **Repo layout** (`getmaipai/catalog`, public): `plugins/<category>/<id>/`,
   `apps/`, `companions/`, `integrations/`, `models/`, `wakewords/`,
   `voices/`, `schema/` (mirrored from `home/spec/`), `tools/` (lint, pack,
   sign, index, scorecard, the `check` CLI), `AGENTS.md` and package-writing
@@ -87,7 +92,7 @@ section of [`CLAUDE.md`](../CLAUDE.md)).
 
 ## Review before rebuild
 
-Every legacy hub feature and every legacy robot skill is a review-queue
+Every legacy hub feature and every legacy robot plugin is a review-queue
 entry, not a spec. Before a package is built, its entry gets a one-line
 verdict in the fresh repo's dev docs: rebuild as designed, redesign, merge
 with another, or drop, with the reason. "Copy from legacy" applies only to
