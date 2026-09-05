@@ -1,15 +1,29 @@
 # Packages: definition of done, supply chain, review, CLA
 
-Everything on the hub and robot beyond core is a package: `plugin`, `app`,
-`companion`, `integration`, `model`, `wakeword`, `voice`, `theme`, and
-`module` (declarative kinds). One package is one directory with one
-manifest, one format for every kind. Full manifest and file layout in the
-platform plan section 5.1; this doc is the standard a package is held to.
+Everything on the hub and robot beyond core is a package: `plugin`,
+`skill`, `app`, `companion`, `integration`, `model`, `wakeword`, `voice`,
+`theme`, and `module` (declarative kinds). One package is one directory
+with one manifest, one format for every kind. Full manifest and file
+layout in the platform plan section 5.1; this doc is the standard a
+package is held to.
 A `plugin` is a self-contained, permissioned, installable capability
 (Claude's and, as of 2026, OpenAI's own sense of the word) - deliberately
-not called a `skill`, which `home`'s own dev docs reserve for a real but
-not-yet-built separate primitive: plain instructions, no permissions of
-their own, closer to Claude's actual Skill shape.
+not called a `skill`. A `skill` is a separate, real declarative kind
+(shipped 2026-09-05, `home`'s own dev docs: "The real skill kind,
+shipped"): plain instructions only, a `SKILL.md`-shaped file compatible
+with Claude's own Skill format, no independent permissions and no
+recipe of its own - composed into a chat model's system prompt when
+relevant, never executed standalone. Safely user-authorable end to end,
+since there is nothing in it to review for permissions or network
+access.
+
+A third primitive, `command`, is deliberately **not** in the declarative-
+kind list above: it is household-authored at runtime through a settings
+flow (`home`'s own dev docs: "The command primitive, shipped"), not a
+filesystem package with a manifest and a directory - "when I say X, do
+Y," matched by an exact trigger phrase, with one of two fixed action
+shapes. It needs no catalog entry, no review, and no CLA, because it
+never leaves the household that created it.
 
 ## Definition of done
 
@@ -46,11 +60,11 @@ standard in [`CLAUDE.md`](../CLAUDE.md).
 ## Supply chain and the store
 
 - **Repo layout** (`getmaipai/catalog`, public): `plugins/<category>/<id>/`,
-  `apps/`, `companions/`, `integrations/`, `models/`, `wakewords/`,
-  `voices/`, `schema/` (mirrored from `home/spec/`), `tools/` (lint, pack,
-  sign, index, scorecard, the `check` CLI), `AGENTS.md` and package-writing
-  skills so an agent produces a conforming package, `ASSIGNMENT.md`,
-  `CONTRIBUTING.md`.
+  `skills/<category>/<id>/`, `apps/`, `companions/`, `integrations/`,
+  `models/`, `wakewords/`, `voices/`, `schema/` (mirrored from
+  `home/spec/`), `tools/` (lint, pack, sign, index, scorecard, the `check`
+  CLI), `AGENTS.md` and package-writing skills so an agent produces a
+  conforming package, `ASSIGNMENT.md`, `CONTRIBUTING.md`.
 - **The one PR carve-out.** `catalog` is the only repo in the org that
   accepts pull requests (see [`CLAUDE.md`](../CLAUDE.md) > Git workflow).
   Maintainers still land their own work directly on `main`.
