@@ -24,6 +24,9 @@ if [ -d standards/schemas ]; then
   (cd standards && uv run pytest tests/py -q)
 fi
 
+echo "== standards: prose-lint.sh self-test"
+bash standards/bin/prose-lint.test.sh
+
 echo "== standards core (local)"
 bash standards/bin/check-core.sh "$(pwd)"
 

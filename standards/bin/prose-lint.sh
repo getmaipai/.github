@@ -28,6 +28,7 @@ git ls-files '*.md' 2>/dev/null | while IFS= read -r f; do
 
   in_code=0
   in_inline=0
+  in_html_comment=0
   ln=0
   while IFS= read -r line || [ -n "$line" ]; do
     ln=$((ln + 1))
@@ -40,12 +41,16 @@ git ls-files '*.md' 2>/dev/null | while IFS= read -r f; do
       *"$ALLOW_MARKER"*) continue ;;
     esac
 
-    # Strip inline (single-backtick) code spans before the exclamation
-    # check below: real technical prose leans on `!==`, a non-null
-    # assertion, or a shell `!` inside one. A span that wraps across a
-    # line break (docs/dev.md's own 80-column convention does this)
-    # carries the open/closed state in `in_inline` the same way `in_code`
-    # already tracks fenced blocks above.
+    # Strip inline (single-backtick) code spans first: real technical
+    # prose leans on `!==`, a non-null assertion, or a shell `!` inside
+    # one, and a code span can itself contain a literal `<!--` (e.g.
+    # documenting HTML-comment syntax) that must never be mistaken for a
+    # real, unmatched comment opener by the HTML-comment pass below -
+    # stripping code first removes that content before the comment
+    # scanner ever sees it. A span that wraps across a line break
+    # (docs/dev.md's own 80-column convention does this) carries the
+    # open/closed state in `in_inline` the same way `in_code` already
+    # tracks fenced blocks above.
     line_no_inline_code=""
     rest="$line"
     while true; do
@@ -74,22 +79,63 @@ git ls-files '*.md' 2>/dev/null | while IFS= read -r f; do
       fi
     done
 
-    if [[ "$line" == *"—"* ]]; then
+    # Then strip HTML comments (`<!-- ... -->`) from what's left: a
+    # comment is markup and authoring metadata, not prose a reader ever
+    # sees, the same reason code spans are excluded above - every
+    # store-card README in home/backend/packages/*/README.md opens with
+    # one (`<!-- Store card. ... -->`), and its literal `!` was a real
+    # false positive found live (2026-09-06) blocking
+    # session-d-packages-and-store.md's step 1 commit on home. Applied
+    # to every check below, not just the exclamation one: a banned
+    # filler word or an em dash inside a comment is exactly the same
+    # kind of false positive, just on a different check. Handles a
+    # comment that opens and closes on the same line (the common case)
+    # and one that spans multiple lines, mirroring `in_inline`'s own
+    # state-carrying shape.
+    prose=""
+    rest="$line_no_inline_code"
+    while true; do
+      if [ "$in_html_comment" -eq 1 ]; then
+        if [[ "$rest" == *'-->'* ]]; then
+          rest="${rest#*-->}"
+          in_html_comment=0
+        else
+          rest=""
+          break
+        fi
+      elif [[ "$rest" == *'<!--'* ]]; then
+        prose="$prose${rest%%<!--*}"
+        rest="${rest#*<!--}"
+        if [[ "$rest" == *'-->'* ]]; then
+          rest="${rest#*-->}"
+        else
+          in_html_comment=1
+          rest=""
+          break
+        fi
+      else
+        prose="$prose$rest"
+        rest=""
+        break
+      fi
+    done
+
+    if [[ "$prose" == *"—"* ]]; then
       echo "em dash (U+2014) in $f:$ln"
       echo 1 > "$STATUS_FILE"
     fi
 
-    if echo "$line" | grep -qniE 'delve|seamless(ly)?|\brobust\b|leverage|empower|elevate|streamline|game-changer|in today.s world|it.s important to note'; then
+    if echo "$prose" | grep -qniE 'delve|seamless(ly)?|\brobust\b|leverage|empower|elevate|streamline|game-changer|in today.s world|it.s important to note'; then
       echo "AI filler vocabulary in $f:$ln"
       echo 1 > "$STATUS_FILE"
     fi
 
-    if echo "$line" | grep -qniE "not just [^,.]+,? (it.s|it is) "; then
+    if echo "$prose" | grep -qniE "not just [^,.]+,? (it.s|it is) "; then
       echo "'not just X, it's Y' construction in $f:$ln"
       echo 1 > "$STATUS_FILE"
     fi
 
-    if [[ "$line_no_inline_code" == *"!"* ]]; then
+    if [[ "$prose" == *"!"* ]]; then
       echo "exclamation point in $f:$ln"
       echo 1 > "$STATUS_FILE"
     fi
