@@ -4,7 +4,7 @@
 # Enforces the org's AI writing standards (CLAUDE.md > Writing style) against
 # every tracked Markdown file: no em dashes, no AI filler vocabulary, no
 # "not just X, it's Y" constructions, no exclamation points outside fenced
-# code blocks. Exits non-zero on any hit.
+# or inline code. Exits non-zero on any hit.
 #
 # A line that ends with the literal marker `<!-- prose-lint: allow -->` is
 # exempt from every check on this file. Use it only for a line that names a
@@ -27,6 +27,7 @@ git ls-files '*.md' 2>/dev/null | while IFS= read -r f; do
   [ -f "$f" ] || continue
 
   in_code=0
+  in_inline=0
   ln=0
   while IFS= read -r line || [ -n "$line" ]; do
     ln=$((ln + 1))
@@ -38,6 +39,40 @@ git ls-files '*.md' 2>/dev/null | while IFS= read -r f; do
     case "$line" in
       *"$ALLOW_MARKER"*) continue ;;
     esac
+
+    # Strip inline (single-backtick) code spans before the exclamation
+    # check below: real technical prose leans on `!==`, a non-null
+    # assertion, or a shell `!` inside one. A span that wraps across a
+    # line break (docs/dev.md's own 80-column convention does this)
+    # carries the open/closed state in `in_inline` the same way `in_code`
+    # already tracks fenced blocks above.
+    line_no_inline_code=""
+    rest="$line"
+    while true; do
+      if [ "$in_inline" -eq 1 ]; then
+        if [[ "$rest" == *'`'* ]]; then
+          rest="${rest#*\`}"
+          in_inline=0
+        else
+          rest=""
+          break
+        fi
+      elif [[ "$rest" == *'`'* ]]; then
+        line_no_inline_code="$line_no_inline_code${rest%%\`*}"
+        rest="${rest#*\`}"
+        if [[ "$rest" == *'`'* ]]; then
+          rest="${rest#*\`}"
+        else
+          in_inline=1
+          rest=""
+          break
+        fi
+      else
+        line_no_inline_code="$line_no_inline_code$rest"
+        rest=""
+        break
+      fi
+    done
 
     if [[ "$line" == *"—"* ]]; then
       echo "em dash (U+2014) in $f:$ln"
@@ -54,7 +89,7 @@ git ls-files '*.md' 2>/dev/null | while IFS= read -r f; do
       echo 1 > "$STATUS_FILE"
     fi
 
-    if [[ "$line" == *"!"* ]]; then
+    if [[ "$line_no_inline_code" == *"!"* ]]; then
       echo "exclamation point in $f:$ln"
       echo 1 > "$STATUS_FILE"
     fi
