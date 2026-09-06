@@ -109,7 +109,16 @@ index($0, allow_marker) > 0 { next }
     status = 1
   }
 
-  if (index(prose, "!") > 0) {
+  # Markdown image syntax (`![alt](url)`) starts with a literal `!`
+  # immediately before `[` - not a real exclamation point. Found live
+  # (2026-09-06, Session E, `home`) blocking a commit of real tier-1 user
+  # docs embedding real screenshots: `docs/STYLE.md`'s own tier-1 rule
+  # calls for "screenshots over prose," and every one of them trips this
+  # check as written. Stripped in a copy, not `prose` itself, since
+  # nothing else below needs it removed.
+  excl_check = prose
+  gsub(/![[]/, "[", excl_check)
+  if (index(excl_check, "!") > 0) {
     print "exclamation point in " FILENAME ":" FNR
     status = 1
   }

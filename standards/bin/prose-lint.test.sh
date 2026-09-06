@@ -91,6 +91,20 @@ cat > allowed.md <<'EOF'
 EOF
 git add allowed.md
 
+# Markdown image syntax's own `!` (immediately before `[`) must not read
+# as an exclamation point - found live (2026-09-06, Session E, `home`)
+# blocking a commit of real tier-1 docs embedding real screenshots, which
+# `docs/STYLE.md`'s own rule calls for. A real exclamation point on the
+# same line must still be caught.
+cat > image.md <<'EOF'
+![alt text](../assets/screens/home.png)
+EOF
+git add image.md
+cat > image-and-real-exclamation.md <<'EOF'
+![alt text](../assets/screens/home.png) and this part is exciting!
+EOF
+git add image-and-real-exclamation.md
+
 OUTPUT=$("$PROSE_LINT" . 2>&1)
 STATUS=$?
 
@@ -110,6 +124,9 @@ assert "code-span-with-marker.md's real em dash (line 2) still flagged (no swall
   "$(echo "$OUTPUT" | grep -c "em dash (U+2014) in code-span-with-marker.md:2$")"
 assert "vocab-inside-comment.md not flagged at all" "0" "$(echo "$OUTPUT" | grep -c "vocab-inside-comment.md")"
 assert "allowed.md not flagged at all" "0" "$(echo "$OUTPUT" | grep -c "allowed.md")"
+assert "image.md not flagged at all" "0" "$(echo "$OUTPUT" | grep -c "image.md:1$")"
+assert "image-and-real-exclamation.md's real exclamation still flagged" "1" \
+  "$(echo "$OUTPUT" | grep -c "exclamation point in image-and-real-exclamation.md:1$")"
 
 if [ "$FAIL" -eq 0 ]; then
   echo "prose-lint.test.sh: all assertions passed"
