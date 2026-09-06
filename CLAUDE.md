@@ -360,6 +360,38 @@ Windows account. Both are fixed; these rules keep them fixed.
   getmaipai repos (they mirror to Gitea automatically). Jesse's Gitea remains
   the tracker for homelab matters.
 
+## Backlog and status
+
+Issues track bugs and one-off requests; **`docs/BACKLOG.md` tracks build
+status** - what's built and what's missing, per area, in every repo. One
+definition, no second parallel system (no GitHub Project, no custom fields):
+a visual status dashboard reads this file directly, so it has to stay real.
+
+- **Every repo keeps a `docs/BACKLOG.md`**, in the shape `home`'s already
+  uses: scannable, not narrative (the reasoning and decision history live in
+  `docs/dev.md`, linked where useful); size-tagged **S** (a session or
+  less), **M** (a real slice, days), **L** (a platform-level capability,
+  needs its own design pass first); organized under `## Area` headings that
+  reflect how that repo actually breaks down (a package category, a
+  subsystem, a chapter of the platform plan); `- [ ]`/`- [x]` per item.
+- **Update it in the same commit as the change that closes or opens a
+  gap.** A BACKLOG.md that drifts from what `main` actually does is worse
+  than not having one, because the dashboard trusts it.
+- **Item template**, so a `- [ ]` is pickup-ready for any AI agent, not just
+  a session that already has this conversation's context: a one-line
+  objective, file/dir pointers, an existing file or pattern to mirror,
+  acceptance criteria, what's explicitly out of scope, and the exact exit
+  check (`scripts/check.sh` or a named test). Anything bigger than one item
+  gets a short design note in `docs/dev.md` first, then gets chunked into
+  BACKLOG items - never a new spec-file system invented per feature.
+- **The dashboard is a derived view, never a second source.** The
+  `status-dashboard` skill (`getmaipai/.github`) parses every repo's
+  BACKLOG.md into a colored, phase-grouped status page; run it whenever a
+  BACKLOG.md changes, at latest before the session ends. This is an
+  instruction, not a hook: judging whether status actually changed needs
+  contextual reading, the same reason code-review-before-commit stays a
+  soft gate instead of a script.
+
 ## Compatibility
 
 - The hub API serves multiple clients (Go, Desktop, firmware pods) that

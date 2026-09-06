@@ -1,0 +1,242 @@
+<title>MaiPai Build Status</title>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@500;600&family=IBM+Plex+Sans:wght@400;500;600&display=swap">
+<style>
+:root{
+  --page:#f9f9f7; --surface:#fcfcfb; --surface-2:#f1f0ec;
+  --ink:#0b0b0b; --ink-2:#52514e; --muted:#898781;
+  --line:#e4e2da;
+  --accent:#2f5aa8; --accent-ink:#ffffff;
+  --good:#0ca30c; --warn:#fab219; --crit:#d03b3b; --track:#898781;
+  --good-bg:#e8f6e6; --warn-bg:#fef3dd; --crit-bg:#fbe8e5; --track-bg:#eeede9;
+  --grid-line: rgba(11,11,11,0.035);
+}
+@media (prefers-color-scheme: dark){
+  :root:not([data-theme="light"]){
+    --page:#0d0d0d; --surface:#1a1a19; --surface-2:#212120;
+    --ink:#ffffff; --ink-2:#c3c2b7; --muted:#898781;
+    --line:#2c2b28;
+    --accent:#8fb4ec; --accent-ink:#0d1626;
+    --good-bg:#123317; --warn-bg:#3a2e0e; --crit-bg:#3a1614; --track-bg:#232320;
+    --grid-line: rgba(255,255,255,0.045);
+  }
+}
+:root[data-theme="dark"]{
+  --page:#0d0d0d; --surface:#1a1a19; --surface-2:#212120;
+  --ink:#ffffff; --ink-2:#c3c2b7; --muted:#898781;
+  --line:#2c2b28;
+  --accent:#8fb4ec; --accent-ink:#0d1626;
+  --good-bg:#123317; --warn-bg:#3a2e0e; --crit-bg:#3a1614; --track-bg:#232320;
+  --grid-line: rgba(255,255,255,0.045);
+}
+
+*{box-sizing:border-box}
+body{
+  background:
+    linear-gradient(var(--grid-line) 1px, transparent 1px) 0 0/32px 32px,
+    linear-gradient(90deg, var(--grid-line) 1px, transparent 1px) 0 0/32px 32px,
+    var(--page);
+  color:var(--ink);
+  font-family:"IBM Plex Sans", ui-sans-serif, system-ui, sans-serif;
+  padding: 28px 28px 64px;
+}
+h1,h2,h3{text-wrap:balance; margin:0}
+.mono{font-family:"IBM Plex Mono", ui-monospace, monospace}
+.tabular{font-variant-numeric:tabular-nums}
+
+header.page{
+  display:flex; flex-wrap:wrap; align-items:flex-end; justify-content:space-between;
+  gap:16px; margin-bottom:22px; padding-bottom:18px; border-bottom:1px solid var(--line);
+}
+header.page .title-block{max-width:62ch}
+header.page h1{font-size:1.5rem; font-weight:600; letter-spacing:-0.01em}
+header.page p{margin:6px 0 0; color:var(--ink-2); font-size:0.92rem; line-height:1.5}
+header.page code{font-family:"IBM Plex Mono",monospace; font-size:0.85em; background:var(--surface-2); padding:0.1em 0.4em; border-radius:3px}
+
+.legend{display:flex; gap:14px; flex-wrap:wrap; font-family:"IBM Plex Mono",monospace; font-size:0.72rem; color:var(--ink-2)}
+.legend .item{display:flex; align-items:center; gap:6px}
+.dot{width:8px; height:8px; border-radius:50%; flex:none}
+.dot.good{background:var(--good)} .dot.warn{background:var(--warn)}
+.dot.crit{background:var(--crit)} .dot.track{background:var(--track)}
+
+#meta{font-family:"IBM Plex Mono",monospace; font-size:0.72rem; color:var(--muted); text-align:right}
+
+main{display:flex; gap:18px; overflow-x:auto; padding-bottom:12px; align-items:flex-start}
+
+.lane{
+  flex:0 0 300px; min-width:300px;
+  background:var(--surface); border:1px solid var(--line); border-radius:10px;
+  display:flex; flex-direction:column; overflow:hidden;
+}
+.lane header{
+  padding:14px 16px; border-bottom:2px solid var(--accent);
+  display:flex; flex-direction:column; gap:3px;
+  background:var(--surface-2);
+}
+.lane .phase-tag{
+  font-family:"IBM Plex Mono",monospace; font-size:0.68rem; letter-spacing:0.06em;
+  text-transform:uppercase; color:var(--accent); font-weight:600;
+}
+.lane h2{font-size:1.05rem; font-weight:600}
+.lane a.issues{
+  font-family:"IBM Plex Mono",monospace; font-size:0.74rem; color:var(--ink-2);
+  text-decoration:none; border-bottom:1px dotted var(--ink-2); width:max-content;
+}
+.lane a.issues:hover{color:var(--accent); border-color:var(--accent)}
+
+.cards{padding:12px; display:flex; flex-direction:column; gap:10px}
+.card{
+  background:var(--surface-2); border-radius:8px; padding:11px 12px 12px;
+  border-left:4px solid var(--track);
+  display:flex; flex-direction:column; gap:6px;
+}
+.card.good{border-left-color:var(--good)}
+.card.warn{border-left-color:var(--warn)}
+.card.crit{border-left-color:var(--crit)}
+.card.track{border-left-color:var(--track)}
+
+.card .row1{display:flex; align-items:baseline; justify-content:space-between; gap:8px}
+.card h3{font-size:0.88rem; font-weight:600; line-height:1.3; min-width:0}
+.pill{
+  font-family:"IBM Plex Mono",monospace; font-size:0.66rem; font-weight:600;
+  letter-spacing:0.03em; text-transform:uppercase; white-space:nowrap;
+  padding:2px 7px; border-radius:20px; flex:none;
+}
+.pill.good{background:var(--good-bg); color:var(--good)}
+.pill.warn{background:var(--warn-bg); color:#9a6a00}
+:root[data-theme="dark"] .pill.warn{color:var(--warn)}
+@media (prefers-color-scheme:dark){:root:not([data-theme="light"]) .pill.warn{color:var(--warn)}}
+.pill.crit{background:var(--crit-bg); color:var(--crit)}
+.pill.track{background:var(--track-bg); color:var(--muted)}
+
+.count{font-family:"IBM Plex Mono",monospace; font-size:0.72rem; color:var(--muted)}
+.summary{font-size:0.81rem; line-height:1.45; color:var(--ink-2)}
+.summary b{color:var(--ink); font-weight:600}
+.summary .label{font-family:"IBM Plex Mono",monospace; font-size:0.66rem; text-transform:uppercase; letter-spacing:0.04em; color:var(--muted); margin-right:5px}
+
+footer{margin-top:26px; font-size:0.78rem; color:var(--muted); max-width:70ch; line-height:1.5}
+footer code{font-family:"IBM Plex Mono",monospace; background:var(--surface-2); padding:0.1em 0.4em; border-radius:3px}
+</style>
+
+<header class="page">
+  <div class="title-block">
+    <h1>MaiPai Build Status</h1>
+    <p>What's built and what's missing, per area, across <code>home</code>, <code>bot</code>, <code>catalog</code>, and <code>go</code> - parsed directly from each repo's <code>docs/BACKLOG.md</code>.</p>
+    <div class="legend" style="margin-top:10px">
+      <span class="item"><span class="dot good"></span>built</span>
+      <span class="item"><span class="dot warn"></span>partial</span>
+      <span class="item"><span class="dot crit"></span>not started</span>
+      <span class="item"><span class="dot track"></span>not tracked yet</span>
+    </div>
+  </div>
+  <div id="meta"></div>
+</header>
+
+<main id="lanes"></main>
+
+<footer>
+  Generated by the <code>status-dashboard</code> skill (<code>getmaipai/.github</code>), which
+  parses every repo's <code>docs/BACKLOG.md</code> checkbox counts into this view. Re-run it
+  after a BACKLOG.md changes to refresh - see <code>getmaipai/CLAUDE.md</code> &gt; Backlog and status.
+</footer>
+
+<script>
+// Real data as of the last skill run - renders immediately, then a live db
+// subscription (if granted) overlays anything newer without a redeploy.
+const INITIAL = {"repos": {"home": {"repo": "home", "phase": "Hub", "open_issues": 42, "issues_url": "https://github.com/getmaipai/home/issues", "updated_at": "2026-09-06T20:12:00.916Z"}, "bot": {"repo": "bot", "phase": "Robot parity", "open_issues": 40, "issues_url": "https://github.com/getmaipai/bot/issues", "updated_at": "2026-09-06T20:12:00.916Z"}, "catalog": {"repo": "catalog", "phase": "Catalog (infra)", "open_issues": 0, "issues_url": "https://github.com/getmaipai/catalog/issues", "updated_at": "2026-09-06T20:12:00.916Z"}, "go": {"repo": "go", "phase": "Go", "open_issues": 0, "issues_url": "https://github.com/getmaipai/go/issues", "updated_at": "2026-09-06T20:12:00.916Z"}}, "areas": {"home": [{"area": "Naming: rename `skill` to `plugin`, add real `skill` and `command`", "status": "yellow", "done": 4, "open": 1, "built": ["Rename the `skill` manifest kind to `plugin`", "Add a real `skill` kind: plain instructions, Claude-`SKILL.md`- compatible, no independent permissions"], "missing": ["A settings UI for authoring commands"]}, {"area": "Skill standards (definition of done)", "status": "yellow", "done": 4, "open": 4, "built": ["A real `quality_scale.yaml` per package", "A `smoke` entry per package"], "missing": ["Real i18n for skills", "Full i18n string extraction across the shell, kit, and apps"]}, {"area": "Skills (Tier 0 catalog)", "status": "red", "done": 0, "open": 14, "built": [], "missing": ["Fix trivia: it reveals the question and the answer in the same reply", "Web search (S-M) - already decided as \"permitted and required\" (`docs/dev.md`'s 2026-09..."]}, {"area": "Integrations", "status": "red", "done": 0, "open": 6, "built": [], "missing": ["Calendar", "Email search"]}, {"area": "Vision", "status": "red", "done": 0, "open": 3, "built": [], "missing": ["`host.camera.still` (L) - no pipeline, no hardware path in this repo (the hub isn't the...", "`host.ocr.read` (M) - RapidOCR already decided as the library (`docs/dev.md`); needs wi..."]}, {"area": "Generation (image, video)", "status": "red", "done": 0, "open": 2, "built": [], "missing": ["Image generation (L) - deliberately not started", "Video generation (L) - same posture, same reason."]}, {"area": "Advanced tool calling (Tier 2)", "status": "yellow", "done": 1, "open": 2, "built": ["Wire the `embed` role into routing"], "missing": ["Real multi-source, multi-skill answers (L) - see `docs/dev.md`'s 2026-09-04 tier 2 note...", "Plugin/recipe `ask`-continuation: let any plugin pause for a real answer, not just reply in one shot"]}, {"area": "Feature parity: ChatGPT / Gemini / Claude", "status": "red", "done": 0, "open": 4, "built": [], "missing": ["Projects: a persistent, instructed workspace scoped above a single conversation", "Canvas / Artifacts: a side panel for iterating on a document or running code, not just chat text"]}, {"area": "Chat, memory and persona (the intelligence gap)", "status": "yellow", "done": 21, "open": 10, "built": ["Send prior turns to the model", "A speaker block in the prompt"], "missing": ["Rate-limit `/api/turn` and `/api/llm/*` per person", "Use the bi-temporal fields, and add a clock to every memory"]}, {"area": "People, relationships and permissions", "status": "yellow", "done": 3, "open": 9, "built": ["The hub half of entities and relationships", "Migrate authorization from roles to grants, additively"], "missing": ["`min_role` on every package manifest becomes a grant check too", "Resolve the unrestricted-mode age collision"]}, {"area": "Settings", "status": "red", "done": 0, "open": 4, "built": [], "missing": ["Rebuild Settings as a real settings editor", "Do NOT add a global \"show advanced\" toggle"]}, {"area": "UI / shell", "status": "yellow", "done": 23, "open": 18, "built": ["Person edit and delete (M) - done 2026-09-05", "Backup restore, end to end (S) - done 2026-09-05"], "missing": ["A generic \"share\" mechanism in the UI schema/manifest system", "Batch select and clear-all everywhere else"]}, {"area": "Proactive / ambient intelligence", "status": "red", "done": 0, "open": 1, "built": [], "missing": ["Cache skill lookups proactively, and surface them unprompted when relevant"]}, {"area": "Portability and the link (hub <-> robot)", "status": "yellow", "done": 3, "open": 11, "built": ["Forget and person-delete must write tombstone ops, not bare DELETEs", "A clock stamp on every spec record"], "missing": ["A spec-or-local verdict for each hub-internal table", "Cut `spec-v0.1.0`"]}, {"area": "Voice / robot", "status": "red", "done": 0, "open": 2, "built": [], "missing": ["Wake word past phase 1 (L) - mic capture + inference exists in-browser; everything else...", "Robot pairing / the link API (L) - not implemented in `home` at all."]}, {"area": "Cross-cutting", "status": "yellow", "done": 9, "open": 9, "built": ["The notification system (4.13) (L, a real working subset done 2026-09-05, `docs/dev.md`...", "Content ceiling record and dials"], "missing": ["Cut a first real release (S, but blocking) - no tag has ever been made", "Real i18n (L) - \"language and region\" is a stored preference today with no translation..."]}, {"area": "Legacy: copy, re-examine, record", "status": "red", "done": 0, "open": 5, "built": [], "missing": ["Verdicts for the features absent from both this file and the rebuild", "The wake-word training and calibration pipeline"]}, {"area": "Wave 2 additions (2026-09-06)", "status": "yellow", "done": 13, "open": 19, "built": ["Lifecycle events", "Sessions per device with revoke, optional TOTP for owner and admin"], "missing": ["The first-run wizard, end to end", "A family member joins, a kid profile, a guest"]}], "bot": [{"area": "Step 0: repo scaffolding", "status": "green", "done": 2, "open": 0, "built": ["Repo reset to a clean history (S) - `LICENSE` (AGPL-3.0), `NOTICE`, `README.md`, `docs/...", "Port the pre-rebuild bench and wake-word learnings into `docs/dev.md` (S) - done 2026-0..."], "missing": []}, {"area": "Robot v0.1 (not started)", "status": "red", "done": 0, "open": 9, "built": [], "missing": ["Pin and consume `home/spec/` v0.1 (`maipai-spec @ git+...@spec-v0.1.0#subdirectory=spec...", "The voice loop (wake word, VAD, STT, TTS) - legacy's bench used `hey_jarvis` (stock ope..."]}], "catalog": [{"area": "Supply-chain tooling (`tools/`)", "status": "yellow", "done": 7, "open": 7, "built": ["Lint", "Pack"], "missing": ["Permission-diff PR comment", "Banned-API scan"]}, {"area": "Packages: plugins (Tier 0/1)", "status": "yellow", "done": 3, "open": 1, "built": ["`define`, `weather`", "`joke`, `trivia`"], "missing": ["`recall`, `remember`"]}, {"area": "Packages: skills (plain-instruction, no independent permissions)", "status": "yellow", "done": 1, "open": 1, "built": ["`storytime-style`"], "missing": ["Any other skill"]}, {"area": "Packages: companions", "status": "red", "done": 0, "open": 1, "built": [], "missing": ["Any companion package"]}, {"area": "Packages: apps", "status": "red", "done": 0, "open": 1, "built": [], "missing": ["Any app package"]}, {"area": "Packages: integrations", "status": "red", "done": 0, "open": 1, "built": [], "missing": ["Any integration package"]}, {"area": "Packages: models", "status": "red", "done": 0, "open": 1, "built": [], "missing": ["Any model package"]}, {"area": "Packages: wakewords", "status": "red", "done": 0, "open": 1, "built": [], "missing": ["Any wakeword package"]}, {"area": "Packages: voices", "status": "red", "done": 0, "open": 1, "built": [], "missing": ["Any voice package"]}, {"area": "Governance and contributor flow", "status": "red", "done": 0, "open": 3, "built": [], "missing": ["`ASSIGNMENT.md` legal review", "`AGENTS.md` real package-scaffolder link"]}], "go": [{"area": "Where this repo actually is", "status": "red", "done": 0, "open": 1, "built": [], "missing": ["Everything"]}]}};
+
+const LANE_ORDER = ["home", "bot", "catalog", "go"];
+const STATUS_LABEL = {good:"built", warn:"partial", crit:"not started", track:"not tracked yet"};
+
+function statusClass(s){
+  if (s === "green") return "good";
+  if (s === "yellow") return "warn";
+  if (s === "red") return "crit";
+  return "track";
+}
+
+function esc(s){
+  return String(s ?? "").replace(/[&<>"']/g, (c) => ({
+    "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;"
+  }[c]));
+}
+
+function renderList(items, label){
+  if (!items || !items.length) return "";
+  return `<div class="summary"><span class="label">${label}</span>${items.map(esc).join(" &middot; ")}</div>`;
+}
+
+function cardHtml(a){
+  const cls = statusClass(a.status);
+  return `
+    <div class="card ${cls}">
+      <div class="row1">
+        <h3>${esc(a.area)}</h3>
+        <span class="pill ${cls}">${STATUS_LABEL[cls]}</span>
+      </div>
+      <div class="count tabular">${a.done}/${a.done + a.open} done</div>
+      ${renderList(a.built, "built")}
+      ${renderList(a.missing, "missing")}
+    </div>`;
+}
+
+const STATUS_RANK = {crit:0, warn:1, track:2, good:3};
+
+function render(state){
+  const lanesEl = document.getElementById("lanes");
+  lanesEl.innerHTML = "";
+  let latest = null;
+
+  for (const repoName of LANE_ORDER){
+    const repo = state.repos[repoName];
+    const areas = (state.areas[repoName] || []).slice().sort(
+      (a, b) => STATUS_RANK[statusClass(a.status)] - STATUS_RANK[statusClass(b.status)]
+    );
+    if (repo && repo.updated_at && (!latest || repo.updated_at > latest)) latest = repo.updated_at;
+
+    const lane = document.createElement("div");
+    lane.className = "lane";
+    lane.innerHTML = `
+      <header>
+        <span class="phase-tag">${repo ? repo.phase : ""}</span>
+        <h2>${repoName}</h2>
+        <a class="issues" href="${repo ? repo.issues_url : "#"}" target="_blank" rel="noopener">
+          ${repo ? repo.open_issues : 0} open issue${repo && repo.open_issues === 1 ? "" : "s"}
+        </a>
+      </header>
+      <div class="cards">${areas.map(cardHtml).join("") || '<div class="summary" style="padding:8px 4px">No BACKLOG.md areas yet.</div>'}</div>
+    `;
+    lanesEl.appendChild(lane);
+  }
+
+  document.getElementById("meta").textContent = latest
+    ? "updated " + new Date(latest).toLocaleString(undefined, {dateStyle:"medium", timeStyle:"short"})
+    : "";
+}
+
+render(INITIAL);
+
+(async () => {
+  try {
+    const db = await claude.use("db");
+    if (!db) return;
+
+    const state = JSON.parse(JSON.stringify(INITIAL));
+
+    db.collection("repos").onSnapshot((docs) => {
+      for (const d of docs) state.repos[d.repo] = d;
+      render(state);
+    });
+    db.collection("areas").onSnapshot((docs) => {
+      const byRepo = {};
+      for (const d of docs) {
+        (byRepo[d.repo] ||= []).push(d);
+      }
+      state.areas = byRepo;
+      render(state);
+    });
+  } catch (e) {
+    // No db capability granted for this viewer - the initial render already
+    // shows the last known-good status, so the page still works standalone.
+  }
+})();
+</script>
