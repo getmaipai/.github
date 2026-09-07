@@ -1,0 +1,33 @@
+name: Feature request
+description: Suggest an idea or something you wish MaiPai did
+title: "[Feature]: "
+labels: ["enhancement"]
+body:
+  - type: markdown
+    attributes:
+      value: |
+        Describe the idea like you're explaining it to a friend, not
+        writing a spec. We'll work out the technical shape from there.
+
+  - type: textarea
+    id: problem
+    attributes:
+      label: What's the problem, or what's missing?
+      description: What's annoying, missing, or would just make things easier?
+    validations:
+      required: true
+
+  - type: textarea
+    id: idea
+    attributes:
+      label: What are you picturing?
+      description: Plain terms are fine — a rough sketch beats a formal spec.
+    validations:
+      required: true
+
+  - type: textarea
+    id: alternatives
+    attributes:
+      label: Anything you've tried or considered instead?
+    validations:
+      required: false

@@ -359,6 +359,25 @@ Windows account. Both are fixed; these rules keep them fixed.
   even when not being fixed now. GitHub Issues are the tracker of record for
   getmaipai repos (they mirror to Gitea automatically). Jesse's Gitea remains
   the tracker for homelab matters.
+- **Write issue bodies like a person describing the problem, not a bot filling
+  out a template.** A bug report says what happened and what you expected to
+  happen instead, in plain words a non-engineer could follow. A feature
+  request says what someone wants and why it'd help, not a spec. The title
+  and opening line should make sense to Jesse on his phone with zero context
+  loaded. Technical detail (stack traces, logs, exact repro steps, file/line
+  pointers) is welcome, but goes underneath the plain-language summary, not
+  instead of it. The same AI writing standards as everywhere else apply here
+  too (see Writing style above): no em dashes, no filler vocabulary, no
+  robotic "as an AI" phrasing, no listing symptoms without ever saying what's
+  actually wrong in a sentence a person would say out loud.
+- **This is enforced structurally, not by memory.** `.github/ISSUE_TEMPLATE/`
+  in this repo (`bug_report.yml`, `feature_request.yml`) is GitHub's
+  org-wide default: any repo in the org without its own issue templates
+  (every repo, currently) serves these automatically, so the plain-language
+  prompts show up for human contributors and AI sessions alike, on GitHub's
+  side, with no per-repo copy to keep in sync. A repo only needs its own
+  templates if it genuinely needs different fields; if so, keep the same
+  plain-language framing.
 
 ## Backlog and status
 

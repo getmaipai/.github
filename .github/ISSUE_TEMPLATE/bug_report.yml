@@ -1,0 +1,53 @@
+name: Bug report
+description: Something isn't working the way it should
+title: "[Bug]: "
+labels: ["bug"]
+body:
+  - type: markdown
+    attributes:
+      value: |
+        Thanks for reporting this. Write it like you're telling a friend
+        what happened, not filing a technical spec — plain language helps
+        us more than precision does. If you have logs or a stack trace,
+        there's a spot for that at the bottom.
+
+  - type: textarea
+    id: what-happened
+    attributes:
+      label: What happened?
+      description: In your own words, what went wrong?
+      placeholder: "I tapped play on a video and it just spun forever."
+    validations:
+      required: true
+
+  - type: textarea
+    id: expected
+    attributes:
+      label: What did you expect to happen instead?
+    validations:
+      required: true
+
+  - type: textarea
+    id: steps
+    attributes:
+      label: Steps to reproduce, if you know them
+      description: Plain, numbered, or a couple of sentences — whatever's natural.
+    validations:
+      required: false
+
+  - type: textarea
+    id: environment
+    attributes:
+      label: Where were you when this happened?
+      description: Device, browser, app version, which household member's profile — whatever you know.
+    validations:
+      required: false
+
+  - type: textarea
+    id: technical
+    attributes:
+      label: Technical details (optional)
+      description: Logs, error messages, stack traces. Paste them here, not above.
+      render: shell
+    validations:
+      required: false
