@@ -225,7 +225,11 @@ A Blocked line is written for a reader who has seen no earlier
 message: it names the thing, says why only Jesse can do it, and gives
 the exact command or action, every time it appears, never a shorthand
 like "still yours" that refers back to an earlier explanation. If it
-cannot be written that way, it is not a Blocked item. Prefer moving a
-standing ask into Done or In flight once it stops mattering; a Blocked
-line repeated for hours without the ask spelled out is the failure
-this rule exists to end (2026-09-13).
+cannot be written that way, it is not a Blocked item. Blocked is only
+for what stops the sessions' work. A fact Jesse will want that stops
+nothing (his own dev hub is down, a decision waits for him with no
+deadline, a machine change made while he slept) goes in a fourth line,
+FYI, present only when there is one, and stays there until he has
+seen it once, then drops. A Blocked line repeated for hours, or
+carrying a fact that blocks nothing, is the failure this rule exists
+to end (2026-09-13, twice).

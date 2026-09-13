@@ -353,7 +353,11 @@ These apply to docs, UI copy, comments, commit messages, changelogs, issues.
 - **End every reply to Jesse with a status block**: Done (what shipped, and
   whether it is deployed/installed, not just committed), In flight (what is
   still running), Blocked (what cannot proceed, why, and what Jesse must do,
-  repeated every turn until unblocked).
+  repeated every turn until unblocked), and FYI only when there is one
+  (a fact Jesse will want that stops nothing: his own dev hub is down,
+  a decision waits for him with no deadline, a machine change made
+  while he was away). Blocked is only for what stops the work; a fact
+  that stops nothing never goes there.
 
 ## Privacy and PII (hard rules)
 
