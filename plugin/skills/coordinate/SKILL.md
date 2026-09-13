@@ -58,7 +58,11 @@ checks (`check.sh`; code review at medium with an explicit target when
 the session is in a worktree, and the reviewed path and branch checked
 against its own before any finding is acted on, since the review's
 forked subagent can land in the main checkout; docs in the same
-commit; stage by name; one commit per item; push at the org's natural
+commit; stage by name; one commit per item; any command that can run
+longer than two minutes, `check.sh` and benches included, runs in the
+background or with the tool's timeout raised, because a foreground
+command is killed at 120 s and the kill looks like a random test
+failure; push at the org's natural
 boundaries, a verified item merged to `main` being one); and the
 reporting contract (section 3). Read ranges, not whole large files;
 re-read only the acceptance list, once, before reporting done.
