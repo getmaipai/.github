@@ -120,6 +120,15 @@ doing work a cheaper one should have done.
   is the failure mode this rule exists to end: it wastes the most
   expensive tokens in the org on work whose value is the same whoever
   types it.
+- **At a stop point, make the state durable, then reset the context.**
+  When a block of work is finished and the next has not started, the
+  session first confirms the status is written down (docs, backlog,
+  memory, the exact next prompt), then recommends one of two things:
+  compact and continue, when the next item continues this one and
+  unwritten working detail would be lost; or a fresh session with the
+  prompt it just wrote, when the next item is a different task. Nothing
+  in a long history is worth re-reading on every turn once it has been
+  written down.
 
 ## Git workflow
 
