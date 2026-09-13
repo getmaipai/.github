@@ -221,3 +221,11 @@ was told, what is open, and where the notes are. Every reply to Jesse
 ends with the status block: Done (what shipped, whether pushed), In
 flight (which session on what, which notices are armed), Blocked (what
 cannot proceed and what Jesse must do, including a push that failed).
+A Blocked line is written for a reader who has seen no earlier
+message: it names the thing, says why only Jesse can do it, and gives
+the exact command or action, every time it appears, never a shorthand
+like "still yours" that refers back to an earlier explanation. If it
+cannot be written that way, it is not a Blocked item. Prefer moving a
+standing ask into Done or In flight once it stops mattering; a Blocked
+line repeated for hours without the ask spelled out is the failure
+this rule exists to end (2026-09-13).
