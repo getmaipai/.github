@@ -91,6 +91,36 @@ his call to begin with (releases, deploys, go/no-go, review verdicts, a
 real-world fact only he knows). A clarifying question that a closer
 reading would have answered is a round trip that did not need to happen.
 
+## Roles by model (hard rule, 2026-09-12)
+
+A session knows which model it runs on from its own system prompt. The
+rule keys on that name, because the expensive model spent a day today
+doing work a cheaper one should have done.
+
+- **A Fable session never codes and never runs a long-running process.**
+  Its job is to architect, inspect, debug the design, review, and
+  advise: read the code, find the defect, name the fix, write the work
+  order, write the prompt for the session that will do it, check the
+  result when it comes back. It does not edit source or test files, does
+  not write scripts, does not run test suites, benches, engines, builds,
+  or `check.sh`, and does not spawn or babysit servers. Quick, read-only
+  inspection is fine: `grep`, `git log`, reading a file, a command that
+  returns in seconds.
+- **A Fable session may still write docs**, because a design record, a
+  backlog item, an issue, or a prompt is what its job produces. A
+  doc-only commit from a Fable session needs the standards core (prose
+  lint, PII wordlist, gitleaks), which runs in seconds, not the full
+  `check.sh`.
+- **Coding, tests, benches, and live acceptance belong to a coder
+  session** (Sonnet, Opus, or Haiku, chosen by Jesse for the task). A
+  coder session that stalls before a live measurement is handed back
+  with a sharper prompt, or to a stronger coder model, never to Fable.
+- **When Fable finds itself about to edit code or start a bench, it
+  stops and writes the prompt instead.** "It is faster if I just do it"
+  is the failure mode this rule exists to end: it wastes the most
+  expensive tokens in the org on work whose value is the same whoever
+  types it.
+
 ## Git workflow
 
 - **All work lands directly on `main`. Never open pull requests.** The remote is
