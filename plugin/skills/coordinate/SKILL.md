@@ -50,87 +50,25 @@ notes, decisions, messages, and docs.
    one started without the flag). Pick the model from the floor table
    in `CLAUDE.md`; the ready handshake (section 3) confirms it.
 
-## 1b. Small isolated items go to Jesse's local coder, sent into his live window
+## 1b. Small isolated items (retired local coder, 2026-09-13)
 
 An S item in files no session has open (a test fixture, a doc page, a
-package in its own directory, an isolated normalizer) does not need a
-Claude session and is never handed to Jesse as a prompt to paste. It
-goes to his local coder: OpenCode running against the household's own
-Qwen3-Coder-30B on the llmhost, started by his `localcode` alias
-(`~/.config/zsh/localclaude.zsh`: races the host over LAN and
-Tailscale, sets the `llama-server/qwen3-coder` provider, `--auto`
-permissions, long timeouts, sharing disabled; nothing leaves the
-house). He keeps the live window; the coordinator sends the work and
-reads the result.
-
-**How to send.** The alias serves an HTTP API on the port it prints
-(4096, then upward). Write the prompt to a file
-(`home/data-scratch/qwen-task-<n>.md`, git-ignored), then drive the
-window's own input so the task appears where Jesse is looking:
-
-```
-POST http://127.0.0.1:<port>/tui/append-prompt   {"text": "<prompt>"}
-POST http://127.0.0.1:<port>/tui/submit-prompt   {}
-```
-
-For a fresh context (every new task; a 30B that has read a lot of
-code turns its task into a question back to the user), create the
-session and switch the window to it first: `POST /session
-{"title": ...}` returns the id, `POST /tui/select-session
-{"sessionID": id}` shows it, then append and submit as above. The
-`session.new` TUI command did not take on 2026-09-13; the create and
-select pair did. Prefer `POST /session/{id}/prompt_async` with the body
-`{"parts":[{"type":"text","text":...}], "tools":{"question":false}}`
-into the created and selected session: it runs in the window Jesse is
-watching and switches the model's question tool off, so it cannot
-stop to ask him (a written "never ask" was not enough; it asked twice
-on 2026-09-13). If a question does appear (`GET /question` lists
-pending ones), the coordinator answers it through
-`POST /question/{requestID}/reply {"answers":[["<option label>"]]}`,
-never Jesse. The append and submit pair is the fallback for a
-prompt that must go through the input box. Sessions are
-listed at `GET /session` (sort by `time.updated`); the transcript is
-`GET /session/{id}/message` (each message has `info.role` and `parts`
-of type `text` or `tool` with a `state.status`). Read it on a timer
-in the background (five minutes for a 30B reading a long prompt),
-never in a polling loop.
-
-**Before sending.** `GET /session` and read the newest session's last
-messages: never inject into a session that is mid-task without
-telling Jesse. If he restarted the alias, the server process changed
-and the window shows a fresh session; a prompt sent to an old session
-id runs headless where he cannot see it (2026-09-13, first attempt),
-so send through the window's input, not by id. If a headless turn was
-started by mistake, `POST /session/{id}/abort` ends it; a stuck turn
-on the llmhost (`GET <host>/slots`, `is_processing` on every slot with
-no output for minutes) is usually that. Check `git status` in the
-shared checkout for anything the previous Qwen session left.
-
-**The prompt.** The same self-contained shape as a Codex task, but
-one page or one file per task (a four-page task exhausted the 30B's
-attention and it asked the user for the answer), with four extra
-lines because a local 30B follows what is written and nothing else:
-"never ask the user a question; leave the sentence and mention it in
-the report"; the exact files it may edit and the folders it may not;
-"do not run `check.sh` or `bun test`" when other sessions have
-half-finished files in the checkout (their failures are not its to
-chase; a docs task gates on the standards core only, a code task gates
-in a sibling throwaway worktree); and the report shape, so its last
-message is parseable. Never "pick something from the backlog": a Qwen
-session that chose its own item ran the full suite in the shared
-checkout beside two editing sessions (2026-09-13).
-
-**Model floor.** Treat Qwen3-Coder-30B as Sonnet-class for S items
-with no shared files and a mechanical gate; not for M items, not for
-anything in the chat engine, memory, safety, or the supervisors.
-
-**Verify.** By artifact, exactly as a session's work: the commit on
-`origin/main` (it pushes itself), the diff read against the task, the
-gate result in its report, the issue state. A claim in its report is
-checked in the code before acceptance (the Codex privacy pass removed
-a true sentence about an automatic download; the same check applies).
-The coordinator files or fixes what the review finds; the local coder
-gets the next task.
+normalizer) goes to the Claude session that owns the area, as one item
+in its lane, or to a Haiku session when it is one clear change with a
+mechanical check (the model floor table in CLAUDE.md). It is never
+handed to Jesse as a prompt to paste, and it no longer goes to the
+local model: the OpenCode-on-Qwen path was tried for seven tasks on
+2026-09-13 and retired the same evening (`docs/DECISIONS.md`). The
+failure modes, kept here so nobody re-runs the experiment by accident:
+it could not tell its own diff from other sessions' in a shared
+checkout, ran the suite from the wrong directory about half the time,
+reported green over partial checks, and at 60k context stopped
+following directory rules entirely; every landed commit needed the
+coordinator to read the diff line by line, which cost more than the
+work. Codex remains the outside reviewer, launched with a
+self-contained prompt and `/clear` between tasks; its findings are
+checked in the code before acceptance (it once removed a true privacy
+sentence), and the coordinator files or fixes what the review finds.
 
 ## 2. The work order
 

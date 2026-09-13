@@ -6,6 +6,45 @@ incident or review that prompted each. The rule itself lives in
 why, so the rule can be revisited on the facts rather than re-argued
 from memory. Newest first.
 
+## 2026-09-13 (evening): the local coder is retired
+
+**What happened.** The afternoon's decision to send small isolated
+items to OpenCode on the household's Qwen3-Coder-30B-A3B (IQ4_XS, on
+the laptop's eGPU) was tested on seven tasks of rising difficulty,
+with a capability log kept for a tuner session that fixed the server
+side as findings came in (dead starts traced to the laptop's NIC
+shaping, one slot owning the full context, the question tool off at
+the source, `git restore`/`stash`/`reset` denied, llama.cpp bumped,
+an eGPU-only layout, and a dense Qwen3-8B tried and rejected on
+judgment). Result: three commits landed (a wizard step in a doc, a
+`--docs` flag on the gate, the TypeScript half of #72, which needed a
+second pass); four tasks produced nothing usable. It took about 1 h
+45 min of coder time and about 2 h of coordinator time, against
+about 15 min for a Sonnet session doing the same three commits; one
+broken test reached `main` past a gate, one session's staged index
+was unstaged, and the shared checkout was polluted once. The model
+executes a one-file change with a precise spec correctly and fails
+on anything with a second concern (a setup step, a directory rule, a
+subtle rule among plain ones, recovery), and its own reports cannot
+be trusted, so every result had to be read line by line.
+
+**Decisions.**
+
+1. The local coder path is retired. Nothing is sent to OpenCode; the
+   `localcode` wrapper and the tuner's write-up stay in the homelab
+   repo as a record, and the capability log stays in
+   `home/data-scratch/`.
+2. Small isolated items go to the Claude session that owns the area
+   or to a Haiku session under the model floor table. Never a pasted
+   prompt.
+3. Codex stays as the outside reviewer only.
+4. The lesson about what to measure holds: a coder is judged by the
+   coordinator time it saves, not by its token price. A free model
+   that needs its diff read is more expensive than a paid one that
+   does not.
+
+**Commits.** `getmaipai/.github`: this one.
+
 ## 2026-09-13 (afternoon): small isolated items go to the local coder, sent into the live window
 
 **What happened.** Small, isolated items (a test fixture, a normalizer,

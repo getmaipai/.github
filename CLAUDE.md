@@ -144,14 +144,16 @@ or Opus may hold it when Jesse says so.
   environmental blocker gets fixed, an unclear requirement gets a
   decision. When the strongest permitted model stalls, the item is
   re-scoped (chunked, or given a design note) rather than retried.
-- **Small isolated items go to the household's local coder, not to a
-  pasted prompt.** An S item touching no file another session has open
-  is sent by the coordinator into Jesse's live `localcode` window
-  (OpenCode on the local Qwen3-Coder, nothing leaving the house)
-  through its API, with one self-contained prompt (files, rules, gate,
-  commit, report), and verified by artifact; the `coordinate` skill,
-  section 1b, is the procedure. Codex is used the same way when the
-  point is a second model's reading (an outside review), never for a
+- **Small isolated items go to a Claude coder session, never to the
+  local model.** Retired 2026-09-13 evening
+  ([docs/DECISIONS.md](docs/DECISIONS.md)): seven tasks through
+  OpenCode on the household's Qwen3-Coder produced three commits at
+  about four hours of machine and coordinator time for fifteen
+  minutes of Sonnet work, plus a broken test on `main` and two
+  cleanups of the shared checkout. An S item goes to whichever Claude
+  session owns the area, or to a Haiku session when it is one clear
+  change with a mechanical check. Codex stays as the outside reviewer
+  (a second model's reading of a design or a block), never for a
   shared-checkout item, and a red gate means stop and report, never
   push.
 - **Coder sessions are launched with
