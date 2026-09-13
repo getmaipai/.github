@@ -313,6 +313,13 @@ your own.
   worked", his hosts, his parts' quirks) stays out of every tier. Docs
   address a reader who has the product or bought the listed parts. Owner
   reminders go in the session status block or a GitHub issue.
+- **Scratch and private notes live inside the repo they belong to, in a
+  git-ignored folder** (`home` uses `data-scratch/`, covered by its
+  `data-*/` ignore rule), never at the org root, never above it. The
+  folder above the org is the source-control service's; the org root
+  holds only the repos, the standards checkout, and the two symlinks.
+  A throwaway gate worktree is created beside the repo for one gate and
+  removed the moment it ends.
 - **Three tiers**, per [docs/STYLE.md](docs/STYLE.md):
   - `user/`: for dads with basic tech knowledge. Grade-6 reading level, no
     jargon, one action per step, screenshots over prose.
