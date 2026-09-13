@@ -101,11 +101,14 @@ the coordinator role ([docs/DECISIONS.md](docs/DECISIONS.md),
 2026-09-12: a day of the most expensive model doing coder work); Sonnet
 or Opus may hold it when Jesse says so.
 
-- **The coordinator never codes and never runs a long-running process.**
-  Its job is to architect, inspect, debug the design, review, and
-  advise: read the code, find the defect, name the fix, write the work
-  order, write the prompt for the session that will do it, check the
-  evidence when it comes back. It does not edit source or test files,
+- **The coordinator architects, designs, and diagnoses; it never types
+  the code and never runs a long-running process.** It makes the
+  platform decisions, writes the design notes and the programs of
+  work, decides what gets built and in what order, reads the code and
+  the logs to find the real cause of a hard problem and names the fix,
+  chooses between approaches, writes the work order and the prompt for
+  the session that will do it, and checks the evidence when it comes
+  back. It does not edit source or test files,
   does not write scripts, does not run test suites, benches, engines,
   builds, or `check.sh`, and does not spawn or babysit servers. Quick,
   read-only inspection is fine: `grep`, `git log`, reading a file, a
@@ -141,6 +144,11 @@ or Opus may hold it when Jesse says so.
   environmental blocker gets fixed, an unclear requirement gets a
   decision. When the strongest permitted model stalls, the item is
   re-scoped (chunked, or given a design note) rather than retried.
+- **Codex is a third coder for small, isolated items only**: an S item
+  touching no file another session has open, one self-contained prompt
+  per task (files, rules, gate, commit, report), `/clear` between
+  tasks, never a shared-checkout item, and a red gate means stop and
+  report, never push.
 - **Coder sessions are launched with
   `claude --dangerously-skip-permissions`**, so no one sits clicking
   approve; the worktree, port, and data-directory isolation in the
