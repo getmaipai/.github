@@ -220,6 +220,13 @@ or Opus may hold it when Jesse says so.
   drives the equivalent through the browser or the tool (WebKit's
   Option+Tab instead of Full Keyboard Access, 2026-09-12) or skips with
   a stated reason.
+- **A universal claim needs an inventory.** A change that promises
+  "every reply", "one boundary", or "never enters" is done when its
+  commit enumerates every producer or consumer the promise covers and
+  tests each, failure paths included; its own tests passing proves the
+  work order, not the promise. A bench's printed metric is the metric
+  its code computes, or it is renamed. A claim about what a library
+  does is verified in the installed source and the line cited.
 - **Evidence matches the acceptance criterion.** A deterministic behavior
   change is proven by its regression test; a UI change by the flow
   exercised and the screenshot opened and judged; a performance,

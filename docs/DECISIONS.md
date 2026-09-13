@@ -6,6 +6,51 @@ incident or review that prompted each. The rule itself lives in
 why, so the rule can be revisited on the facts rather than re-argued
 from memory. Newest first.
 
+## 2026-09-13: acceptance verifies the claim, not the work order
+
+**What happened.** After a night of coordinated work on `home` (the
+2026-09-12 chat block, ROUTE-01/02, CHAT-18/01/02, and Session B's
+frontend lanes), an outside review by Codex read the whole diff
+against its acceptance claims and found five defects in accepted
+commits: the "one output safety boundary" skipped package error
+fallbacks on two outlets (#86); the credential filter redacted history
+rows but not existing summaries, and matched only a key's header line
+(#89); the edit-branch exclusion covered the conversation window but
+not episode recall or the memory judge (#88); the judge bench printed
+"precision" and "recall" that were both a two-case pass rate (#87);
+the Firefox service-worker passthrough gated one listener while the
+precache library registered another (#90). Two of the coordinator's
+own work orders rested on premises a grep would have refuted (a "spec
+first" item for a record that is deliberately hub-internal; a
+reconnection item that assumed a finished reply exists after a
+disconnect that aborts generation). Every faulted item had passed its
+own tests and met its written acceptance.
+
+**Decisions.**
+
+1. A universal claim ("every", "one boundary", "never enters") is
+   accepted only with an enumeration of every producer or consumer it
+   covers and a test per path, failure paths included. The acceptor
+   reads the enumeration against the code (CLAUDE.md Verification;
+   the `coordinate` skill, section 4).
+2. A metric's name is checked against its computation before a number
+   is accepted under that name.
+3. A claim about a library's behavior is verified in the installed
+   source, cited by line.
+4. A work order states no premise about the code the coordinator has
+   not read (skill, section 2).
+5. An accepted exception opens its follow-up item in the same commit,
+   and a `BACKLOG.md` tick states which of three things it means:
+   verified at a commit, accepted exception with the ruling and the
+   follow-up named, or verification outstanding.
+6. A block ends with an independent review by a session that neither
+   wrote nor accepted the work, triaged before the next block. The
+   coordinator's acceptance is never the last review.
+7. A waiting session goes idle and is woken by one message; it never
+   polls, re-checks, or reports that nothing changed.
+
+**Commits.** `getmaipai/.github` 5dea0f1, 32e78ac, and this one.
+
 ## 2026-09-12: the coordinator role, its skill, and the rules it changed
 
 **What happened.** A Fable session reviewing `home`'s chat program

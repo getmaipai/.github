@@ -83,6 +83,14 @@ boundaries, a verified item merged to `main` being one); and the
 reporting contract (section 3). Read ranges, not whole large files;
 re-read only the acceptance list, once, before reporting done.
 
+A work order states no premise about the code that the coordinator has
+not read. If an item says "spec first", "the route logs the turn", or
+"the finished reply can be fetched", the coordinator has opened the
+file and cites the line; two work orders on 2026-09-13 sent a session
+to build on a premise a grep would have refuted (a record that is
+deliberately not spec-shaped; a reply that never exists because the
+route aborts on disconnect).
+
 Size the slice so it can be implemented and verified with context to
 spare. An M item that would take days is chunked into such slices, each
 with its own acceptance, before it is assigned.
@@ -162,6 +170,34 @@ report proves it finished and what was done with the findings); docs
 landed in the same commit. After the integrator merges, the combined
 `main` has its own `check.sh` result before the block is called done.
 A failed gate leaves the item open with its evidence.
+
+That checks the work order was done. It does not check the claim the
+item makes, and on 2026-09-13 an outside review found five items whose
+own tests passed while the claim had uncovered inputs (an output
+boundary that missed error fallbacks, a credential filter that missed
+summaries, an edit exclusion that missed recall and the judge). So,
+in addition:
+
+- **A universal claim is accepted only with an enumeration.** When an
+  item says "every", "one boundary for all", or "never enters", the
+  done report lists every producer or consumer the claim covers and the
+  test that exercises each, failure paths included (error fallbacks,
+  partial results, aborted streams are replies, captures, and turns
+  like any other). The coordinator reads that list against the code
+  (grep for the call sites), not against the tests.
+- **A metric name is checked against its computation.** When a verdict
+  rule names precision, recall, or a rate, read the bench's lines that
+  compute it before accepting a number under that name.
+- **A claim about a library is verified in its installed source** and
+  the report cites where; a header comment or a README is not
+  verification.
+- **An accepted exception opens its follow-up item in the same
+  commit**, named in the tick's status line.
+- **A block ends with an independent review**: a session that neither
+  wrote nor accepted the work (a fresh session, or Codex) reads the
+  block's whole diff against its acceptance claims, by source
+  inspection, and its findings are triaged before the next block
+  starts. The coordinator's acceptance is never the last review.
 
 A tick in `BACKLOG.md` says which of three things it means, in its
 status line: verified at a named commit; done with an accepted
