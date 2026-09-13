@@ -139,6 +139,17 @@ Handling, within the coordinator's own turn:
   check (re-send, or a status request) is allowed; routine progress
   polling is not.
 
+The same economy applies to the coder sessions. A session waiting on
+another session's commit goes idle and is woken by one message from
+the committing session (the hash and "files free"); it never re-checks
+git, never writes "still waiting", never messages the coordinator to
+say nothing changed. Every such turn re-reads its whole context for no
+work. Messages go to the one session they concern; both sessions get
+the same message only when both need the same fact (a merge window
+opening, a ruling that changes what each may touch). Sessions message
+each other directly for file handoffs and do not route them through
+the coordinator.
+
 ## 4. Verifying a completion report
 
 Before ticking anything: the commit exists on the branch and its diff
