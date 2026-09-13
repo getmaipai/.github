@@ -211,6 +211,15 @@ or Opus may hold it when Jesse says so.
   The one exception: a commit that touches only docs (Markdown, a prompt,
   a backlog line) needs the standards core (prose lint, PII wordlist,
   gitleaks, `standards/bin/check-core.sh`), which runs in seconds.
+- **A check, test, bench, or screenshot script never changes the machine
+  outside the repo and its own data directory.** No system preferences
+  (`defaults write`), no global config, no installs, no environment
+  left behind, even wrapped in a restore step: a killed run leaves the
+  change in place, and the next contributor's OS will not have it. If
+  the behavior under test depends on a machine setting, the script
+  drives the equivalent through the browser or the tool (WebKit's
+  Option+Tab instead of Full Keyboard Access, 2026-09-12) or skips with
+  a stated reason.
 - **Evidence matches the acceptance criterion.** A deterministic behavior
   change is proven by its regression test; a UI change by the flow
   exercised and the screenshot opened and judged; a performance,
