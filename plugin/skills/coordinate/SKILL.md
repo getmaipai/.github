@@ -50,6 +50,24 @@ notes, decisions, messages, and docs.
    one started without the flag). Pick the model from the floor table
    in `CLAUDE.md`; the ready handshake (section 3) confirms it.
 
+## 1b. Small isolated items: delegate to a background agent, never by paste
+
+An S item in files no session has open (a test fixture, a doc page, a
+package in its own directory, an isolated normalizer) does not need a
+terminal session or a pasted prompt. The coordinator spawns a
+background subagent with the Agent tool, model per the floor table
+(Sonnet for anything that closes an issue), with the same
+self-contained prompt a Codex task would get (files, rules, the gate
+in a sibling throwaway worktree, commit by name, red gate means stop),
+and is notified when it finishes; the result is verified by artifact
+(the diff, the gate result, the issue) exactly as a session's is. A
+second model's perspective (Codex, OpenCode) is launched the same way
+through its non-interactive command (`codex exec`, `opencode run`) in
+the background, when the point is the different reading rather than
+the fix. Spawning a coder agent is delegation, which is the
+coordinator's job; what the rule forbids is the coordinator doing the
+coding itself.
+
 ## 2. The work order
 
 Written to a file first, then sent. The file is the canonical handoff
