@@ -9,6 +9,8 @@ The MaiPai org's shared home:
   this automatically via the directory-level copy on the dev machine.
 - **[STACK.md](STACK.md)**: the tech stack standard.
 - **[docs/STYLE.md](docs/STYLE.md)**: the three-tier documentation style guide.
+- **[docs/DECISIONS.md](docs/DECISIONS.md)**: the org decision record, the
+  why behind each rule change, dated.
 - **[SECURITY.md](SECURITY.md)** / **[CONTRIBUTING.md](CONTRIBUTING.md)**:
   org-default community health files (apply to every repo without one).
 - **[plugin/](plugin/)**: the `maipai` Claude Code plugin: shared skills

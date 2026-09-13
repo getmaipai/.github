@@ -97,9 +97,9 @@ Two roles, held by different sessions. This section is the policy; the
 `coordinate` skill in the maipai plugin
 (`plugin/skills/coordinate/SKILL.md`) is the procedure. A session knows
 which model it runs on from its own system prompt. Fable always holds
-the coordinator role (the decision record: 2026-09-12, a day of the most
-expensive model doing coder work); Sonnet or Opus may hold it when Jesse
-says so.
+the coordinator role ([docs/DECISIONS.md](docs/DECISIONS.md),
+2026-09-12: a day of the most expensive model doing coder work); Sonnet
+or Opus may hold it when Jesse says so.
 
 - **The coordinator never codes and never runs a long-running process.**
   Its job is to architect, inspect, debug the design, review, and
