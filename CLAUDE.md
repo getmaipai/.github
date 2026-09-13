@@ -93,76 +93,66 @@ reading would have answered is a round trip that did not need to happen.
 
 ## Roles: coordinator and coder (hard rule, 2026-09-12)
 
-Two roles, held by different sessions. The `coordinate` skill in the
-maipai plugin (`plugin/skills/coordinate/SKILL.md`) is the full playbook
-for the first; this section is the standing rule. A session knows which
-model it runs on from its own system prompt, and Fable always holds the
-coordinator role, because the expensive model spent a day today doing
-work a cheaper one should have done. Sonnet or Opus may hold it when
-Jesse says so.
+Two roles, held by different sessions. This section is the policy; the
+`coordinate` skill in the maipai plugin
+(`plugin/skills/coordinate/SKILL.md`) is the procedure. A session knows
+which model it runs on from its own system prompt. Fable always holds
+the coordinator role (the decision record: 2026-09-12, a day of the most
+expensive model doing coder work); Sonnet or Opus may hold it when Jesse
+says so.
 
 - **The coordinator never codes and never runs a long-running process.**
   Its job is to architect, inspect, debug the design, review, and
   advise: read the code, find the defect, name the fix, write the work
   order, write the prompt for the session that will do it, check the
-  result when it comes back. It does not edit source or test files, does
-  not write scripts, does not run test suites, benches, engines, builds,
-  or `check.sh`, and does not spawn or babysit servers. Quick, read-only
-  inspection is fine: `grep`, `git log`, reading a file, a command that
-  returns in seconds.
-- **When directing sessions, the coordinator manages their tokens,
+  evidence when it comes back. It does not edit source or test files,
+  does not write scripts, does not run test suites, benches, engines,
+  builds, or `check.sh`, and does not spawn or babysit servers. Quick,
+  read-only inspection is fine: `grep`, `git log`, reading a file, a
+  command that returns in seconds. When it finds itself about to edit
+  code or start a bench, it stops and writes the prompt instead.
+- **The coordinator may still write docs**, because a design record, a
+  backlog item, an issue, or a handoff note is what its job produces
+  (doc-only commits: see Verification).
+- **When directing sessions, the coordinator manages their context,
   handles their questions and blockers, and drives their work to
-  completion.** It is event-driven, never polled: every prompt it
-  sends carries the reporting contract (message the coordinator on
-  done, blocked, question, or low context) and every send that expects
-  work back subscribes to the session's idle notice. On done it
-  verifies the claim before ticking anything; on blocked it diagnoses
-  read-only and answers with the cause and the fix; on a question it
-  decides or dispatches `design-resolver`; on low context it snapshots
-  the tree, writes the continuation prompt with the inherited state,
-  and hands it to Jesse for a fresh session. "Token budget" from a
-  coder session means its context window is full, not a spend cap:
-  the coordinator sizes lanes to one M item per session and tells
-  sessions to read targeted ranges, never whole files, and to report
-  low context early with a status note.
+  completion.** It is event-driven, never polled: every work order
+  carries the reporting contract (ready, done, blocked, question, low
+  context), and a session starts only on the coordinator's start
+  message after its ready report. On done the coordinator verifies the
+  completion report against the item's acceptance before ticking
+  anything; on blocked it classifies the blocker before choosing a
+  remedy; on a question it decides or dispatches `design-resolver`; on
+  low context it writes the handoff note and hands it to Jesse for a
+  fresh session. Parallel lanes have one named integrator that merges
+  serially, reconciles shared docs, and verifies the combined `main`.
+- **Model floor per item** (the one authoritative table; the skill
+  points here): Haiku only for an S item with one clear change and a
+  mechanical check; Sonnet for any M item, anything with a verification
+  loop (screenshots to open, a bench to run, a guard to prove), or
+  anything that closes an issue; Opus for an item whose blocker was
+  classified as a reasoning failure, that needs a live measurement plus
+  judgment, or that spans subsystems. The agent list's label and a
+  commit's co-author line are hints, not proof; the session's own
+  report of the model named in its system prompt is the check, made
+  before work starts, and "unknown" is an allowed answer that the
+  coordinator resolves with Jesse. A model change is the remedy for a
+  reasoning failure only: context exhaustion gets a handoff, an
+  environmental blocker gets fixed, an unclear requirement gets a
+  decision. When the strongest permitted model stalls, the item is
+  re-scoped (chunked, or given a design note) rather than retried.
 - **Coder sessions are launched with
   `claude --dangerously-skip-permissions`**, so no one sits clicking
   approve; the worktree, port, and data-directory isolation in the
-  prompt is what keeps that safe. A session found asking for approvals
-  is restarted with the flag and `--continue`.
-- **The coordinator may still write docs**, because a design record, a
-  backlog item, an issue, or a prompt is what its job produces. A
-  doc-only commit from a Fable session needs the standards core (prose
-  lint, PII wordlist, gitleaks), which runs in seconds, not the full
-  `check.sh`.
-- **Coding, tests, benches, and live acceptance belong to a coder
-  session**, on a model no weaker than the item's floor: Haiku only
-  for an S item with one clear change and a mechanical check; Sonnet
-  for any M item, anything with a verification loop (screenshots,
-  benches, a guard to prove) or that closes an issue; Opus for what
-  stalled once, needs a live measurement plus judgment, or spans
-  subsystems. The coordinator confirms the model before work starts
-  (the session states the model from its own system prompt in its
-  first reply; the agent list's label is not proof) and stops a
-  session below the floor before it edits anything. A
-  coder session that stalls before a live measurement is handed back
-  with a sharper prompt, or to a stronger coder model, never to the
-  coordinator. Two stalls on the same item means the next attempt runs
-  on a stronger model.
-- **When the coordinator finds itself about to edit code or start a
-  bench, it stops and writes the prompt instead.** "It is faster if I just do it"
-  is the failure mode this rule exists to end: it wastes the most
-  expensive tokens in the org on work whose value is the same whoever
-  types it.
+  work order is what keeps that safe. A session found asking for
+  approvals is restarted with the flag and `--continue`.
 - **At a stop point, make the state durable, then reset the context.**
   When a block of work is finished and the next has not started, the
   session first confirms the status is written down (docs, backlog,
-  memory, the exact next prompt), then recommends one of two things:
-  compact and continue, when the next item continues this one and
-  unwritten working detail would be lost; or a fresh session with the
-  prompt it just wrote, when the next item is a different task. Nothing
-  in a long history is worth re-reading on every turn once it has been
-  written down.
+  the handoff note, memory pointing at it), then recommends one of two
+  things: compact and continue, when the next item continues this one
+  and unwritten working detail would be lost; or a fresh session with
+  the handoff note, when the next item is a different task.
 
 ## Git workflow
 
@@ -197,8 +187,10 @@ Jesse says so.
   (`plugin/hooks/README.md`), the same shape as the blind-staging gate,
   because a session remembering to review its own work does not survive a
   fresh session picking the task back up.
-- **Push at natural boundaries** (end of a work session, or when Jesse says
-  ship), never reflexively after every commit.
+- **Push at natural boundaries** (a verified item merged to `main`, the end
+  of a work session, or when Jesse says ship), never reflexively after
+  every commit. A push needs no approval; a push that fails is reported
+  as blocked like anything else.
 - **Deploys and releases are always explicit.** Cutting a release or rolling
   the hub requires Jesse's word in the moment.
 - **Author identity:** Jesse's name is public and fine. His email is not:
@@ -209,6 +201,16 @@ Jesse says so.
 
 - Every repo exposes **`scripts/check.sh`**: lint + format check + tests +
   gitleaks + the PII wordlist scan (below). It must pass before any commit.
+  The one exception: a commit that touches only docs (Markdown, a prompt,
+  a backlog line) needs the standards core (prose lint, PII wordlist,
+  gitleaks, `standards/bin/check-core.sh`), which runs in seconds.
+- **Evidence matches the acceptance criterion.** A deterministic behavior
+  change is proven by its regression test; a UI change by the flow
+  exercised and the screenshot opened and judged; a performance,
+  model, or hardware change by measured numbers with the engine build,
+  model file, and a sanitized hardware description (never a hostname)
+  recorded in the dev docs. Live numbers are required when the item's
+  acceptance names them, not for every item.
 - "Verified" also means **exercised for real**: the feature was hit in the
   running app, the build installed on the target device, or the tests cover
   the change. "It compiles" is not verified.
