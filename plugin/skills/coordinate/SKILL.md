@@ -86,8 +86,11 @@ messages: never inject into a session that is mid-task without
 telling Jesse. If he restarted the alias, the server process changed
 and the window shows a fresh session; a prompt sent to an old session
 id runs headless where he cannot see it (2026-09-13, first attempt),
-so send through the window's input, not by id. Check `git status` in
-the shared checkout for anything the previous Qwen session left.
+so send through the window's input, not by id. If a headless turn was
+started by mistake, `POST /session/{id}/abort` ends it; a stuck turn
+on the llmhost (`GET <host>/slots`, `is_processing` on every slot with
+no output for minutes) is usually that. Check `git status` in the
+shared checkout for anything the previous Qwen session left.
 
 **The prompt.** The same self-contained shape as a Codex task, with
 three extra lines because a local 30B follows what is written and
