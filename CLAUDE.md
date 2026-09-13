@@ -144,11 +144,16 @@ or Opus may hold it when Jesse says so.
   environmental blocker gets fixed, an unclear requirement gets a
   decision. When the strongest permitted model stalls, the item is
   re-scoped (chunked, or given a design note) rather than retried.
-- **Codex is a third coder for small, isolated items only**: an S item
-  touching no file another session has open, one self-contained prompt
-  per task (files, rules, gate, commit, report), `/clear` between
-  tasks, never a shared-checkout item, and a red gate means stop and
-  report, never push.
+- **Small isolated items go to the household's local coder, not to a
+  pasted prompt.** An S item touching no file another session has open
+  is sent by the coordinator into Jesse's live `localcode` window
+  (OpenCode on the local Qwen3-Coder, nothing leaving the house)
+  through its API, with one self-contained prompt (files, rules, gate,
+  commit, report), and verified by artifact; the `coordinate` skill,
+  section 1b, is the procedure. Codex is used the same way when the
+  point is a second model's reading (an outside review), never for a
+  shared-checkout item, and a red gate means stop and report, never
+  push.
 - **Coder sessions are launched with
   `claude --dangerously-skip-permissions`**, so no one sits clicking
   approve; the worktree, port, and data-directory isolation in the

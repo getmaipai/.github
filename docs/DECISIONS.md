@@ -6,6 +6,38 @@ incident or review that prompted each. The rule itself lives in
 why, so the rule can be revisited on the facts rather than re-argued
 from memory. Newest first.
 
+## 2026-09-13 (afternoon): small isolated items go to the local coder, sent into the live window
+
+**What happened.** Small, isolated items (a test fixture, a normalizer,
+a doc page) were being handed to Jesse as prompts to paste into Codex
+or OpenCode by hand, and he had to relay the reports back. He rejected
+that, rejected a Claude subagent as the substitute (the local model is
+the point: private, his hardware), and asked to keep watching the live
+window. His `localcode` alias runs OpenCode against the household's
+Qwen3-Coder-30B and serves an HTTP API; the coordinator can put a task
+into the window's own input and read the transcript back. Two
+lessons from the first attempts: a prompt sent by session id after he
+restarted the alias ran headless where he could not see it, and a
+Qwen session left to pick its own backlog item ran the full test
+suite in the shared checkout beside two editing sessions.
+
+**Decisions.**
+
+1. Small isolated items go to the local coder through the live
+   window's API; the coordinator sends, reads, and verifies by
+   artifact. No pasted prompts, no relayed reports (CLAUDE.md Roles;
+   the `coordinate` skill, section 1b).
+2. Qwen3-Coder-30B is Sonnet-class for S items with no shared files
+   and a mechanical gate; never the chat engine, memory, safety, or
+   the supervisors.
+3. A local-coder prompt names its files, forbids the full suite when
+   the shared checkout is dirty, and fixes the report shape; a local
+   coder never chooses its own item.
+4. Codex stays as the outside reviewer (a second model's reading of a
+   design or a block), launched the same way.
+
+**Commits.** `getmaipai/.github` 565f2ca, 8868fb2, and this one.
+
 ## 2026-09-13: acceptance verifies the claim, not the work order
 
 **What happened.** After a night of coordinated work on `home` (the

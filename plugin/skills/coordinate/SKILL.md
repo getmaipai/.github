@@ -50,24 +50,67 @@ notes, decisions, messages, and docs.
    one started without the flag). Pick the model from the floor table
    in `CLAUDE.md`; the ready handshake (section 3) confirms it.
 
-## 1b. Small isolated items: delegate to the local coder, never by paste
+## 1b. Small isolated items go to Jesse's local coder, sent into his live window
 
 An S item in files no session has open (a test fixture, a doc page, a
 package in its own directory, an isolated normalizer) does not need a
-terminal session or a pasted prompt. The coordinator writes the same
-self-contained prompt a Codex task would get (files, rules, the gate
-in a sibling throwaway worktree, commit by name, red gate means stop)
-to a file and launches Jesse's local coder in the background:
-`home/data-scratch/bin/localcode-run <dir> <prompt-file>` (his
-`localcode` alias's non-interactive twin: OpenCode against the local
-Qwen3-Coder on the llmhost, nothing leaving the house). It reads the
-transcript on the completion notice and verifies the result by
-artifact (the diff, the gate result, the issue) exactly as a session's
-is. A second reading of a design (Codex, an outside review) is
-launched the same way through that tool's non-interactive command
-when the point is the different perspective. Spawning a coder agent is
-delegation, which is the coordinator's job; what the rule forbids is
-the coordinator doing the coding itself.
+Claude session and is never handed to Jesse as a prompt to paste. It
+goes to his local coder: OpenCode running against the household's own
+Qwen3-Coder-30B on the llmhost, started by his `localcode` alias
+(`~/.config/zsh/localclaude.zsh`: races the host over LAN and
+Tailscale, sets the `llama-server/qwen3-coder` provider, `--auto`
+permissions, long timeouts, sharing disabled; nothing leaves the
+house). He keeps the live window; the coordinator sends the work and
+reads the result.
+
+**How to send.** The alias serves an HTTP API on the port it prints
+(4096, then upward). Write the prompt to a file
+(`home/data-scratch/qwen-task-<n>.md`, git-ignored), then drive the
+window's own input so the task appears where Jesse is looking:
+
+```
+POST http://127.0.0.1:<port>/tui/append-prompt   {"text": "<prompt>"}
+POST http://127.0.0.1:<port>/tui/submit-prompt   {}
+```
+
+`POST /session/{id}/prompt_async` sends into a named session instead,
+headless; it is the fallback when there is no window. Sessions are
+listed at `GET /session` (sort by `time.updated`); the transcript is
+`GET /session/{id}/message` (each message has `info.role` and `parts`
+of type `text` or `tool` with a `state.status`). Read it on a timer
+in the background (five minutes for a 30B reading a long prompt),
+never in a polling loop.
+
+**Before sending.** `GET /session` and read the newest session's last
+messages: never inject into a session that is mid-task without
+telling Jesse. If he restarted the alias, the server process changed
+and the window shows a fresh session; a prompt sent to an old session
+id runs headless where he cannot see it (2026-09-13, first attempt),
+so send through the window's input, not by id. Check `git status` in
+the shared checkout for anything the previous Qwen session left.
+
+**The prompt.** The same self-contained shape as a Codex task, with
+three extra lines because a local 30B follows what is written and
+nothing else: the exact files it may edit and the folders it may not;
+"do not run `check.sh` or `bun test`" when other sessions have
+half-finished files in the checkout (their failures are not its to
+chase; a docs task gates on the standards core only, a code task gates
+in a sibling throwaway worktree); and the report shape, so its last
+message is parseable. Never "pick something from the backlog": a Qwen
+session that chose its own item ran the full suite in the shared
+checkout beside two editing sessions (2026-09-13).
+
+**Model floor.** Treat Qwen3-Coder-30B as Sonnet-class for S items
+with no shared files and a mechanical gate; not for M items, not for
+anything in the chat engine, memory, safety, or the supervisors.
+
+**Verify.** By artifact, exactly as a session's work: the commit on
+`origin/main` (it pushes itself), the diff read against the task, the
+gate result in its report, the issue state. A claim in its report is
+checked in the code before acceptance (the Codex privacy pass removed
+a true sentence about an automatic download; the same check applies).
+The coordinator files or fixes what the review finds; the local coder
+gets the next task.
 
 ## 2. The work order
 
