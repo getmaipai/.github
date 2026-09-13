@@ -79,8 +79,16 @@ session and switch the window to it first: `POST /session
 {"title": ...}` returns the id, `POST /tui/select-session
 {"sessionID": id}` shows it, then append and submit as above. The
 `session.new` TUI command did not take on 2026-09-13; the create and
-select pair did. `POST /session/{id}/prompt_async` sends into a named
-session headless; it is the fallback when there is no window. Sessions are
+select pair did. Prefer `POST /session/{id}/prompt_async` with the body
+`{"parts":[{"type":"text","text":...}], "tools":{"question":false}}`
+into the created and selected session: it runs in the window Jesse is
+watching and switches the model's question tool off, so it cannot
+stop to ask him (a written "never ask" was not enough; it asked twice
+on 2026-09-13). If a question does appear (`GET /question` lists
+pending ones), the coordinator answers it through
+`POST /question/{requestID}/reply {"answers":[["<option label>"]]}`,
+never Jesse. The append and submit pair is the fallback for a
+prompt that must go through the input box. Sessions are
 listed at `GET /session` (sort by `time.updated`); the transcript is
 `GET /session/{id}/message` (each message has `info.role` and `parts`
 of type `text` or `tool` with a `state.status`). Read it on a timer
