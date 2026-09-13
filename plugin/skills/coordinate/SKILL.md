@@ -54,8 +54,11 @@ the steps in order; **acceptance evidence matched to the item** (a
 regression test for deterministic behavior; the flow exercised and the
 screenshot opened for UI; measured numbers with engine build, model
 file, and sanitized hardware for performance or hardware work); exit
-checks (`check.sh`, code review at medium, docs in the same commit,
-stage by name, one commit per item; push at the org's natural
+checks (`check.sh`; code review at medium with an explicit target when
+the session is in a worktree, and the reviewed path and branch checked
+against its own before any finding is acted on, since the review's
+forked subagent can land in the main checkout; docs in the same
+commit; stage by name; one commit per item; push at the org's natural
 boundaries, a verified item merged to `main` being one); and the
 reporting contract (section 3). Read ranges, not whole large files;
 re-read only the acceptance list, once, before reporting done.

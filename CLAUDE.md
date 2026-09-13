@@ -182,7 +182,14 @@ says so.
   recent `git status` exists to point to, not the command itself.
 - **Run a code review before committing code** (not a doc-only change): the
   `code-review` skill, at least medium effort, on the diff about to be
-  committed. This is not a "remember to do it" rule: the `maipai` plugin's
+  committed. In a worktree, pass the review an explicit target (the
+  worktree path or the branch) and read the path and branch the review
+  reports before acting on a single finding: the review runs in a
+  forked subagent whose working directory can resolve to the main
+  checkout, and on 2026-09-12 one reviewed another session's
+  uncommitted work that way. A review whose reported path is not yours
+  is discarded and re-run with the target; its findings go to that
+  file's owner, never acted on by you. This is not a "remember to do it" rule: the `maipai` plugin's
   `require-review-before-commit.sh` hook enforces it mechanically
   (`plugin/hooks/README.md`), the same shape as the blind-staging gate,
   because a session remembering to review its own work does not survive a
