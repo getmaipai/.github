@@ -31,7 +31,13 @@ notes, decisions, messages, and docs.
    session's half-edited files make `check.sh` fail for everyone, so
    each session gates on its own diff applied to a throwaway worktree
    of `main`, commits by name in the shared checkout, and removes the
-   worktree; shared docs are staged with `git add -p` only. Name each session's port and data
+   worktree; shared docs are staged with `git add -p` only. Better
+   still, do not share the prose file at all: each session writes its
+   dated sections to its own `docs/dev/session-<x>.md` and the shared
+   `docs/dev.md` carries one index line per item (patch-mode staging
+   failed once on each side in one night when both appended to
+   `dev.md`; a one-line tick in `BACKLOG.md` is safe, a 140-line
+   section is not). Name each session's port and data
    directory. Say who owns which lines of `docs/BACKLOG.md` and
    `docs/dev.md`.
 4. Name one session the **integrator** for the block: it merges lanes
