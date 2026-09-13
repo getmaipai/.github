@@ -163,6 +163,20 @@ landed in the same commit. After the integrator merges, the combined
 `main` has its own `check.sh` result before the block is called done.
 A failed gate leaves the item open with its evidence.
 
+A tick in `BACKLOG.md` says which of three things it means, in its
+status line: verified at a named commit; done with an accepted
+exception (what was missed, who ruled, and the follow-up item's name);
+or committed with live verification still outstanding (what remains).
+An item with two acceptance gates where one is missed is the second
+kind, never a bare tick. The status dashboard reads these lines, so a
+bare tick on a partial result is a false report.
+
+When two sessions commit to the same `main`, each session's gate runs
+on its own diff over the current `main`, so every gate after the first
+verifies the other session's committed work too; the integrator still
+runs `check.sh` on bare `main` at the block's end so the final state
+is verified as a whole at a named commit.
+
 ## 5. Stop points and status
 
 Before a context reset: the handoff notes are current, memory
