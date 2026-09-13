@@ -1,6 +1,6 @@
 ---
 name: issue
-description: File a bug, idea, or feature request as a GitHub issue in the current getmaipai repo, fast and without duplicates - search open issues first, show matches, then file with the org's plain-language template. Use when Jesse or a session says "file an issue", "log a bug", "note this as a feature request", or notices a defect mid-task that is not being fixed now.
+description: File a bug, a feature request, or an idea as a GitHub issue in the current getmaipai repo, fast and without duplicates - search open issues first, comment on a match, otherwise file with the org's plain-language template and the right label. Use when Jesse or a session says "file an issue", "log a bug", "feature request", "it would be nice if", "add this to the wishlist", or notices a defect mid-task that is not being fixed now.
 ---
 
 # File an issue without a duplicate
@@ -39,6 +39,13 @@ If the search returns nothing and the words were specific, one retry
 with a broader word is allowed; a second empty search means file.
 
 ## 3. Write it like a person
+
+Bug or request is decided by one question: is something broken that
+should work (bug), or is this something that does not exist yet and
+someone wants (feature request, label `enhancement`)? A request's
+search words are the want, not a symptom ("shopping list voice",
+"kid profile timer"), and its body answers what someone wants and why
+it would help, in a sentence a parent would say; no spec, no design.
 
 The title makes sense on a phone with zero context: what the person
 saw, in one sentence, no ticket prefix (GitHub's template adds its
