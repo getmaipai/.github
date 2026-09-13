@@ -30,16 +30,29 @@ may take the role when Jesse says so. Org rule: `CLAUDE.md`, "Roles".
    so nobody clicks approve. The isolation in the prompt (worktree,
    ports, data directory, owned files) is what makes that safe; write
    it every time.
-5. Pick the model by the task: Haiku for a small mechanical S item;
-   Sonnet for an M item with a clear work order; Opus for anything that
-   stalled once, needs a live measurement plus judgment, or spans more
-   than one subsystem. After two stalls on the same item, the next
-   attempt is on a stronger model, never on the coordinator.
+5. Model floor per item, and check it before any work starts. Haiku
+   only for an S item with one clear change and a mechanical check;
+   Sonnet is the floor for any M item, anything touching more than one
+   file with a verification loop (screenshots to open, a bench to run,
+   a guard to prove), or any item that closes a GitHub issue; Opus for
+   anything that stalled once, needs a live measurement plus judgment,
+   or spans more than one subsystem. After two stalls on the same item,
+   the next attempt is on a stronger model, never on the coordinator.
+   The `ListAgents` row name is not proof of the model (a row said
+   "sonnet" while the session's commits carried a Haiku co-author line,
+   2026-09-12). Every assignment therefore opens with "Reply first with
+   the model named in your own system prompt, then start"; if the reply
+   names a model below the floor, tell the session to stop before
+   editing anything and tell Jesse which terminal needs `/model` and
+   to what. A commit whose co-author line names a model below the floor
+   is reviewed as suspect: read the diff against every acceptance
+   bullet before accepting anything from it.
 
 ## The prompt every coder session gets
 
 Written to a file first (scratchpad or the repo's dev docs), then sent.
-In this order: who they are and which lane; the files they own and the
+In this order: the model check ("reply first with your model, then
+start"); who they are and which lane; the files they own and the
 files they must not touch; setup (worktree, ports, engines, data dir);
 the state they inherit (uncommitted tree, what is done, what is not,
 "read `git diff` first, do not restart"); the steps in order; acceptance

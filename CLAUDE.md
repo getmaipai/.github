@@ -136,7 +136,15 @@ Jesse says so.
   lint, PII wordlist, gitleaks), which runs in seconds, not the full
   `check.sh`.
 - **Coding, tests, benches, and live acceptance belong to a coder
-  session** (Sonnet, Opus, or Haiku, chosen by Jesse for the task). A
+  session**, on a model no weaker than the item's floor: Haiku only
+  for an S item with one clear change and a mechanical check; Sonnet
+  for any M item, anything with a verification loop (screenshots,
+  benches, a guard to prove) or that closes an issue; Opus for what
+  stalled once, needs a live measurement plus judgment, or spans
+  subsystems. The coordinator confirms the model before work starts
+  (the session states the model from its own system prompt in its
+  first reply; the agent list's label is not proof) and stops a
+  session below the floor before it edits anything. A
   coder session that stalls before a live measurement is handed back
   with a sharper prompt, or to a stronger coder model, never to the
   coordinator. Two stalls on the same item means the next attempt runs
