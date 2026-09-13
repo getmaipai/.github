@@ -62,7 +62,12 @@ commit; stage by name; one commit per item; any command that can run
 longer than two minutes, `check.sh` and benches included, runs in the
 background or with the tool's timeout raised, because a foreground
 command is killed at 120 s and the kill looks like a random test
-failure; push at the org's natural
+failure; every server or engine a session starts for a live check is
+recorded by pid and port when started and stopped by that pid, with
+the ports confirmed free afterward, never by a command-line pattern
+(a start script that changes directory and execs leaves no path to
+match, so a pattern "stop" reports success while a 5 GB engine keeps
+running, 2026-09-12); push at the org's natural
 boundaries, a verified item merged to `main` being one); and the
 reporting contract (section 3). Read ranges, not whole large files;
 re-read only the acceptance list, once, before reporting done.
