@@ -26,7 +26,12 @@ notes, decisions, messages, and docs.
    session; everything below still applies.
 3. Give each session one lane with disjoint file ownership. Two sessions
    editing the same repo means one works in a worktree (the one case
-   the org branch rule allows). Name each session's port and data
+   the org branch rule allows). When both must sit in the same checkout
+   (after a merge, on `main`), disjoint files are not enough: the other
+   session's half-edited files make `check.sh` fail for everyone, so
+   each session gates on its own diff applied to a throwaway worktree
+   of `main`, commits by name in the shared checkout, and removes the
+   worktree; shared docs are staged with `git add -p` only. Name each session's port and data
    directory. Say who owns which lines of `docs/BACKLOG.md` and
    `docs/dev.md`.
 4. Name one session the **integrator** for the block: it merges lanes
