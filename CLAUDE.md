@@ -219,7 +219,11 @@ or Opus may hold it when Jesse says so.
   the behavior under test depends on a machine setting, the script
   drives the equivalent through the browser or the tool (WebKit's
   Option+Tab instead of Full Keyboard Access, 2026-09-12) or skips with
-  a stated reason.
+  a stated reason. A session never launches a browser with a visible
+  window: headless only, and if a headless engine cannot start after
+  one retry, that is the recorded finding, not a reason to try a
+  window (2026-09-13: a non-headless Playwright Firefox put its own
+  "profile cannot be loaded" dialog on Jesse's screen).
 - **A universal claim needs an inventory.** A change that promises
   "every reply", "one boundary", or "never enters" is done when its
   commit enumerates every producer or consumer the promise covers and
