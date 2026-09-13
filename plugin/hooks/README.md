@@ -77,3 +77,14 @@ command match a pattern, is a timestamp recent, is a checkbox unchecked),
 exactly the case where a fixed script is faster and more predictable than
 an LLM judgment call. Reach for a prompt-based hook only for something that
 genuinely needs contextual reasoning to answer.
+
+## block-wholesale-shared-docs.sh (PreToolUse, Bash)
+
+Refuses a plain `git add` of `docs/dev.md` or `docs/BACKLOG.md`, the
+two files every session in a shared checkout appends to. A wholesale
+add sweeps the other session's unstaged hunks into your commit; it
+happened three times on 2026-09-13 even with the rule written down.
+Patch, edit and interactive modes (`-p`, `--patch`, `-e`, `-i`) pass,
+since they stage hunks. Every other path is untouched. This is a hard
+gate, not a soft one: there is no legitimate wholesale add of a shared
+file while another session is active.

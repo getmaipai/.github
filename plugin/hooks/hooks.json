@@ -1,5 +1,5 @@
 {
-  "description": "Git hygiene: a soft gate on blind staging, a status-checked stamp, a soft gate requiring a code review before a code commit, and session-start repo context.",
+  "description": "Git hygiene: a soft gate on blind staging, a status-checked stamp, a hard gate on wholesale staging of the two shared doc files, a soft gate requiring a code review before a code commit, and session-start repo context.",
   "hooks": {
     "PreToolUse": [
       {
@@ -13,6 +13,11 @@
           {
             "type": "command",
             "command": "bash ${CLAUDE_PLUGIN_ROOT}/hooks/scripts/require-review-before-commit.sh",
+            "timeout": 5
+          },
+          {
+            "type": "command",
+            "command": "bash ${CLAUDE_PLUGIN_ROOT}/hooks/scripts/block-wholesale-shared-docs.sh",
             "timeout": 5
           }
         ]
