@@ -73,8 +73,14 @@ POST http://127.0.0.1:<port>/tui/append-prompt   {"text": "<prompt>"}
 POST http://127.0.0.1:<port>/tui/submit-prompt   {}
 ```
 
-`POST /session/{id}/prompt_async` sends into a named session instead,
-headless; it is the fallback when there is no window. Sessions are
+For a fresh context (every new task; a 30B that has read a lot of
+code turns its task into a question back to the user), create the
+session and switch the window to it first: `POST /session
+{"title": ...}` returns the id, `POST /tui/select-session
+{"sessionID": id}` shows it, then append and submit as above. The
+`session.new` TUI command did not take on 2026-09-13; the create and
+select pair did. `POST /session/{id}/prompt_async` sends into a named
+session headless; it is the fallback when there is no window. Sessions are
 listed at `GET /session` (sort by `time.updated`); the transcript is
 `GET /session/{id}/message` (each message has `info.role` and `parts`
 of type `text` or `tool` with a `state.status`). Read it on a timer
@@ -92,9 +98,12 @@ on the llmhost (`GET <host>/slots`, `is_processing` on every slot with
 no output for minutes) is usually that. Check `git status` in the
 shared checkout for anything the previous Qwen session left.
 
-**The prompt.** The same self-contained shape as a Codex task, with
-three extra lines because a local 30B follows what is written and
-nothing else: the exact files it may edit and the folders it may not;
+**The prompt.** The same self-contained shape as a Codex task, but
+one page or one file per task (a four-page task exhausted the 30B's
+attention and it asked the user for the answer), with four extra
+lines because a local 30B follows what is written and nothing else:
+"never ask the user a question; leave the sentence and mention it in
+the report"; the exact files it may edit and the folders it may not;
 "do not run `check.sh` or `bun test`" when other sessions have
 half-finished files in the checkout (their failures are not its to
 chase; a docs task gates on the standards core only, a code task gates
