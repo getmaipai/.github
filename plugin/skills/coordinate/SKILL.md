@@ -83,6 +83,13 @@ boundaries, a verified item merged to `main` being one); and the
 reporting contract (section 3). Read ranges, not whole large files;
 re-read only the acceptance list, once, before reporting done.
 
+A work order that names a source, a service, or a mechanism names the
+platform's existing general one first and places the new thing inside
+it; a specific source described as if it were the design inverts the
+architecture (2026-09-13: a media metadata package was written up as
+the lookup plan while the hub's own SearXNG web search, the spine of
+every world lookup, went unmentioned until Jesse asked).
+
 A work order states no premise about the code that the coordinator has
 not read. If an item says "spec first", "the route logs the turn", or
 "the finished reply can be fetched", the coordinator has opened the
