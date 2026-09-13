@@ -15,7 +15,7 @@ The MaiPai org's shared home:
   org-default community health files (apply to every repo without one).
 - **[plugin/](plugin/)**: the `maipai` Claude Code plugin: shared skills
   (`release`, `update-docs`, `verify`, `new-package`, `standards-check`,
-  `verify-screenshots`, `status-dashboard`, `coordinate`), hooks (a blind-staging gate, session-start repo
+  `verify-screenshots`, `status-dashboard`, `coordinate`, `issue`), hooks (a blind-staging gate, session-start repo
   context; see [plugin/hooks/README.md](plugin/hooks/README.md)), and an
   agent (`design-resolver`, an opus-model subagent for resolving a design
   or spec ambiguity by reasoning from what already exists, instead of

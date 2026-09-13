@@ -1,7 +1,7 @@
 {
   "name": "maipai",
-  "description": "MaiPai org shared skills: release ceremony, docs refresh, verification contract, platform package scaffolding, standards pin check, screenshot verification, build status dashboard, and the coordinator role for directing coder sessions. Hooks: a blind-staging gate, a review-before-commit gate, and session-start repo context. Agent: design-resolver, an opus subagent for resolving design/spec ambiguities.",
-  "version": "0.7.0",
+  "description": "MaiPai org shared skills: release ceremony, docs refresh, verification contract, platform package scaffolding, standards pin check, screenshot verification, build status dashboard, the coordinator role for directing coder sessions, and duplicate-safe issue filing. Hooks: a blind-staging gate, a review-before-commit gate, and session-start repo context. Agent: design-resolver, an opus subagent for resolving design/spec ambiguities.",
+  "version": "0.8.0",
   "author": {
     "name": "JesseWebDotCom"
   }

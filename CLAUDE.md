@@ -449,7 +449,9 @@ Windows account. Both are fixed; these rules keep them fixed.
 - Bugs and ideas noticed mid-task get filed as GitHub Issues in that repo,
   even when not being fixed now. GitHub Issues are the tracker of record for
   getmaipai repos (they mirror to Gitea automatically). Jesse's Gitea remains
-  the tracker for homelab matters.
+  the tracker for homelab matters. File through the maipai plugin's
+  `issue` skill: it searches open issues first and comments on a match
+  instead of filing a duplicate.
 - **Write issue bodies like a person describing the problem, not a bot filling
   out a template.** A bug report says what happened and what you expected to
   happen instead, in plain words a non-engineer could follow. A feature
