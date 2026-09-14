@@ -195,13 +195,20 @@ or Opus may hold it when Jesse says so.
   The `maipai` plugin's `block-blind-staging.sh` hook enforces this
   mechanically (`plugin/hooks/README.md`); it denies the blind form when no
   recent `git status` exists to point to, not the command itself.
-  **In a shared checkout, commit by explicit pathspec** (`git commit
-  -- <files>`), never a bare `git commit`: the index is shared, and a
-  bare commit takes whatever another session has staged along with
-  yours (2026-09-13: a coordinator's doc-only commit carried Session
-  A's staged #99 code under a docs title; `main` was correct, the
-  history is not). A pathspec commit takes only the named files,
-  staged or not, and leaves the rest of the index alone.
+  **In a shared checkout the commit is atomic with the staging.**
+  Stage exactly what is yours (`git add <file>` for a file only you
+  changed, `git add -p` for a shared doc), read `git diff --cached
+  --stat` and confirm it lists only yours, then commit immediately
+  with a bare `git commit`; never leave anything staged for later,
+  and never commit while another session's hunks sit in the index.
+  Do not use `git commit -- <files>` on a shared file: a pathspec
+  commit takes the file from the working tree, not the index, so it
+  sweeps the other session's uncommitted hunks in and defeats the
+  `git add -p` you just did (2026-09-13: it happened both ways in one
+  evening, a bare commit that took Session A's staged code under a
+  docs title, then a pathspec commit that took A's unstaged backlog
+  hunks). After every commit, `git show --stat HEAD` is read before
+  the done report.
 - **Run a code review before committing code** (not a doc-only change): the
   `code-review` skill, at least medium effort, on the diff about to be
   committed. In a worktree, pass the review an explicit target (the

@@ -31,10 +31,13 @@ notes, decisions, messages, and docs.
    session's half-edited files make `check.sh` fail for everyone, so
    each session gates on its own diff applied to a throwaway worktree
    of `main`, commits by name in the shared checkout, and removes the
-   worktree, and commits by explicit pathspec (`git commit -- <files>`),
-   never a bare `git commit`, because the index is shared and a bare
-   commit takes the other session's staged hunks too (this applies to
-   the coordinator's own doc-only commits in that checkout); shared
+   worktree, and commits atomically with its staging: stage only its
+   own files or hunks, read `git diff --cached --stat`, bare `git
+   commit` at once, `git show --stat HEAD` afterwards; never a
+   pathspec commit on a shared file (it takes the working tree and
+   sweeps the other session's hunks in) and never a commit while the
+   other session's hunks are staged (this binds the coordinator's own
+   doc-only commits in that checkout too); shared
    docs are staged with `git add -p` only. Better
    still, do not share the prose file at all: each session writes its
    dated sections to its own `docs/dev/session-<x>.md` and the shared
