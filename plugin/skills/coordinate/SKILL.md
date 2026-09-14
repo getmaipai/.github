@@ -252,18 +252,19 @@ is verified as a whole at a named commit.
 Before a context reset: the handoff notes are current, memory
 (`coordinator-sessions-<date>`) says which session is which, what each
 was told, what is open, and where the notes are. Every reply to Jesse
-ends with the status block: Done (what shipped, whether pushed), In
-flight (which session on what, which notices are armed), Blocked (what
-cannot proceed and what Jesse must do, including a push that failed).
-A Blocked line is written for a reader who has seen no earlier
-message: it names the thing, says why only Jesse can do it, and gives
-the exact command or action, every time it appears, never a shorthand
-like "still yours" that refers back to an earlier explanation. If it
-cannot be written that way, it is not a Blocked item. Blocked is only
-for what stops the sessions' work. A fact Jesse will want that stops
-nothing (his own dev hub is down, a decision waits for him with no
-deadline, a machine change made while he slept) goes in a fourth line,
-FYI, present only when there is one, and stays there until he has
-seen it once, then drops. A Blocked line repeated for hours, or
-carrying a fact that blocks nothing, is the failure this rule exists
-to end (2026-09-13, twice).
+ends with the status block in CLAUDE.md's shape (Writing style):
+
+```
+State: on track | waiting [on: <what>, ~<when>] | blocked [<owner>: <what>]
+Active: <session>: <item>; <session>: <item>
+You: nothing | <ask> (whenever) | <ask> (blocking: <what it holds>)
+Landed: <what shipped, deployed or not>        (only when something did)
+```
+
+`You:` is the only place an ask appears, and each ask is written for
+a reader who saw no earlier message (the exact command or decision;
+never "still yours"); `State: blocked` is used only when work has
+stopped and names the owner; a fact that stops nothing is never a
+block. The old four-section block put asks in two places and blocks
+where nothing was blocked (2026-09-13 twice, 2026-09-14 once); this
+shape exists to end that.

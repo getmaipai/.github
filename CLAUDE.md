@@ -386,14 +386,19 @@ These apply to docs, UI copy, comments, commit messages, changelogs, issues.
   performant". Numbers, names, and file paths beat adjectives.
 - User-facing copy passes the dad test: would a busy parent with basic tech
   knowledge understand it on first read, without feeling stupid?
-- **End every reply to Jesse with a status block**: Done (what shipped, and
-  whether it is deployed/installed, not just committed), In flight (what is
-  still running), Blocked (what cannot proceed, why, and what Jesse must do,
-  repeated every turn until unblocked), and FYI only when there is one
-  (a fact Jesse will want that stops nothing: his own dev hub is down,
-  a decision waits for him with no deadline, a machine change made
-  while he was away). Blocked is only for what stops the work; a fact
-  that stops nothing never goes there.
+- **End every reply to Jesse with the status block** (2026-09-14
+  shape, replacing Done / In flight / Blocked / FYI): three fixed
+  lines, a fourth only when something shipped, nothing after it.
+  `State:` one of `on track`, `waiting [on: <what>, ~<when>]`, or
+  `blocked [<owner>: <what>]`; blocked is used only when work has
+  stopped and always names the owner. `Active:` each session and its
+  item. `You:` the only place an ask ever appears: `nothing`, or each
+  ask tagged `(whenever)` or `(blocking: <what it holds>)`, written so
+  a reader who saw no earlier message can act on it (the exact
+  command or decision, never "still yours"). `Landed:` what shipped
+  since the last block and whether it is deployed, omitted when
+  nothing did. An ask that stops nothing is never a block; a block
+  never sits outside `State:` and `You:`.
 
 ## Privacy and PII (hard rules)
 
