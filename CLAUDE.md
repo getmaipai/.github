@@ -387,20 +387,20 @@ These apply to docs, UI copy, comments, commit messages, changelogs, issues.
 - User-facing copy passes the dad test: would a busy parent with basic tech
   knowledge understand it on first read, without feeling stupid?
 - **End every reply to Jesse with the status block** (2026-09-14
-  shape): three fixed lines, plus `Landed:` when something shipped
-  and `State:` only when work is blocked; nothing after it.
-  `Active:` each session with its item and its condition in brackets
-  (running with a time, holding and behind what, blocked and on
-  what). `You:` the only place an ask ever appears: `nothing`, or
-  each ask tagged `(whenever)` or `(blocking: <what it holds>)`,
-  written so a reader who saw no earlier message can act on it (the
-  exact command or decision, never "still yours"). `Progress:` the
-  path to the current milestone on one line: its name, a bar of done
-  and remaining items, the count, `now` and `next` in order.
-  `Landed:` what shipped since the last block and whether it is
-  deployed, omitted when nothing did. `State: blocked [<owner>:
-  <what>]` only when work has stopped, mirroring a blocking ask; a
-  fact that stops nothing is never a block.
+  shape): three lines, uppercase labels, in this order, nothing after
+  it. `STATE:` opens with one word, `active`, `waiting` or
+  `blocked [<owner>: <what>]`, then each session with its item and
+  condition in parentheses (running with a time, holding and behind
+  what, blocked), and `landed <item>` when something shipped since
+  the last block. `PROGRESS:` the path to the current milestone on
+  one line: its name, a bar of done and remaining items, the count,
+  `now` and `next` in order. `YOU:` the only place an ask ever
+  appears: `nothing`, or each ask tagged `(whenever)` or
+  `(blocking: <what it holds>)`, written so a reader who saw no
+  earlier message can act on it (the exact command or decision,
+  never "still yours"). `blocked` is used only when work has stopped
+  and always names the owner; a fact that stops nothing is never a
+  block.
 
 ## Privacy and PII (hard rules)
 

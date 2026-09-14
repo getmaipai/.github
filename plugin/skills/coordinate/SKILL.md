@@ -255,11 +255,9 @@ was told, what is open, and where the notes are. Every reply to Jesse
 ends with the status block in CLAUDE.md's shape (Writing style):
 
 ```
-Active: <session>: <item> [running, ~<when> | holding, behind <what> | blocked, on <what>]; ...
-You: nothing | <ask> (whenever) | <ask> (blocking: <what it holds>)
-Progress: <milestone>  ▰▰▰▱▱▱  3/6  ·  now <item>  ·  next <items in order>
-Landed: <what shipped, deployed or not>            (only when something did)
-State: blocked [<owner>: <what>]                    (only when work has stopped)
+STATE: active | waiting | blocked [<owner>: <what>] · <session>: <item> (running ~<when> | holding, behind <what> | blocked) · landed <item>
+PROGRESS: <milestone>  ▰▰▰▱▱▱  3/6  ·  now <item>  ·  next <items in order>
+YOU: nothing | <ask> (whenever) | <ask> (blocking: <what it holds>)
 ```
 
 `You:` is the only place an ask appears, and each ask is written for
