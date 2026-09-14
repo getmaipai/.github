@@ -195,6 +195,13 @@ or Opus may hold it when Jesse says so.
   The `maipai` plugin's `block-blind-staging.sh` hook enforces this
   mechanically (`plugin/hooks/README.md`); it denies the blind form when no
   recent `git status` exists to point to, not the command itself.
+  **In a shared checkout, commit by explicit pathspec** (`git commit
+  -- <files>`), never a bare `git commit`: the index is shared, and a
+  bare commit takes whatever another session has staged along with
+  yours (2026-09-13: a coordinator's doc-only commit carried Session
+  A's staged #99 code under a docs title; `main` was correct, the
+  history is not). A pathspec commit takes only the named files,
+  staged or not, and leaves the rest of the index alone.
 - **Run a code review before committing code** (not a doc-only change): the
   `code-review` skill, at least medium effort, on the diff about to be
   committed. In a worktree, pass the review an explicit target (the

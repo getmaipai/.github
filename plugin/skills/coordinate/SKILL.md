@@ -31,7 +31,11 @@ notes, decisions, messages, and docs.
    session's half-edited files make `check.sh` fail for everyone, so
    each session gates on its own diff applied to a throwaway worktree
    of `main`, commits by name in the shared checkout, and removes the
-   worktree; shared docs are staged with `git add -p` only. Better
+   worktree, and commits by explicit pathspec (`git commit -- <files>`),
+   never a bare `git commit`, because the index is shared and a bare
+   commit takes the other session's staged hunks too (this applies to
+   the coordinator's own doc-only commits in that checkout); shared
+   docs are staged with `git add -p` only. Better
    still, do not share the prose file at all: each session writes its
    dated sections to its own `docs/dev/session-<x>.md` and the shared
    `docs/dev.md` carries one index line per item (patch-mode staging
