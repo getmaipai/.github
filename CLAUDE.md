@@ -397,7 +397,10 @@ These apply to docs, UI copy, comments, commit messages, changelogs, issues.
   a reader who saw no earlier message can act on it (the exact
   command or decision, never "still yours"). `Landed:` what shipped
   since the last block and whether it is deployed, omitted when
-  nothing did. An ask that stops nothing is never a block; a block
+  nothing did. `Progress:` the path to the current milestone on one
+  line: the milestone's name, a bar of done and remaining items, the
+  count, `now` (the item in flight) and `next` (the remaining items in
+  order). An ask that stops nothing is never a block; a block
   never sits outside `State:` and `You:`.
 
 ## Privacy and PII (hard rules)

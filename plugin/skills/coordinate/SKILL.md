@@ -259,6 +259,7 @@ State: on track | waiting [on: <what>, ~<when>] | blocked [<owner>: <what>]
 Active: <session>: <item>; <session>: <item>
 You: nothing | <ask> (whenever) | <ask> (blocking: <what it holds>)
 Landed: <what shipped, deployed or not>        (only when something did)
+Progress: <milestone>  ▰▰▰▱▱▱  3/6  ·  now <item>  ·  next <items in order>
 ```
 
 `You:` is the only place an ask appears, and each ask is written for
