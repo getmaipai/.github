@@ -144,18 +144,22 @@ or Opus may hold it when Jesse says so.
   environmental blocker gets fixed, an unclear requirement gets a
   decision. When the strongest permitted model stalls, the item is
   re-scoped (chunked, or given a design note) rather than retried.
-- **Small isolated items go to a Claude coder session, never to the
-  local model.** Retired 2026-09-13 evening
-  ([docs/DECISIONS.md](docs/DECISIONS.md)): seven tasks through
-  OpenCode on the household's Qwen3-Coder produced three commits at
-  about four hours of machine and coordinator time for fifteen
-  minutes of Sonnet work, plus a broken test on `main` and two
-  cleanups of the shared checkout. An S item goes to whichever Claude
-  session owns the area, or to a Haiku session when it is one clear
-  change with a mechanical check. Codex stays as the outside reviewer
-  (a second model's reading of a design or a block), never for a
-  shared-checkout item, and a red gate means stop and report, never
-  push.
+- **Small isolated items go to one of two token-free lanes, never to
+  a Claude session as typing work** (2026-09-15,
+  [docs/DECISIONS.md](docs/DECISIONS.md)): the household's local
+  coding model through its one OpenCode session, or Codex in Jesse's
+  visible window driven over tmux by the coordinator; the `coordinate`
+  skill's section 1b is the procedure for both. Each takes only an S
+  or small M item whose brief names every file, rule, test and
+  command, works in its own worktree at the base the coordinator
+  picks, commits only and never pushes, and every result is read by
+  the coordinator (the diff, the checks rerun) before it is stacked.
+  Anything needing a decision, a diagnosis or a read across
+  subsystems stays with a Claude session at the model floor. A red
+  gate means stop and report, never push. (The first local-model try
+  of 2026-09-13 was retired for the reasons in DECISIONS.md; the
+  2026-09-14 lane fixed them with a fresh worktree per item, a scratch
+  working directory and git denies.)
 - **Coder sessions are launched with
   `claude --dangerously-skip-permissions`**, so no one sits clicking
   approve; the worktree, port, and data-directory isolation in the

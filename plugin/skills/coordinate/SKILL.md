@@ -57,25 +57,47 @@ notes, decisions, messages, and docs.
    one started without the flag). Pick the model from the floor table
    in `CLAUDE.md`; the ready handshake (section 3) confirms it.
 
-## 1b. Small isolated items (retired local coder, 2026-09-13)
+## 1b. Small isolated items: the two non-Claude lanes (2026-09-15)
 
-An S item in files no session has open (a test fixture, a doc page, a
-normalizer) goes to the Claude session that owns the area, as one item
-in its lane, or to a Haiku session when it is one clear change with a
-mechanical check (the model floor table in CLAUDE.md). It is never
-handed to Jesse as a prompt to paste, and it no longer goes to the
-local model: the OpenCode-on-Qwen path was tried for seven tasks on
-2026-09-13 and retired the same evening (`docs/DECISIONS.md`). The
-failure modes, kept here so nobody re-runs the experiment by accident:
-it could not tell its own diff from other sessions' in a shared
-checkout, ran the suite from the wrong directory about half the time,
-reported green over partial checks, and at 60k context stopped
-following directory rules entirely; every landed commit needed the
-coordinator to read the diff line by line, which cost more than the
-work. Codex remains the outside reviewer, launched with a
-self-contained prompt and `/clear` between tasks; its findings are
-checked in the code before acceptance (it once removed a true privacy
-sentence), and the coordinator files or fixes what the review finds.
+An S item in files no session has open, or a small M item whose brief
+can name every file, rule, test and command, goes to one of two lanes
+that cost no Claude tokens; anything needing a decision, a diagnosis
+or a read of how subsystems interact stays with a Claude session (the
+model floor table in CLAUDE.md). The first try of a local model
+(2026-09-13, `docs/DECISIONS.md`) was retired for reading its own
+diff badly in a shared checkout; both lanes below run in their own
+worktree at the base the coordinator picks, commit only, never push,
+and every result is read by the coordinator (the diff, the checks
+rerun, the commit message compared) before it is stacked.
+
+**The local model** (the household's 27B through an OpenCode server on
+the dev machine, `docs/local-coding-model.md` for what it can and
+cannot do). Exactly one session, never recreated; between briefs the
+coordinator deletes its messages through the server API and posts the
+next brief with `prompt_async` (the `session-c-post` helper in the
+repo's scratch folder). The server's working directory is a scratch
+folder, never a checkout, and the session's own directory is the same
+folder, so a relative path in a brief cannot land in shared code. It
+never works inside the turn engine file; those items go to the other
+lane or to a Claude session.
+
+**Codex**, in Jesse's visible window, driven by the coordinator. Codex
+has no API for a running TUI, so it runs inside a tmux session named
+`codex` started once by Jesse (`tmux new -s codex -c <the codex
+worktree>`, then `codex` inside it) and the coordinator types into it:
+`tmux send-keys -t codex "/clear" Enter`, a two-second wait, the
+pointer line ("Read <brief path> and do exactly what it says.") sent
+as text, a one-second wait, then `Enter` on its own (text typed while
+`/clear` runs is lost), and reads the screen with `tmux capture-pane
+-t codex -p` to see when it is done and what it printed. One fixed
+worktree folder for Codex, kept forever; the coordinator re-points its
+branch between briefs (`git checkout -b codex/<item> <base>` in that
+folder) so Jesse never changes directory or restarts it. Reports go to
+a file outside the worktree, never committed. Its failure modes so
+far: a commit made over a red check, a test expectation changed to
+match the code, a word list widened until a test passed, a cause
+"explained" by restating the diff; the brief forbids each by name and
+the coordinator reads for them.
 
 ## 2. The work order
 

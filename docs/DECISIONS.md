@@ -6,6 +6,39 @@ incident or review that prompted each. The rule itself lives in
 why, so the rule can be revisited on the facts rather than re-argued
 from memory. Newest first.
 
+## 2026-09-15: two token-free lanes, the local model and Codex over tmux
+
+**Decision.** Small isolated items (S, or a small M whose brief names
+every file, rule, test and command) go to one of two lanes that spend
+no Claude tokens: the household's local coding model (a 27B dense
+model, run through one OpenCode session the coordinator posts into
+and clears through the server API) and Codex (in Jesse's visible
+window, inside a tmux session the coordinator types into and reads
+back). Claude sessions keep the work that needs judgment. The
+procedure is the `coordinate` skill's section 1b; what the local
+model is and is not good for is `docs/local-coding-model.md`.
+
+**Why.** Two facts changed since the 2026-09-13 retirement. The model
+changed: measured side by side with Sonnet on the same briefs, the
+27B produced the same code on a small item (2.4x the time) and on a
+medium one (1.9x the time), where the earlier small mixture model had
+not; a 48K window and a 100-step cap were the limits, not the model.
+And the budget changed: with the Claude subscription at three
+quarters of its week by Tuesday, every S item typed by a Claude
+session was a token cost the plan could not carry. The three
+retirement failure modes have fixes in the lane rules: a fresh
+worktree per item (its own diff is the only diff), the OpenCode
+server and session pointed at a scratch folder (a relative path
+cannot reach shared code), and git denied except commit (no merge, no
+push). Codex joined when its quota returned; its own failure modes
+(a commit over a red check, an expectation edited to match the code)
+are named in the brief and read for.
+
+**What it costs.** The coordinator reads every result: the diff,
+the checks rerun, the commit message compared. On a precise brief
+that is two minutes; a vague brief costs a whole run and a fix-up
+round, which is why the brief shape in the skill is not optional.
+
 ## 2026-09-13 (evening): the local coder is retired
 
 **What happened.** The afternoon's decision to send small isolated
