@@ -88,10 +88,15 @@ the worktree by absolute path, and by the wrapper's git denies. It
 never works inside the turn engine file; those items go to the other
 lane or to a Claude session.
 
-**The local model is never idle (Jesse's rule, 2026-09-15).** Its
-session is either running a brief or the status block says what it
-is waiting on, and "the coordinator has not written the next brief"
-is not an allowed reason. The coordinator keeps at least two briefs
+**Neither lane is ever idle (Jesse's rule, 2026-09-15, said twice).** The local model's and Codex's
+sessions are each either running a brief or the status block says what
+it is waiting on, and neither "the coordinator has not written the next
+brief" nor "the next item waits on something not yet landed" is an
+allowed reason: a dependency wait means pulling the next independent
+item, or an item from the other lane's queue. A background monitor
+watches both lanes and nags the coordinator every three minutes while
+either is idle; the next brief goes out in the same turn as the idle
+event. The coordinator keeps at least two briefs
 written ahead of it in the scratch folder, and fills them in this
 order: the current milestone's items that do not touch the turn
 engine file; then any other item in `home`'s backlog it can brief
