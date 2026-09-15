@@ -75,9 +75,16 @@ the dev machine, `docs/local-coding-model.md` for what it can and
 cannot do). Exactly one session, never recreated; between briefs the
 coordinator deletes its messages through the server API and posts the
 next brief with `prompt_async` (the `session-c-post` helper in the
-repo's scratch folder). The server's working directory is a scratch
-folder, never a checkout, and the session's own directory is the same
-folder, so a relative path in a brief cannot land in shared code. It
+repo's scratch folder). **Jesse's window never moves (his rule,
+2026-09-15):** the session belongs to the `home` checkout folder, he
+opens it once with `opencode attach` from that folder and picks the
+session from the list, and the coordinator never changes the
+session's folder, the server's port, or the attach command again. The
+OpenCode TUI lists only sessions whose own folder is the one it was
+opened from, so a session moved to a scratch folder vanishes from his
+list (it happened the same day; the day's fix was to move it back).
+The shared-checkout risk is carried instead by the briefs, which name
+the worktree by absolute path, and by the wrapper's git denies. It
 never works inside the turn engine file; those items go to the other
 lane or to a Claude session.
 
