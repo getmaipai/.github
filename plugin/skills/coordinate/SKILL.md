@@ -81,6 +81,20 @@ folder, so a relative path in a brief cannot land in shared code. It
 never works inside the turn engine file; those items go to the other
 lane or to a Claude session.
 
+**The local model is never idle (Jesse's rule, 2026-09-15).** Its
+session is either running a brief or the status block says what it
+is waiting on, and "the coordinator has not written the next brief"
+is not an allowed reason. The coordinator keeps at least two briefs
+written ahead of it in the scratch folder, and fills them in this
+order: the current milestone's items that do not touch the turn
+engine file; then any other item in `home`'s backlog it can brief
+precisely (files, rules, tests, commands); then the robot's backlog,
+same standard. A gate is not a brief: it is three minutes between
+briefs, and the next brief is posted the moment the gate reports. A
+backlog line found already shipped while looking for work is ticked
+in the coordinator's next docs commit, never left to mislead the next
+search.
+
 **Codex**, in Jesse's visible window, driven by the coordinator. Codex
 has no API for a running TUI, so it runs inside a tmux session named
 `codex` started once by Jesse (`tmux new -s codex -c <the codex
