@@ -84,6 +84,34 @@ instead of the function and the line.
   the instructions it needs most, which is how commit steps get lost.
 - Git limited to commit; the manager does every merge, rebase and push.
 
+## The configuration that produced these results
+
+For anyone reproducing this; the two pieces are the model server and the
+coding agent, and each has a handful of settings that mattered.
+
+The model server (llama.cpp, a build from May 2026 or later, which is
+when speculative decoding for this model family landed): the GGUF file
+with the speculative-decoding head included, since the plain file lacks
+it; all layers on the card; flash attention on; the cache at 8-bit for
+both keys and values; the window at 48,000 or more; speculative decoding
+of up to three draft tokens; the model's thinking turned off at the
+server; the chat template enabled so tool calls work; one slot; the
+server's own prompt cache on (it makes the agent's repeated reads cheap).
+On two cards, a layer split weighted so neither card sits within half a
+gigabyte of its limit; a card driven that close dropped off the bus once.
+
+The coding agent (OpenCode, pointed at the server's OpenAI-style API): the
+sampling from the model's own card (temperature 1.0, top-p 0.95, top-k 20,
+no minimum-p, no repetition penalty); the context limit set to the
+server's window and the output limit to 8,000; request timeouts of twenty
+minutes, since one agent turn can legitimately run that long; the step
+cap at 100 with the loop guard on; the agent's own to-do and
+"ask the user" tools off (it asked for confirmation despite being told not
+to); file edits, reads and commands allowed inside its folder; every git
+command denied except commit; and, for unattended runs, the agent's input
+closed, because a run started with an open terminal input hangs waiting
+on it.
+
 ## What it gets, and what it does not
 
 It gets small changes with a precise brief, mechanical refactors, schema
