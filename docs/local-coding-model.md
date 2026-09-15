@@ -29,9 +29,22 @@ Better hardware buys two things and only two: speed (bandwidth) and
 window (memory). Both matter: with a 32,000-token window the medium task
 below failed outright, and with 48,000 it passed, so a card that allows
 64,000 turns more tasks from "fails" into "passes". What better hardware
-does not buy is judgment. The model's inability to design, diagnose, or
-catch its own wrong turns is the model's, and only a stronger model
-changes it.
+does not buy is judgment: the model's failures to design, diagnose, or
+catch its own wrong turns did not change between the two-card and the
+larger-window runs.
+
+One caveat on that judgment claim, and it is ours to settle, not the
+hardware's: every agent run above was made with the model's thinking
+turned off. We turned it off because the model ships with its reasoning
+effort at the highest setting and, on its first agent run, spent its
+entire output budget thinking before touching a file; its makers and
+early users report the same, and the documented fix is a lower effort
+level set at the server (the model was trained on three: low, medium,
+high). Our first attempt set the level from the agent side, where it did
+not reach the server, so we went to "off". We have not yet measured the
+agent loop at low or medium effort; until we do, the judgment gap is
+partly a setting we chose, and the next measurement is the same failed
+judgment task at medium effort against thinking off.
 
 ## How it compares to Claude Sonnet, and to Haiku
 
@@ -78,7 +91,9 @@ instead of the function and the line.
 - Window 48,000 tokens or more, set from the server, with the cache kept
   at 8-bit; a 4-bit cache saves memory and costs accuracy on long tool
   loops.
-- Output cap 8,000 tokens, thinking off.
+- Output cap 8,000 tokens. Thinking off for now, set at the server, not
+  the agent (an agent-side effort setting did not reach the server); a
+  low or medium effort at the server is the untested alternative.
 - One brief per fresh session. A session that carries the history of
   earlier briefs fills the window and the model starts compacting away
   the instructions it needs most, which is how commit steps get lost.
