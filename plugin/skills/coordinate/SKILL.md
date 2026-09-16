@@ -88,6 +88,21 @@ the worktree by absolute path, and by the wrapper's git denies. It
 never works inside the turn engine file; those items go to the other
 lane or to a Claude session.
 
+**When the coordinator will be away (a budget stop, a night), the lanes
+run a self-service queue instead of one brief at a time (2026-09-15).**
+`home/data-scratch/c/queue/README.md` is the one file each lane is
+pointed at: the lane takes the first `open/<lane>-NN-*.md` with its
+prefix, claims it with `mv open/X taken/X` (atomic, so the two lanes
+cannot take the same item), works on `<lane>/NN-<item>` in its own
+worktree, waits for any other gate, gates, commits, writes
+`done/X-REPORT.md`, moves the brief to `done/`, and takes the next
+until `open/` is empty. `data-scratch/bin/lanes-autofeed` re-points an
+idle lane at the README while items remain. Queue only items with a
+pattern to copy and no open design call; every item is self-contained
+(base commit, files and spans, tests, gate, report). Nothing lands
+from the queue until the coordinator has read each report's gate
+lines; the loop is stopped before any seeded set or live retest.
+
 **Neither lane is ever idle (Jesse's rule, 2026-09-15, said twice).** The local model's and Codex's
 sessions are each either running a brief or the status block says what
 it is waiting on, and neither "the coordinator has not written the next
