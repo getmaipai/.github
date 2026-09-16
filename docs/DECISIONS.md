@@ -6,6 +6,27 @@ incident or review that prompted each. The rule itself lives in
 why, so the rule can be revisited on the facts rather than re-argued
 from memory. Newest first.
 
+## 2026-09-16: rules, word lists and learned components
+
+**Decision.** Six standing rules in CLAUDE.md ("Rules, word lists and
+learned components"): no rule without a counter and a corpus row; three
+phrasings in a week make a classifier candidate, never a fourth regex;
+classifier labels come from people or a frontier model, never a small
+local model; nothing learned sits in the safety, consent or privacy
+path; a model judge is a trend line, never a gate; tone is the plan
+line, the example lines and a steering vector, not prose.
+
+**Why.** The owner asked whether the chat pipeline's regexes, word
+banks and if-then rules were a non-intelligent, hard-to-maintain
+approach. A frontier design review with 159 references (the plan
+file named above) found the shape right (every fast, private assistant
+puts decisions in code; an 8B model is measurably bad at the decisions
+it would be handed) and the word lists the wrong ceiling: one evening
+had added about ten regex families and nothing reported which rules
+fired; ACT-02's classifier heads had failed on 4B-labeled data, not on
+the idea. The rules keep the floor deterministic and make the ceiling
+learnable.
+
 ## 2026-09-15: two token-free lanes, the local model and Codex over tmux
 
 **Decision.** Small isolated items (S, or a small M whose brief names
