@@ -64,7 +64,7 @@ Your own AI at home, a robot companion, and apps to reach them anywhere, all on 
         <img src="https://raw.githubusercontent.com/getmaipai/.github/main/brand/maipai-stack-icon-light.png" alt="MaiPai Stack" width="72">
       </picture>
     </td>
-    <td><b><a href="https://github.com/getmaipai/stack">MaiPai Stack</a></b><br>Every engine and model behind MaiPai, installed, sized to your hardware, watched, updated and testable from one page, on your own computer, for you and anything you build on it.</td>
+    <td><b><a href="https://github.com/getmaipai/stack">MaiPai Stack</a></b><br>The easy way to run your own local AI: the whole stack installed, watched, tested and kept up to date on your own computer, for you and anything you build on it.</td>
   </tr>
   <tr>
     <td align="center">
