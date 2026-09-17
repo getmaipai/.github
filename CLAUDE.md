@@ -910,6 +910,9 @@ all pinned by the [`@maipai/standards`](standards/) tooling core
   install.
 - [docs/BACKUPS.md](docs/BACKUPS.md): backups, integrated and scheduled.
 - [docs/NOTIFICATIONS.md](docs/NOTIFICATIONS.md): the notification system.
+- [docs/SERVICES.md](docs/SERVICES.md): how a daemon runs on a person's
+  machine (the three pieces, service managers per OS, the watchdog
+  layers, one health list, logs, install and uninstall).
 
 A repo's own `CLAUDE.md` may add specifics; it never restates or weakens a
 platform standard. `@maipai/standards` `check.sh` core is what actually

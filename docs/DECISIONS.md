@@ -6,6 +6,31 @@ incident or review that prompted each. The rule itself lives in
 why, so the rule can be revisited on the facts rather than re-argued
 from memory. Newest first.
 
+## 2026-09-17 (evening): the shipping shape, no Docker, the tray on Tauri, the services standard
+
+**Decision.** Every MaiPai daemon ships as three pieces: one compiled
+binary under the OS service manager, a web UI on localhost, and a thin
+native status app that is the only poster of native notifications and
+an independent observer of the daemon. No Docker (no Metal in a Mac
+container; a second install to explain). The status app is Tauri 2, a
+written deviation from STACK.md's Electron for Desktop (no UI of its
+own, sits in the menu bar all day beside large models). Install is one
+command hosted by us, downloading only our own binary; the board is
+the first screen, no wizard; the operator password is deferred until a
+client key or LAN access needs it. The new [docs/SERVICES.md](SERVICES.md)
+holds the per-OS table, the watchdog layers, the one health list and
+the install rules; NOTIFICATIONS.md gains the `operator` audience and
+names Telegram and ntfy as the off-LAN channels.
+
+**Why.** The survey in `stack/docs/plans/operations-design-2026-09-17.md`:
+Ollama, LM Studio, oMLX, mlx-serve, Tailscale and Syncthing all ship
+this shape; a bare daemon cannot post macOS notifications; launchd and
+systemd already provide the outer watchdog when the daemon's exit codes
+mean what they say; five-step wizards and up-front multi-gigabyte
+downloads are where people abandon local-AI apps (LM Studio's tracker),
+while Ollama's thirty-second install and Jan's "chatting in seconds"
+are what people keep.
+
 ## 2026-09-17: the Stack, the hub's engine layer as its own product
 
 **Decision.** The engine layer (engine catalog, downloads and checksums,

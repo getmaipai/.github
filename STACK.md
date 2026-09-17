@@ -24,6 +24,16 @@ justification in that repo's dev docs.
 
 Electron + electron-builder, unsigned phase-1 builds (ad-hoc signed on arm64).
 
+## Status app (MaiPai Stack's tray or menu-bar item)
+
+Tauri 2 (Rust shell, the web UI in its window, tray, native
+notifications, updater and sidecar plugins). A written deviation from
+Electron, decided 2026-09-17: the status app has no UI of its own and
+sits in the menu bar all day beside large models, where Electron's
+size and memory are the wrong trade; justification in
+`stack/docs/dev.md`, "The shipping shape". Services of every product
+follow [docs/SERVICES.md](docs/SERVICES.md).
+
 ## TV / Phone (MaiPai Go)
 
 SwiftUI (tvOS + iOS), project generated with xcodegen, built locally with

@@ -6,7 +6,8 @@ Full source: platform plan section 2.6.
 
 A package or core declares each notification: `id`, `level` (`immediate`,
 `time_sensitive`, `passive`), `audience` (a person, the household, admins,
-parents of a child), a plain-language template, optional `actions[]`, a
+parents of a child, or `operator` for a product that has no people,
+such as the Stack), a plain-language template, optional `actions[]`, a
 default channel set, and a `privacy` flag (never on a shared screen). The
 catalog lint refuses a notification without a level and a template.
 Repairs, Updates, backups, credentials, and robot health all use the same
@@ -34,7 +35,10 @@ push endpoint on the LAN; Go local notifications from the hub's event
 stream, with a TV overlay and speech through a companion if present; the
 robot speaks once at a natural moment (`immediate` interrupts) and turns
 actions into a spoken question; pods and Desktop use the same overlay and
-chime; email and SMS only as later integration packages. Any channel that
+chime; email and SMS only as later integration packages; Telegram is the one
+off-LAN channel that exists today (a direct call from the machine to
+Telegram's API, opt-in, with a "send a test" in its form), and ntfy
+(self-hosted first) joins it on the Stack. Any channel that
 would need a third-party relay off the LAN is off by default and listed on
 the privacy page, per the org's zero-phone-home rule in
 [`CLAUDE.md`](../CLAUDE.md).
