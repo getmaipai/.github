@@ -24,9 +24,9 @@ onto it.
 |---|---|---|
 | `stack` | MaiPai Stack | The local AI foundation: one service that installs, sizes, runs, watches, updates and tests the engines and models behind every MaiPai product, with one address by role. Knows clients, not people. Home and Bot are built on it; a person can run it alone. Design stage, no code yet. |
 | `home` | MaiPai Home | The self-hosted family AI hub: the platform and the household's master (identity, people, memory, the turn engine, settings, the package host, the shell). Every feature ships as a catalog package. |
-| `bot` | MaiPai Bot | Robot companion. Pairs with the hub like a pod (a full replica, the hub as its brain when reachable), stands alone complete when not. Bench-proven, rebuilt fresh on the platform design. |
 | `catalog` | MaiPai Catalog | The public package catalog: every plugin, app, companion, integration, model, wake word, voice, and theme, signed and indexed. Hub and robot install from it. |
 | `go` | MaiPai Go | Apple TV and iPhone client. Renders the same UI schema natively. Built last, once the hub and robot have packages with schema pages. |
+| `bot` | MaiPai Bot | Robot companion. Pairs with the hub like a pod (a full replica, the hub as its brain when reachable), stands alone complete when not. Bench-proven, rebuilt fresh on the platform design. |
 | `.github` | (this repo) | Org standards, `@maipai/standards` tooling, the shared Claude plugin, org profile |
 
 MaiPai's promise: private, local AI that's actually yours. Nothing leaves the

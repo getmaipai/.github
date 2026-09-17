@@ -18,15 +18,14 @@ The easy way to run your own local AI: the whole stack installed, watched, teste
 Your own AI, music, videos, podcasts, maps, books, and more, on your own
 hardware, online or offline - for protection, privacy, and independence.
 
-**desktop (MaiPai Desktop, part of the home repo):**
-Mac and Windows app for your MaiPai Home and Bot, right on your desktop, integrated with your dock and your computer.
+**catalog (MaiPai Catalog):**
+New features and abilities for your Home and Bot, from one catalog: plugins, apps, companions and integrations, every one reviewed and signed.
 
 **go (MaiPai Go):**
 iPhone and Apple TV app for your MaiPai Home and Bot: your own AI, media, and robot companion, wherever you are.
 
+**desktop (MaiPai Desktop, part of the home repo):**
+Mac and Windows app for your MaiPai Home and Bot, right on your desktop, integrated with your dock and your computer.
+
 **bot (MaiPai Bot):**
 A robot friend with its own onboard AI: it sees, hears, talks, thinks, moves, self-charges, and guards your home in sentry mode. It recognizes each person by face and voice, keeps its own memories of people, facts, and experiences, and learns and evolves with your family.
-
-**catalog (MaiPai Catalog):**
-New features and abilities for your Home and Bot, from one catalog: plugins, apps, companions and integrations, every one reviewed and signed.
-
