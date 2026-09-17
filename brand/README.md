@@ -33,3 +33,4 @@ product, with the product's glyph inside the smile. All PNGs are transparent.
   palette and iconography).
 - App icons, favicons, DMG art, and docs-site logos are derived from these
   masters during each product's build/asset pass; don't hand-redraw variants.
+- `maipai-ecosystem.png`: the one-picture map of how the products fit together (dark background, used above the product table on the org profile and the site).

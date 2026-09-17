@@ -17,6 +17,8 @@ Your own AI at home, a robot companion, and apps to reach them anywhere, all on 
 
 ---
 
+<p align="center"><img src="https://raw.githubusercontent.com/getmaipai/.github/main/brand/maipai-ecosystem.png" alt="How the MaiPai products fit together: people and their devices reach MaiPai Home, which runs on MaiPai Stack; Go, Desktop and the web reach Home; Bot pairs with Home; local media and optional external services feed both" width="900"></p>
+
 <table>
   <tr>
     <td align="center" width="120">
@@ -70,13 +72,5 @@ Your own AI at home, a robot companion, and apps to reach them anywhere, all on 
     <td><b>MaiPai Bot</b><br>A robot friend with its own onboard AI: it sees, hears, talks, thinks, moves, self-charges, and guards your home in sentry mode. It recognizes each person by face and voice, keeps its own memories of people, facts, and experiences, and learns and evolves with your family.</td>
   </tr>
 </table>
-
-## How it fits together
-
-- **MaiPai Stack** goes on your computer and gives you every local AI ability.
-- **MaiPai Home** runs on the Stack.
-- **MaiPai Bot** pairs with Home.
-- **Home and Bot** get their abilities from the Catalog.
-- **Go and Desktop** connect to Home.
 
 <p>Built and maintained by <a href="https://github.com/JesseWebDotCom">Jesse Torres</a>.</p>
