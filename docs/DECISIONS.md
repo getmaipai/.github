@@ -6,6 +6,69 @@ incident or review that prompted each. The rule itself lives in
 why, so the rule can be revisited on the facts rather than re-argued
 from memory. Newest first.
 
+## 2026-09-17: the Stack, the hub's engine layer as its own product
+
+**Decision.** The engine layer (engine catalog, downloads and checksums,
+the supervisors, the resource governor, model identity, engine updates)
+becomes MaiPai Stack, its own repo and product (`getmaipai/stack`), with
+Home and Bot as its first two clients. It ships on the Mac first, Linux
+with the robot, Windows for the CUDA catalogue. Design first, no
+migration: nothing moves out of `home` until the Stack has proven the
+hub's residency profile on the Mac Studio beside the running hub
+(STACK-14, then STACK-16).
+
+**The line.** The Stack knows clients, not people: one operator login,
+per-client API keys scoped to roles, no Person, no household, no memory,
+no history, no packages. Its test surfaces are stateless. The moment a
+second person in the house wants a turn, that is Home's job, and the
+Stack's own page says so ("Share with your family"). The case that fixed
+it: Oliver installs the Stack and tests everything as himself; he wants
+Sprout to try it without pictures or video. Sprout is a child profile in
+Home, restricted by default; the Stack never learns the name. A users
+table in the Stack would put a child in two places with two permission
+models and two safety paths the day Home installs, which is the drift
+the no-data-debt and one-definition rules forbid.
+
+**Why a repo (principle 5).** A different cadence (engine bumps and
+model revisions land weekly regardless of hub features), a different
+audience (a person who wants local AI on a Mac done right, with no
+family hub), and a second consumer in the robot, which needs the same
+supervised, provenance-checked, memory-governed engine set on its own
+hardware. That last point is principle 1: one implementation, not one
+per product.
+
+**Why not adopt an existing host.** Surveyed the same day: LocalAI,
+Harbor, mlx-serve, oMLX, Ollama, LM Studio and ComfyUI. None covers the
+role table with the operating promises (sizing, one budget, updates with
+rollback, notifications, a try-it per role) on Apple silicon, and the
+MaiPai-specific parts (provenance before selection, the governor's
+admission decision, the operator-only safety posture, the Home hand-off)
+are what a generic host would never own. They become engines under the
+Stack; `mlx-serve` and `oMLX` join `llama-server` and `mlx-lm` on the
+Studio bench. The survey and what each taught is in
+`stack/docs/dev.md`.
+
+**Name.** "Core" was rejected: it names nothing specific and collides
+with `check-core.sh`, "the standards core" and "core components".
+"Engine" collides with `engineCatalog` and principle 6's "the mandated
+engine". "Stack" is the word the owner reaches for, honest about what
+the thing is, and fits the family of plain nouns (Home, Bot, Go,
+Catalog). "Station" was the runner-up. Final confirmation is the
+owner's; the rename costs nothing before the remote exists.
+
+**What changed in the standards.** The products table and build order
+in CLAUDE.md; STACK.md's "Models and the engine" names the Stack as the
+owner, keeps llama-server as the baseline everywhere and the only engine
+on the robot, admits the MLX candidates on Apple silicon as measured
+alternatives, and extends the role list (`judge`, `rerank`, `music`, the
+`quality` tiers). The pitch line is in brand/COPY.md.
+
+**Bot.** Bot builds on the Stack and never requires Home: the robot runs
+its own Linux Stack for the three language roles, the body keeps speech
+over `spec/voice/` as a managed engine, and GOV-01's one governor is the
+Stack's, fed by the body's power and thermal budget. The robot design
+pass confirms or amends this in `bot/docs/dev.md`.
+
 ## 2026-09-16: rules, word lists and learned components
 
 **Decision.** Six standing rules in CLAUDE.md ("Rules, word lists and

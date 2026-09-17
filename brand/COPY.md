@@ -11,6 +11,9 @@ are not repeated across products.
 **Org (getmaipai):**
 Your own AI at home, a robot companion, and apps to reach them anywhere, all on your own hardware, never the cloud.
 
+**stack (MaiPai Stack):**
+Every engine and model behind MaiPai, installed, sized to your hardware, watched, updated and testable from one page, on your own computer, for you and anything you build on it.
+
 **home (MaiPai Home):**
 Your own AI, music, videos, podcasts, maps, books, and more, on your own
 hardware, online or offline - for protection, privacy, and independence.

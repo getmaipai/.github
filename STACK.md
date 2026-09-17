@@ -53,9 +53,10 @@ GitHub Pages. Three content tiers (`user/`, `dev/`, `api/`) per
 
 | Layer | Standard |
 |---|---|
-| Engine | llama-server (llama.cpp), the only model engine on hub and robot. Ollama is not part of the fresh hub |
-| Wire contract | OpenAI-compatible HTTP for text and embeddings (`spec/llm/`); ComfyUI's API for image and video; the voice sidecar contract (`spec/voice/`) for speech |
-| Roles in code | `chat`, `router`, `embed`, `vision`, `image`, `video`, `coding`, `tts`, `stt`, `wakeword`, never a model name |
+| Owner | MaiPai Stack (`getmaipai/stack`, design stage 2026-09-17): the one service that installs, supervises, budgets and serves every engine and model, on the hub and the robot. Until Home runs on it, the hub's own supervisors stand in with the same rules |
+| Engine | llama-server (llama.cpp) is the baseline everywhere and the only engine on the robot. On Apple silicon the Stack measures `mlx-serve` and `oMLX` beside it (the hub's `docs/plans/hub-on-apple-silicon-2026-09-17.md`); ComfyUI is a managed sidecar for image edits and video. Ollama and LM Studio are never product dependencies (a person may point the Stack at one they installed) |
+| Wire contract | OpenAI-compatible HTTP for text, embeddings, transcription, speech and images, addressed by role; the Stack's job API for image, video and music; the voice sidecar contract (`spec/voice/`) for the robot's body and the hub's in-process speech |
+| Roles in code | `chat`, `coding`, `judge`, `router`, `embed`, `rerank`, `vision`, `stt`, `tts`, `wakeword`, `image`, `video`, `music`, never a model name; generator roles take `quality: fast, everyday, best` |
 
 ## Shell and kit (hub, robot, Go)
 

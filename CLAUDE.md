@@ -16,10 +16,13 @@ only as a reference to copy hard-won logic from, never a requirement of
 feature scope. `home`'s 21 pre-rebuild releases were deleted from GitHub;
 their metadata (tags, notes, asset lists with sha256, no binaries) is
 backed up alongside the mirror. Build order: hub first, robot for parity,
-Go last.
+Go last; the Stack (2026-09-17) is the hub's engine layer as its own
+product and is proven on the Studio beside the hub before Home moves
+onto it.
 
 | Repo | Product | What it is |
 |---|---|---|
+| `stack` | MaiPai Stack | The local AI foundation: one service that installs, sizes, runs, watches, updates and tests the engines and models behind every MaiPai product, with one address by role. Knows clients, not people. Home and Bot are built on it; a person can run it alone. Design stage, no code yet. |
 | `home` | MaiPai Home | The self-hosted family AI hub: the platform and the household's master (identity, people, memory, the turn engine, settings, the package host, the shell). Every feature ships as a catalog package. |
 | `bot` | MaiPai Bot | Robot companion. Pairs with the hub like a pod (a full replica, the hub as its brain when reachable), stands alone complete when not. Bench-proven, rebuilt fresh on the platform design. |
 | `catalog` | MaiPai Catalog | The public package catalog: every plugin, app, companion, integration, model, wake word, voice, and theme, signed and indexed. Hub and robot install from it. |
@@ -63,7 +66,10 @@ platform plan; this is the standing summary every session should carry.
    same terms: slower, more tokens, less predictable.
 7. **Hub first, robot for parity, Go last.** Every hub step is in family use
    before its robot counterpart; nothing early may close the door on the
-   later clients.
+   later clients. The Stack sits under all three and follows the same
+   rule: it is in family use the day Home runs on it, and nothing moves
+   out of Home before the Stack has proven the hub's profile on the
+   Studio.
 8. **Every feature is reviewed and rebuilt, never carried.** No existing app,
    plugin, or screen is a requirement by virtue of existing in the legacy
    code. Each is re-examined (does the family use it, does it fit a package,
