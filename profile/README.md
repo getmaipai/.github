@@ -70,7 +70,7 @@ Your own AI at home, a robot companion, and apps to reach them anywhere, all on 
     <td align="center">
       <img src="https://raw.githubusercontent.com/getmaipai/.github/main/brand/maipai-brand-icon.png" alt="MaiPai Catalog" width="72">
     </td>
-    <td><b><a href="https://github.com/getmaipai/catalog">MaiPai Catalog</a></b><br>Every plugin, app, companion, integration, and model for your hub and robot, in one signed catalog you review and install with one click.</td>
+    <td><b><a href="https://github.com/getmaipai/catalog">MaiPai Catalog</a></b><br>New features and abilities for your Home and Bot, from one catalog: plugins, apps, companions and integrations, every one reviewed and signed.</td>
   </tr>
 </table>
 
@@ -94,7 +94,7 @@ flowchart TB
     stack["MaiPai Stack<br/>the engines and models,<br/>on your computer"]
     stack2["MaiPai Stack<br/>a smaller one<br/>on board the robot"]
   end
-  catalog["MaiPai Catalog<br/>plugins, apps, companions, voices and models, signed and reviewed"]
+  catalog["MaiPai Catalog<br/>new features and abilities for Home and Bot,<br/>reviewed and signed"]
   go --> home
   desktop --> home
   browser --> home
@@ -116,7 +116,7 @@ flowchart TB
   works alone and joins the family when it is in range.
 - **Go and Desktop** are how you reach Home and Bot from a phone, a TV
   or a computer. They never talk to the Stack directly.
-- **The Catalog** is where everything installable comes from, reviewed
-  and signed, added with one click.
+- **The Catalog** is where Home and Bot get new features and abilities,
+  each one reviewed and signed before you can add it.
 
 <p>Built and maintained by <a href="https://github.com/JesseWebDotCom">Jesse Torres</a>.</p>
