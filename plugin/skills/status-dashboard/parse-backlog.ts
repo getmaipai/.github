@@ -11,6 +11,7 @@ const PHASE_BY_REPO: Record<string, string> = {
   bot: "Robot parity",
   go: "Go",
   catalog: "Catalog (infra)",
+  stack: "Stack (foundation)",
 };
 
 type Item = { checked: boolean; text: string };

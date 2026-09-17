@@ -17,7 +17,7 @@ derived view, never a second place status gets decided.
 
 ## Process
 
-1. For each repo (`home`, `bot`, `catalog`, `go`), run the parser:
+1. For each repo (`home`, `bot`, `catalog`, `go`, `stack`), run the parser:
    ```
    bun run parse-backlog.ts <repo> ~/Developer/github.com/getmaipai/<repo>
    ```
