@@ -48,6 +48,24 @@ Dates, units, and currency come from household locale, never hard-coded.
 Robot languages drive which speech catalogs load (see
 [STACK.md](../STACK.md) > Robot speech).
 
+## API layers: the Stack and the products above it
+
+The foundational API (engines, models, hardware, memory, machine
+health, updates of those, raw inference by role) is MaiPai Stack's,
+under `/v1` (the OpenAI shape) and `/stack/v1`. Home, Bot and Go keep
+their own APIs for everything that needs a person, a household, a
+conversation, memory, consent, a companion, a package, a schedule or a
+device. The full rules are the Stack's design record
+(`stack/docs/dev.md`, "The API boundary"); the ones every session must
+carry: one fact has one API and the products read the Stack's through
+a pass-through, never a translation; both `/v1`s speak the same wire
+but the Stack answers as the model and Home as the assistant, never
+confused; a person never holds a Stack key and the Stack never learns a
+person; a capability the engines must gain is added to the Stack first,
+never re-implemented above it; one event feed, one producer per event;
+products hold Stack ids, never copies of Stack records; failure passes
+through verbatim; the contract is tested from both sides.
+
 ## Logging
 
 Structured JSON lines: level, timestamp, package id, the turn or op
