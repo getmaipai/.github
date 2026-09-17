@@ -73,47 +73,10 @@ Your own AI at home, a robot companion, and apps to reach them anywhere, all on 
 
 ## How it fits together
 
-Six pieces, one house. Everything runs on your own hardware, and the
-layers only talk to each other inside your home.
-
-```mermaid
-flowchart TB
-  subgraph reach["Reach it"]
-    go["MaiPai Go<br/>iPhone and Apple TV"]
-    desktop["MaiPai Desktop<br/>Mac and Windows"]
-    browser["Any browser<br/>on your home network"]
-  end
-  subgraph house["Your home"]
-    home["MaiPai Home<br/>the hub: your family, memory,<br/>companions and apps, kid-safe profiles"]
-    bot["MaiPai Bot<br/>the robot: pairs with Home when near,<br/>complete on its own when not"]
-  end
-  subgraph ai["The AI itself"]
-    stack["MaiPai Stack<br/>the engines and models,<br/>on your computer"]
-    stack2["MaiPai Stack<br/>a smaller one<br/>on board the robot"]
-  end
-  catalog["MaiPai Catalog<br/>new features and abilities for Home and Bot,<br/>reviewed and signed"]
-  go --> home
-  desktop --> home
-  browser --> home
-  go -.-> bot
-  home <-.->|pairs| bot
-  home --> stack
-  bot --> stack2
-  catalog --> home
-  catalog --> bot
-  catalog --> stack
-```
-
-- **The Stack** runs the AI: it installs the engines and models, sizes
-  them to your computer, and keeps them healthy. You can run it by
-  itself.
-- **Home** sits on top and adds the people: profiles, memory,
-  companions, apps, and the rules for kids.
-- **Bot** carries its own Stack and its own copy of Home's brain, so it
-  works alone and joins the family when it is in range.
-- **Go and Desktop** are how you reach Home and Bot from a phone, a TV
-  or a computer. They never talk to the Stack directly.
-- **The Catalog** is where Home and Bot get new features and abilities,
-  each one reviewed and signed before you can add it.
+- **MaiPai Stack** goes on your computer and gives you every local AI ability.
+- **MaiPai Home** runs on the Stack.
+- **MaiPai Bot** pairs with Home.
+- **Home and Bot** get their abilities from the Catalog.
+- **Go and Desktop** connect to Home.
 
 <p>Built and maintained by <a href="https://github.com/JesseWebDotCom">Jesse Torres</a>.</p>
