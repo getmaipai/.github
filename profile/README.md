@@ -59,7 +59,10 @@ Your own AI at home, a robot companion, and apps to reach them anywhere, all on 
 <table>
   <tr>
     <td align="center" width="120">
-      <img src="https://raw.githubusercontent.com/getmaipai/.github/main/brand/maipai-brand-icon.png" alt="MaiPai Stack" width="72">
+      <picture>
+        <source media="(prefers-color-scheme: dark)" srcset="https://raw.githubusercontent.com/getmaipai/.github/main/brand/maipai-stack-icon-dark.png">
+        <img src="https://raw.githubusercontent.com/getmaipai/.github/main/brand/maipai-stack-icon-light.png" alt="MaiPai Stack" width="72">
+      </picture>
     </td>
     <td><b><a href="https://github.com/getmaipai/stack">MaiPai Stack</a></b><br>Every engine and model behind MaiPai, installed, sized to your hardware, watched, updated and testable from one page, on your own computer, for you and anything you build on it.</td>
   </tr>
