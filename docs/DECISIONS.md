@@ -6,6 +6,95 @@ incident or review that prompted each. The rule itself lives in
 why, so the rule can be revisited on the facts rather than re-argued
 from memory. Newest first.
 
+## 2026-09-20: the `shared` repo (`ui`, `core`, `spec`)
+
+**Decision.** The libraries every product imports live in one new
+repo, `getmaipai/shared`, as three workspaces tagged on their own:
+`ui` (`@maipai/ui`, `ui-vX.Y.Z`: the kit, tokens, icons, the shell,
+the settings and permission renderers, the kit's ESLint config),
+`core` (`@maipai/core`, `core-vX.Y.Z`: log, withTimeout, paths,
+archive, hlc, id, secrets and the keystore, secretThrottle,
+rateLimiter, singleflight, ssrfGuard, diagnostics, the openapi helper,
+the hardware probe, backup crypto) and `spec` (`@maipai/spec`,
+`spec-vX.Y.Z`: everything now in `home/spec`, the Python package
+included). Dependency direction, never reversed: `shared` is imported
+by `stack`, `home` and `catalog`; `bot` gets `ui`, `core` and `spec`
+through Home's pinned runtime package and pins `spec` directly for its
+Python body at the same version; `go` pins `spec`. Nothing in `shared`
+imports a product. `@maipai/standards` stays in `.github` (org
+tooling, not product code). The org rule "shared record changes go
+through the spec first" now means a commit in `shared/spec` before the
+hub commit.
+
+**Why one repo and not three.** The three packages move together: a
+kit primitive renders a spec shape, a core helper logs a spec error,
+and a change in one is verified against the other two in one gate.
+Three repos would mean three tag ceremonies for one change and a
+sibling-checkout matrix in every consumer's `check.sh`; one repo with
+per-workspace tags keeps one gate and three version numbers, which is
+what consumers actually pin.
+
+**Why Catalog stays separate.** It is the one community-PR surface,
+with its own cadence and its own trust gate (the CLA, the scorecard,
+the signing). It becomes a consumer of `spec` and deletes its schema
+mirror, whose `manifest.schema.json` had already drifted from
+`home/spec`.
+
+**Why now.** The refocus below made the Stack a second consumer of the
+kit and of eight `lib` helpers that had already diverged between
+`home/backend/src/lib` and `stack/backend/src/lib` (`log.ts` and
+`withTimeout.ts` differed on 2026-09-20). Principle 1 forbids the copy;
+the Stack's reconciled kit and shell (owner-approved 2026-09-19) is the
+version that moves, and Home adopts it.
+
+## 2026-09-20: the Stack is Home's engine foundation, not a product
+
+**Decision.** Supersedes the 2026-09-17 entry below. MaiPai Stack is
+the engine foundation of MaiPai Home: the headless daemon that
+installs, sizes, runs, watches, updates and tests the engines and
+models Home uses, and gives Home (and Bot, which runs the same
+platform code) one stable address by role. It has no user interface,
+no users, no operator login, no client keys, no LAN exposure, no
+public release, no standalone installer, no docs site and no pitch of
+its own; Home is its only caller, Home's installer installs it, and it
+updates with Home's releases. The name stays: "Stack" is the name of
+Home's engine layer the way "turn engine" is the name of Home's
+conversation layer. The repo stays, as a service with its own process
+and port, because a separate process survives a Home crash and is
+shared by Bot on the same box. Every human-facing fundamental
+(notifications, the updates page, repairs, settings rendering, the
+privacy page, backups, logs viewing, identity) is Home's; the Stack
+declares its facts as data and Home renders them. The full ownership
+table is in `stack/docs/plans/refocus-work-order-2026-09-20.md` and
+`stack/AGENTS.md`. Of the three-piece shipping shape decided on the
+evening of 2026-09-17, the Stack keeps only the first piece (one
+binary under the OS service manager, exit codes that mean what they
+say); the web UI and the status app are Home's.
+
+**Why.** The necessity review
+(`stack/docs/plans/stack-necessity-review-2026-09-20.md`) checked the
+field on 2026-09-20: Msty Nexus, Lemonade and LocalAI each ship
+"several engines, one service, one API, a model manager" on a Mac
+today, two of them open source, and Msty Nexus announced the Stack's
+exact pitch three months before the Stack's first commit. The one
+thing none of them ships, one measured residency budget across the
+processes a family hub launches, is a feature Home needs, not a
+product strangers would install. After four days and 247 commits,
+roughly a third of the backlog by line count was console surface
+(showroom, panels, palette, library, Try-it studio, tray, channels):
+a second admin UI, a second docs site, a second notification center
+and a second update feed, each a copy principle 1 forbids inside one
+product and which the repo split had made permissible by naming them
+a different product. The continuing cost (qualifying upstream
+nightlies per OS and GPU, Apple signing and notarization, a rollback
+proof per release, support for people who are not the household) is
+release engineering for a public runtime with zero users, on top of
+Home, which has a family waiting and which principle 7 puts first.
+The 2026-09-17 reasons for a repo (a different cadence, a different
+audience) fall with the audience; the cadence argument and the
+robot's need for the same layer are met by a private daemon inside
+Home's release.
+
 ## 2026-09-17 (evening): the shipping shape, no Docker, the tray on Tauri, the services standard
 
 **Decision.** Every MaiPai daemon ships as three pieces: one compiled

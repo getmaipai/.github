@@ -36,7 +36,10 @@ store card says "web only"; iPhone shows it in a web view; Apple TV shows a
 
 ## The kit
 
-`@maipai/ui` is a thin layer over shadcn/ui on Radix and Tailwind v4: the
+`@maipai/ui` lives in `getmaipai/shared` as the `ui` workspace (decided
+2026-09-20; the kit and shell moved there from the Stack's reconciled
+copy, and Home imports it like every other product). It is a thin layer
+over shadcn/ui on Radix and Tailwind v4: the
 tokens, the layout primitives, the settings and permission-prompt
 renderers, the pattern components, re-exports. It never reimplements a
 widget the library ships. Icons are lucide, by name, at three token sizes;

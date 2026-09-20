@@ -12,7 +12,7 @@ are not repeated across products.
 Your own AI at home, a robot companion, and apps to reach them anywhere, all on your own hardware, never the cloud.
 
 **stack (MaiPai Stack):**
-The easy way to run your own local AI: the whole stack installed, watched, tested and kept up to date on your own computer, for you and anything you build on it.
+MaiPai Stack is the engine foundation of MaiPai Home: the headless service that installs, sizes, runs, watches, updates and tests the engines and models behind Home, and gives Home one stable address by role. It has no interface and no users of its own; Home is its only caller.
 
 **home (MaiPai Home):**
 Your own AI, music, videos, podcasts, maps, books, and more, on your own

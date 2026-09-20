@@ -16,15 +16,18 @@ only as a reference to copy hard-won logic from, never a requirement of
 feature scope. `home`'s 21 pre-rebuild releases were deleted from GitHub;
 their metadata (tags, notes, asset lists with sha256, no binaries) is
 backed up alongside the mirror. Build order: hub first, robot for parity,
-Go last; the Stack (2026-09-17) is the hub's engine layer as its own
-product and is proven on the Studio beside the hub before Home moves
-onto it.
+Go last; the Stack (2026-09-20, superseding the 2026-09-17 product
+framing) is Home's engine layer as a private daemon inside Home's
+release, proven on the Studio beside the hub before Home moves onto it.
+The libraries every product imports (`ui`, `core`, `spec`) live in
+`shared`.
 
 | Repo | Product | What it is |
 |---|---|---|
-| `stack` | MaiPai Stack | The local AI foundation: one service that installs, sizes, runs, watches, updates and tests the engines and models behind every MaiPai product, with one address by role. Knows clients, not people. Home and Bot are built on it; a person can run it alone. Design stage, no code yet. |
+| `stack` | MaiPai Stack | The engine foundation of MaiPai Home: the headless service that installs, sizes, runs, watches, updates and tests the engines and models behind Home, and gives Home one stable address by role. It has no interface and no users of its own; Home is its only caller. Ships inside Home's installer, updates with Home's releases. |
+| `shared` | (libraries) | The three packages every product imports, tagged on their own: `ui` (`@maipai/ui`: the kit, tokens, icons, the shell, the settings and permission renderers), `core` (`@maipai/core`: log, paths, secrets, the hardware probe and the other backend helpers), `spec` (`@maipai/spec`: the shared record shapes, schemas, fixtures and the Python package). Imported by `stack`, `home` and `catalog`; `bot` and `go` pin `spec`. Nothing in it imports a product. |
 | `home` | MaiPai Home | The self-hosted family AI hub: the platform and the household's master (identity, people, memory, the turn engine, settings, the package host, the shell). Every feature ships as a catalog package. |
-| `catalog` | MaiPai Catalog | The public package catalog: every plugin, app, companion, integration, model, wake word, voice, and theme, signed and indexed. Hub and robot install from it. |
+| `catalog` | MaiPai Catalog | The public package catalog: every plugin, app, companion, integration, model, wake word, voice, and theme, signed and indexed. Hub and robot install from it. Pins `spec` from `shared` for the manifest shapes; keeps no schema mirror of its own. |
 | `go` | MaiPai Go | Apple TV and iPhone client. Renders the same UI schema natively. Built last, once the hub and robot have packages with schema pages. |
 | `bot` | MaiPai Bot | Robot companion. Pairs with the hub like a pod (a full replica, the hub as its brain when reachable), stands alone complete when not. Bench-proven, rebuilt fresh on the platform design. |
 | `.github` | (this repo) | Org standards, `@maipai/standards` tooling, the shared Claude plugin, org profile |
