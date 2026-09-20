@@ -341,6 +341,8 @@ verifies the other session's committed work too; the integrator still
 runs `check.sh` on bare `main` at the block's end so the final state
 is verified as a whole at a named commit.
 
+**Landing a lane commit (2026-09-20).** The coordinator lands it from a throwaway worktree of `origin/main` (`git worktree add ../<repo>-land origin/main`, cherry-pick, push `HEAD:main`, remove), or hands the hash to the session that owns that checkout for its next boundary; never a cherry-pick inside a checkout another session is working in (one such pick conflicted on `BACKLOG.md` and left a session's index mid-pick until aborted). A conflict goes back to the lane as a rebase brief. Every report is one of three things in the coordinator's status line: landed (the hash on `main`), handed (the hash and to whom), or queued for a rebase; a lane branch is deleted only after `git branch --contains` shows its commit on `main` (one report sat unlanded for two hours and its branch was swept, the commit surviving only in the object store).
+
 ## 5. Stop points and status
 
 Before a context reset: the handoff notes are current, memory
