@@ -103,7 +103,13 @@ Skeleton, in order:
    expect rough edges").
 7. Documentation links (user / developer / API), issues pointer.
 8. Development: a short paragraph at the bottom; users never scroll there.
-9. License line, then the standard disclaimer block.
+9. The standard disclaimer block (docs/TRADEMARKS.md's wording, word for
+   word across repos), then, for a product with an AI feature, the
+   AI-outputs disclaimer paragraph (docs/SAFETY.md) directly under it:
+   the models are third-party and chosen by the person, outputs can be
+   wrong or harmful and are not professional advice, the person is
+   responsible for use, parents decide what children reach.
+10. The licence line, last.
 
 Hard limits (the calm budget):
 
