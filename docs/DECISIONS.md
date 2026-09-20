@@ -479,3 +479,19 @@ under the kit" section (`home/docs/design/home-pages-2026-09-20.md`,
 appended to the kit spec); each page is one item, judged by a capture
 placed beside the reference, and a page that reads as the old Home
 page with new colors fails.
+
+## 2026-09-20: budget mode until the plan resets
+
+At the day's rate the Claude plan would run out by Wednesday, so the
+owner set the routing for the rest of the week: the two token-free
+lanes take M items and code, not only S docs (the local model had
+landed the permission diff, the governor's queue drain and the
+admission rewrite cleanly that day), Codex at low reasoning takes any
+item whose brief names every file, rule, test and command, the Claude
+sessions that implement run on Sonnet (Session A was restarted
+on Sonnet from a handoff note after finishing its last Opus item),
+Haiku takes verification reads and any S item the lanes cannot, and
+only the coordinator stays on Opus. The Home side of the Stack
+(client, event bridge, Engines API) went to the lanes in that order;
+the judgment items (rewiring the turn engine, the Engines page's
+design fit, the spec move) stayed with the Claude sessions.
