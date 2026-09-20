@@ -8,7 +8,7 @@ justification in that repo's dev docs.
 | Layer | Standard |
 |---|---|
 | Runtime | Bun |
-| Shared helpers | `@maipai/core` from `getmaipai/shared` (log, paths, secrets and keystore, throttles, the hardware probe), and `@maipai/spec` for every record and wire shape; pinned by tag, never copied |
+| Shared helpers | `@maipai/core` from `getmaipai/commons` (log, paths, secrets and keystore, throttles, the hardware probe), and `@maipai/spec` for every record and wire shape; pinned by tag, never copied |
 | HTTP framework | Hono, routes defined with Zod schemas via `@hono/zod-openapi` |
 | Validation | Zod (the same schemas that generate the OpenAPI spec) |
 | Database | SQLite via Drizzle ORM |
@@ -19,7 +19,7 @@ justification in that repo's dev docs.
 | Layer | Standard |
 |---|---|
 | Framework | React + Vite (TypeScript) |
-| Styling/components | `@maipai/ui` from `getmaipai/shared` (the kit: tokens, primitives, blocks, the shell, the settings renderer, its ESLint config), pinned by tag; build from it before building new |
+| Styling/components | `@maipai/ui` from `getmaipai/commons` (the kit: tokens, primitives, blocks, the shell, the settings renderer, its ESLint config), pinned by tag; build from it before building new |
 
 ## Desktop (MaiPai Desktop)
 

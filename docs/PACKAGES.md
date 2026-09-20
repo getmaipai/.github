@@ -62,7 +62,7 @@ standard in [`CLAUDE.md`](../CLAUDE.md).
 - **Repo layout** (`getmaipai/catalog`, public): `plugins/<category>/<id>/`,
   `skills/<category>/<id>/`, `apps/`, `companions/`, `integrations/`,
   `models/`, `wakewords/`, `voices/`, `@maipai/spec` pinned from
-  `getmaipai/shared` for the manifest and recipe shapes (no schema mirror of
+  `getmaipai/commons` for the manifest and recipe shapes (no schema mirror of
   its own), `tools/` (lint, pack, sign, index, scorecard, the `check`
   CLI), `AGENTS.md` and package-writing skills so an agent produces a
   conforming package, `ASSIGNMENT.md`, `CONTRIBUTING.md`.

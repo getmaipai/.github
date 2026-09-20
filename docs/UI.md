@@ -36,7 +36,7 @@ store card says "web only"; iPhone shows it in a web view; Apple TV shows a
 
 ## The kit
 
-`@maipai/ui` lives in `getmaipai/shared` as the `ui` workspace (decided
+`@maipai/ui` lives in `getmaipai/commons` as the `ui` workspace (decided
 2026-09-20; the kit and shell moved there from the Stack's reconciled
 copy, and Home imports it like every other product). The kit's approved
 design specification is `shared/ui/docs/spec.md` (the 2026-09-19
@@ -48,7 +48,7 @@ renderers, the pattern components, re-exports. It never reimplements a
 widget the library ships. Icons are lucide, by name, at three token sizes;
 no other set, no emoji as icons, no pasted SVG outside a companion avatar.
 The kit ships the ESLint config every repo and catalog CI run (`ui/eslint.config.js` in
-`getmaipai/shared`, imported by a consumer as
+`getmaipai/commons`, imported by a consumer as
 `@maipai/ui/eslint.config.js`; `core/eslint.config.js` covers the backend helpers the same way): no other component libraries, no raw
 colors, no inline layout outside the primitives, icons only from lucide by name. `@maipai/ui` and the shell
 contract move together on `ui-v` tags; an app declares the kit version it

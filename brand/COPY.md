@@ -23,6 +23,9 @@ Local AI is a pile of parts. One program runs the chat model, a different one tu
 **stack, the install sentence** (said once, plainly, wherever a reader might look for an installer):
 Home's installer installs the Stack; a person never installs the Stack by itself.
 
+**commons, repo description (one sentence, at most 120 characters, the GitHub field):**
+MaiPai Commons: the org's libraries (ui, core, spec) every MaiPai product imports, pinned by tag.
+
 **home (MaiPai Home):**
 Your own AI, music, videos, podcasts, maps, books, and more, on your own
 hardware, online or offline - for protection, privacy, and independence.

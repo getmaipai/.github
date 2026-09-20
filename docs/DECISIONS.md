@@ -495,3 +495,16 @@ only the coordinator stays on Opus. The Home side of the Stack
 (client, event bridge, Engines API) went to the lanes in that order;
 the judgment items (rewiring the turn engine, the Engines page's
 design fit, the spec move) stayed with the Claude sessions.
+
+## 2026-09-20: the libraries repo is public and named `commons`
+
+The Catalog is public and its contributors and CI must read
+`@maipai/spec` and the kit, so the libraries repo could not stay
+private. Its history was scanned (gitleaks and the PII wordlist) and
+came back clean before the switch. The owner also disliked `shared`
+as a name, which reads as an adjective in every sentence, and chose
+`commons`: the org's common libraries, `ui`, `core` and `spec`,
+tagged on their own. The GitHub repo is `getmaipai/commons` (the old
+address redirects); the package names `@maipai/ui`, `@maipai/core`
+and `@maipai/spec` did not change, and the local folder, worktree
+and environment-variable renames land as COMMONS-RENAME-01.

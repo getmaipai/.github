@@ -65,7 +65,7 @@ person; a capability the engines must gain is added to the Stack first,
 never re-implemented above it; one event feed, one producer per event;
 products hold Stack ids, never copies of Stack records; failure passes
 through verbatim; the contract is tested from both sides.
-The wire itself is declared once, in `@maipai/spec` (`spec/stack/` in `getmaipai/shared`: the role request and reply headers, the event feed, the health item, the job, the settings and precious-state declarations, the speech wire), imported by the Stack and by every product that speaks to it, never defined twice; the contract document is `stack/docs/integrations.md`.
+The wire itself is declared once, in `@maipai/spec` (`spec/stack/` in `getmaipai/commons`: the role request and reply headers, the event feed, the health item, the job, the settings and precious-state declarations, the speech wire), imported by the Stack and by every product that speaks to it, never defined twice; the contract document is `stack/docs/integrations.md`.
 
 ## Logging
 
