@@ -57,10 +57,40 @@ bring it back).
 Jesse controls the eGPU enclosure's power through a Kasa smart plug and
 has said this is the fix he wants named directly: tell him to power-cycle
 the eGPU enclosure(s) via Kasa (off, a few seconds, back on), not a vaguer
-"check the Thunderbolt connection." State it as the one sentence he needs
-to act on with zero context ("the eGPU dropped off Thunderbolt again -
-power-cycle it via Kasa"), then stop. Route the item to Codex or a
-Haiku-floor Claude session instead (`CLAUDE.md`, Roles).
+"check the Thunderbolt connection." There are **two** Core X Chroma
+enclosures (both named in `boltctl list`) - say which one(s) are still
+`disconnected` so he knows whether one plug or both need cycling.
+
+**Verify the cycle actually worked before telling him it's fixed.** A
+first real attempt (2026-09-20) did not recover within several minutes:
+`boltctl` stayed at `status: disconnected` on both enclosures and
+`journalctl -u bolt` kept logging `udev: found 0 domain` - meaning the
+host never even saw a hotplug, not just an unauthorized one. After
+Jesse confirms he's cycled the power, poll instead of declaring success:
+
+```
+for i in 1 2 3 4 5 6; do
+  sleep 15
+  ssh laptop-linux 'nvidia-smi -L; boltctl list | grep status'
+done
+```
+
+- **Both GPUs listed within the poll window**: recovered. Restart the
+  service per step 5 if the grant exists, otherwise tell Jesse it will
+  pick itself up within ~15s.
+- **Still one GPU / both `disconnected` after ~90s**: the cycle alone
+  didn't do it. Don't keep polling past this window (rare failures with
+  no timeout are how a 15s check becomes a resident background loop).
+  Report exactly that back to Jesse, plus what to check next: is the
+  Kasa plug he toggled actually the eGPU's plug (not e.g. a light or
+  the wrong outlet), did he cycle *both* enclosures if both need it,
+  and does the Thunderbolt cable need a physical reseat now that power
+  alone didn't clear it. This is new information each time, not a
+  scripted fallback - say plainly that the power cycle didn't work
+  rather than repeating the same instruction.
+
+Route the item to Codex or a Haiku-floor Claude session while this is
+unresolved (`CLAUDE.md`, Roles).
 
 ## 4. Anything else: read and report, don't guess
 
