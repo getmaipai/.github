@@ -72,8 +72,15 @@ rerun, the commit message compared) before it is stacked.
 
 **The local model** (the household's 27B through an OpenCode server on
 the dev machine, `docs/local-coding-model.md` for what it can and
-cannot do). Exactly one session, never recreated; between briefs the
-coordinator deletes its messages through the server API and posts the
+cannot do). **Health check before routing (2026-09-20):** the
+coordinator confirms the OpenCode server answers before assigning an
+item to it; down or unreachable sends the item to Codex or a Haiku-
+floor Claude session instead of waiting on it. The coordinator also
+tracks each lane's fix-up rate; a lane producing more fix-up rounds
+than clean lands over a week reverts to Claude-floor routing for its
+class of item until re-tried, per `CLAUDE.md`'s Roles section. Exactly
+one session, never recreated; between briefs the coordinator deletes
+its messages through the server API and posts the
 next brief with `prompt_async` (the `session-c-post` helper in the
 repo's scratch folder). **Jesse's window never moves (his rule,
 2026-09-15):** the session belongs to the `home` checkout folder, he
@@ -292,9 +299,13 @@ in addition:
   commit**, named in the tick's status line.
 - **A block ends with an independent review**: a session that neither
   wrote nor accepted the work (a fresh session, or Codex) reads the
-  block's whole diff against its acceptance claims, by source
-  inspection, and its findings are triaged before the next block
-  starts. The coordinator's acceptance is never the last review.
+  block's diff against its acceptance claims, by source inspection,
+  and its findings are triaged before the next block starts. The
+  coordinator's acceptance is never the last review. On a long-running
+  item chained across several blocks, this reviews what changed since
+  the last block-end review, not the whole history again from scratch;
+  a review that finds nothing new in an already-reviewed span is a
+  sign the block was cut too small, not a reason to skip the next one.
 
 A tick in `BACKLOG.md` says which of three things it means, in its
 status line: verified at a named commit; done with an accepted

@@ -16,6 +16,10 @@ Jesse's own message asks for one, matching the description's trigger.
 
 - Working tree clean, on `main`, local `main` pushed or pushable.
 - `scripts/check.sh` passes.
+- **Full-history secrets audit**: `gitleaks git --no-banner --redact .` over
+  the whole repo. The per-commit standards core only scans the working tree
+  (`gitleaks dir`); this is the one point in the cycle that re-checks all of
+  committed history, so it happens here instead of on every commit.
 - **Clean-clone build**: clone the repo into a temp dir, run `check.sh` there,
   and boot/build the app. This catches missing files and gitignore mistakes.
   A release never ships from only the working copy's word.

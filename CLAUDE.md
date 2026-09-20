@@ -138,28 +138,16 @@ or Opus may hold it when Jesse says so.
   low context it writes the handoff note and hands it to Jesse for a
   fresh session. Parallel lanes have one named integrator that merges
   serially, reconciles shared docs, and verifies the combined `main`.
-- **Model floor per item** (the one authoritative table; the skill
-  points here): Haiku only for an S item with one clear change and a
-  mechanical check; Sonnet for any M item, anything with a verification
-  loop (screenshots to open, a bench to run, a guard to prove), or
-  anything that closes an issue; Opus for an item whose blocker was
-  classified as a reasoning failure, that needs a live measurement plus
-  judgment, or that spans subsystems. The agent list's label and a
-  commit's co-author line are hints, not proof; the session's own
-  report of the model named in its system prompt is the check, made
-  before work starts, and "unknown" is an allowed answer that the
-  coordinator resolves with Jesse. A model change is the remedy for a
-  reasoning failure only: context exhaustion gets a handoff, an
-  environmental blocker gets fixed, an unclear requirement gets a
-  decision. When the strongest permitted model stalls, the item is
-  re-scoped (chunked, or given a design note) rather than retried.
-- **Small isolated items go to one of two token-free lanes, never to
-  a Claude session as typing work** (2026-09-15,
-  [docs/DECISIONS.md](docs/DECISIONS.md)): the household's local
-  coding model through its one OpenCode session, or Codex in Jesse's
-  visible window driven over tmux by the coordinator; the `coordinate`
-  skill's section 1b is the procedure for both. Each takes only an S
-  or small M item whose brief names every file, rule, test and
+- **Small isolated items go to one of two token-free lanes first, never
+  straight to a Claude session as typing work** (2026-09-15,
+  [docs/DECISIONS.md](docs/DECISIONS.md), reaffirmed 2026-09-20): the
+  household's local coding model (Qwen3.8-27B) through its one OpenCode
+  session, or Codex in Jesse's visible window driven over tmux by the
+  coordinator; the `coordinate` skill's section 1b is the procedure for
+  both, including the health check before routing to the local model
+  (it costs nothing when up, but nothing routes to it while it is down
+  or the coordinator has not confirmed it is running). Each takes only
+  an S or small M item whose brief names every file, rule, test and
   command, works in its own worktree at the base the coordinator
   picks, commits only and never pushes, and every result is read by
   the coordinator (the diff, the checks rerun) before it is stacked.
@@ -168,7 +156,30 @@ or Opus may hold it when Jesse says so.
   gate means stop and report, never push. (The first local-model try
   of 2026-09-13 was retired for the reasons in DECISIONS.md; the
   2026-09-14 lane fixed them with a fresh worktree per item, a scratch
-  working directory and git denies.)
+  working directory and git denies.) A lane that is producing more
+  fix-up rounds than clean lands over a week reverts to Claude-floor
+  routing for its class of item until re-tried; this is a standing
+  check, not a one-time call (2026-09-13 retired the lane on exactly
+  this measure, 2026-09-15 revived it once the cause was fixed).
+- **Model floor per item** (the one authoritative table; the skill
+  points here) is the floor for whichever session actually does the
+  typing, Claude or not: Haiku is the floor only when both token-free
+  lanes are unavailable (down, or the item needs Claude Code tool
+  access neither lane has) and the item is otherwise an S item with
+  one clear change and a mechanical check; Sonnet for any M item,
+  anything with a verification loop (screenshots to open, a bench to
+  run, a guard to prove), or anything that closes an issue; Opus for
+  an item whose blocker was classified as a reasoning failure, that
+  needs a live measurement plus judgment, or that spans subsystems.
+  The agent list's label and a commit's co-author line are hints, not
+  proof; the session's own report of the model named in its system
+  prompt is the check, made before work starts, and "unknown" is an
+  allowed answer that the coordinator resolves with Jesse. A model
+  change is the remedy for a reasoning failure only: context
+  exhaustion gets a handoff, an environmental blocker gets fixed, an
+  unclear requirement gets a decision. When the strongest permitted
+  model stalls, the item is re-scoped (chunked, or given a design
+  note) rather than retried.
 - **Coder sessions are launched with
   `claude --dangerously-skip-permissions`**, so no one sits clicking
   approve; the worktree, port, and data-directory isolation in the
@@ -467,53 +478,11 @@ These apply to docs, UI copy, comments, commit messages, changelogs, issues.
 - Secrets live outside repos (env files on the target machines, the macOS
   keychain locally). `.env.example` documents shape, never values.
 
-## Credentials and secrets (hard rules)
+## Credentials and secrets
 
-A leaked family credential is the one failure MaiPai cannot recover from with an
-update. Found on the hub on 2026-08-29: a linked account's OAuth refresh token
-sitting in plaintext in `app.db`, and the keystore key readable by every local
-Windows account. Both are fixed; these rules keep them fixed.
-
-- **Never in git, ever.** Anything under a repo's `data/`, every `.env`, key,
-  token, cookie jar, session file, exported credential or DB is ignored by
-  `.gitignore` and stays that way. Before every commit, `git diff --cached`
-  is checked for secrets; a secret that reaches a remote is rotated the same
-  hour, and the commit is rewritten out of history, never "removed in a
-  follow-up".
-- **Encrypted at rest, keyed outside the data.** Any reversible secret the
-  app stores (OAuth tokens, app passwords, API keys, session cookies) is
-  encrypted with the keystore (`lib/secrets`: AES-256-GCM, key in `data/keys`
-  or `SECRETS_KEY`), never plaintext in a table or JSON file. A copied
-  database must be useless without the key. One-way secrets (PINs) are
-  hashed with a pepper, never encrypted.
-- **Least privilege on disk.** Secret stores are readable only by the
-  service account, SYSTEM and administrators (`lib/secretPaths`); the server
-  re-applies that at boot and whenever it writes one. Full-disk encryption
-  on the host is expected, not a substitute.
-- **Never logged, never returned.** No secret value in logs, error messages,
-  notifications, chat context, API responses (status = "present", "expires",
-  never the value), screenshots, or session notes. Prefixes and lengths are
-  fine for debugging; values are not.
-- **Handled only where needed.** Credentials move over encrypted channels
-  (HTTPS, SSH) and live only on the server that uses them; a working copy on
-  a laptop or in a scratch folder is deleted as soon as the task is done, and
-  the deletion is stated. Never pass a secret on a command line or in a
-  process list; use a file with restricted permissions or the environment of
-  a child process.
-- **Scoped and revocable.** Prefer per-purpose tokens (a TV-device OAuth
-  grant, an app password) over a person's real password. Every stored
-  credential has a status, an expiry, and a one-click revoke in the admin
-  UI, and the app notices and reports when it stops working.
-- **Identity is per-person; a shared session may only be a doorkey.**
-  Personalization - history, resume, recommendations, a person's own feed -
-  is never pooled into one account: it stays per MaiPai user, enforced at the
-  query level. A household MAY share ONE playback/fetch session (ideally a
-  dedicated account, not a real person's) purely to get past a per-IP block,
-  because that session carries no identity and shapes no one's suggestions.
-  The test: if the shared thing would change what another person sees or
-  recommends, it is identity and must be per-person; if it only unlocks a
-  fetch, it may be shared. A person may always connect their own, and their
-  playback uses it in preference to the shared one.
+Hard rules on never committing secrets, encryption at rest, least privilege,
+and per-person identity. Load [docs/CREDENTIALS.md](docs/CREDENTIALS.md)
+before touching auth, tokens, OAuth, API keys, or session cookies.
 
 ## Issues
 
@@ -582,204 +551,42 @@ a visual status dashboard reads this file directly, so it has to stay real.
   or repurpose a field or endpoint the clients rely on without a versioned
   path and a migration note in the changelog.
 
-## Privacy architecture (the promise, kept structurally)
+## Privacy architecture
 
-"Nothing leaves your house" is the product. These rules keep it true:
-
-- **Zero phone-home, ever.** No analytics, telemetry, crash reporting, usage
-  pings, or unique identifiers are sent to us or to any third party we
-  choose, in any product, under any setting. Local stats stored in the
-  user's own database are fine and are not telemetry.
-- **No MaiPai-operated service ever sits in a user data path.** No relays,
-  proxies, sync servers, or cloud accounts. Org web properties (docs sites,
-  the org page) are static and carry no trackers.
-- **Outbound connections are user-serving and transparent.** The app talks
-  to the network only to serve the user: update checks, on-demand model and
-  dependency downloads, and integrations the user enabled. An integration
-  that identifies the user (their YouTube account, their location for
-  weather) is opt-in, connects directly from their hub to that service with
-  credentials stored locally, and never transits anything of ours.
-- **Every product keeps a user-tier privacy page** with the "what leaves the
-  house" table: each outbound connection, when it happens, what it carries,
-  and who receives it. Plain dad-test language. Adding or changing an
-  outbound endpoint updates this page in the same commit, no exceptions
-  (this is the docs-with-the-change rule applied to privacy).
+"Nothing leaves your house" is the product, kept structurally: zero
+phone-home, no MaiPai-operated service in a user data path, a user-tier
+privacy page per product. Load [docs/PRIVACY.md](docs/PRIVACY.md) before
+adding or changing an outbound connection.
 
 ## Trademarks and platform references
 
-Standing editorial rules for any mention of third-party platforms (YouTube,
-TikTok, Plex, Spotify, Reddit, and the rest) anywhere: code, docs, UI copy,
-READMEs, release notes, commit messages, issues.
-
-- **Names only, descriptively.** Third-party names may be used to state
-  compatibility ("connects to YouTube"), never in product or feature branding,
-  app names, icons, or logos. No platform logos or brand assets in any repo,
-  ever.
-- **Every product README carries the standard disclaimer block**, kept
-  word-for-word consistent across repos: MaiPai is open-source software for
-  personal, self-hosted, non-commercial use by you and your household; it is
-  not affiliated with, endorsed by, or sponsored by any platform it can
-  connect to; all product names and trademarks belong to their respective
-  owners; you are responsible for complying with the terms and laws that
-  apply to you and the services you access. The release skill checks the
-  block is present and current before cutting a release.
-- **Banned vocabulary in all copy:** "bypass", "free <platform> content",
-  "ad-free <platform>", "without limits", "avoid paying", or any phrasing
-  that pitches a MaiPai feature as a way around another service's rules or
-  pricing. Describe what MaiPai is (a private family hub for your own media
-  and accounts), not what it gets around.
-- **Integrations are described, not branded:** "YouTube integration" as a
-  descriptive phrase is fine; "MaiPaiTube" or platform-styled UI is not.
-- **No borrowed trade dress.** A platform's distinctive visual identity is as
-  off-limits as its logo: signature brand colors used as identifiers
-  (YouTube's red on a play control, Spotify's green on anything audio,
-  Netflix-red accents on a video shelf), containered icon shapes (the rounded
-  red play-button tile), typography lockups, or screen layouts recognizable
-  as a specific app's look. MaiPai surfaces use MaiPai's own palette and
-  iconography everywhere, including for integration tiles: an integration is
-  represented by a generic glyph (a play triangle, a music note) in MaiPai
-  colors plus its written name, never by an imitation of the platform's mark.
-  Colors as plain colors are fine (red exists); what's banned is using a
-  brand's color-plus-shape combination where users would read it as that
-  brand.
-- **How strict: conventions are free, signatures are not.** UI patterns found
-  across three or more competing apps (thumbnail card grids, focus/hover
-  autoplay previews, duration badges, watched-progress bars, category
-  shelves, vertical short-video feeds, "continue watching" rows) are industry
-  conventions: use them freely. An element that lives in one app and evokes
-  it is a signature: skip it. Two tests: the convention test above, and the
-  squint test (if a glance from the couch could mistake the screen for the
-  other app, it's too close; if it just reads "a streaming app", it's fine).
-  The craft rule: copy the function, restyle the form in MaiPai's own
-  palette, shapes, and type.
-- **Section and feature naming in our UIs:** generic descriptive names
-  (Trending, Popular, Subscriptions, Continue watching) are always fine, and
-  so is honestly labeling a source section with the platform's name
-  ("YouTube", with a generic glyph). Prefer plain English over a platform's
-  branded jargon for features: "Short videos", not "Shorts". Platform
-  taxonomy displayed as data (their category names on their content) is data,
-  not branding.
-- **Trademark and copyright symbols:** don't sprinkle them. Third-party names
-  appear unmarked in running text; the README disclaimer block covers
-  attribution once. Our own marks carry no ™ for now, and never ® (that
-  requires an actual registration). Copyright is the "Copyright (c) <years>
-  Jesse Torres" line in each LICENSE; no per-file headers, no © elsewhere.
-- When writing anything that touches these rules and the right wording is
-  unclear, flag it for Jesse instead of improvising.
+Standing editorial rules for any mention of a third-party platform (YouTube,
+TikTok, Plex, Spotify, Reddit, and the rest): names only and descriptively,
+no borrowed trade dress, no filter-bypass framing. Load
+[docs/TRADEMARKS.md](docs/TRADEMARKS.md) before writing copy, UI, or code
+that mentions or styles one.
 
 ## Safety invariants (generation features)
 
-MaiPai gives adults full control of their own local AI. Two things are not
-controls, they are architecture:
-
-- **Child-safety protections on generation and chat are non-removable.** No
-  admin setting, config flag, environment variable, or "advanced mode" may
-  disable or weaken them, including for the household's own admin. Code
-  review treats any change that makes them bypassable as a correctness bug
-  of the highest severity. These protections and their design may be
-  documented publicly; they are a feature, not a liability.
-- **Child profiles are restricted by default.** Unrestricted generation and
-  chat are unlocked per-user by an adult, never inherited, never the default
-  for a new profile. Safe-by-default, adult-opt-in.
-- No feature is built whose purpose is generating imagery of identifiable
-  real people.
-
-Marketing and copy rule (all tiers, all repos): never pitch generation
-features as "uncensored", "unfiltered", "no restrictions", or any
-filter-bypass framing. The honest pitch is the one we mean: your hardware,
-your rules; no cloud company deciding for your family; parents decide what
-kids can access.
-
-Adult freedom comes with three standing pieces:
-
-- **AI-outputs disclaimer** in every product README (joining the standard
-  disclaimer block) and in the product's first-run: outputs come from
-  third-party models the user chooses to download; they can be wrong,
-  offensive, or harmful; they are not medical, legal, or professional
-  advice; the user is responsible for how they use them.
-- **One-time adult acknowledgment to unlock unrestricted mode**: a single
-  clear dialog, per adult, stating that unrestricted mode answers without
-  filters and that what they do with it is their responsibility. One
-  confirmation, no legalese ceremony, never repeated.
-- **Crisis resources: offer, never block.** When self-harm intent appears in
-  a conversation, the app adds crisis resources (988 and local equivalents)
-  alongside the conversation without blocking or censoring what an adult can
-  discuss. This overlay is part of the safety architecture: it is not
-  configurable off.
-
-Neutrality rule: MaiPai ships neutral. No jailbreak presets, no
-harm-optimized prompt packs, nothing that curates toward dangerous uses.
-Users bring their own models and their own intentions.
-
-Licensing note: no acceptable-use restrictions get added to our license
-(added restrictions are incompatible with AGPL-3.0). The README disclaimer
-and the models' own licenses carry use responsibility, which rests with the
-user.
+Child-safety protections on generation and chat are non-removable
+architecture, not a setting; child profiles are restricted by default; adult
+freedom comes with a disclaimer, a one-time acknowledgment, and crisis
+resources offered, never blocking. Load [docs/SAFETY.md](docs/SAFETY.md)
+before touching generation, chat, child profiles, or the adult-unlock flow.
 
 ## Licensing
 
-- **Every repo carries a LICENSE from its first commit: AGPL-3.0.** It fits
-  the MaiPai promise (anyone who runs or hosts a modified version must share
-  their changes) and it applies to private repos too, so nothing scrambles
-  for a license on the day it goes public.
-- **Every repo with third-party components carries a NOTICE file** listing
-  required attributions. The release skill checks NOTICE against dependency
-  changes since the last tag; new components with attribution requirements
-  get added before the release cuts.
-- READMEs state the license in one line at the bottom, linking to LICENSE.
-- Never vendor code whose license is incompatible with AGPL-3.0; when in
-  doubt, flag it to Jesse before adding the dependency.
-- **Copyright stays 100% with Jesse (dual-licensing and sale stay possible):**
-  - Every LICENSE carries the line "Copyright (c) 2026 Jesse Torres" (update
-    the year range at each release that touches it).
-  - **Never merge an outside contribution without a signed copyright
-    assignment.** No exceptions, however small the patch. A drive-by fix
-    without paperwork gets reimplemented from the issue description instead
-    of merged.
-  - Because Jesse is sole copyright holder, he is not bound by the AGPL
-    himself: commercial licenses can be sold separately, and the project can
-    be sold outright (already-published versions remain AGPL forever).
+Every repo carries AGPL-3.0 from its first commit; copyright stays 100% with
+Jesse. Load [docs/LICENSING.md](docs/LICENSING.md) at repo setup, release
+time, or before adding a dependency whose license is in doubt.
 
-## Third-party services: we are the user (hard rules)
+## Third-party services: we are the user
 
-MaiPai is the family's assistant, so toward YouTube, Reddit, TikTok, Vimeo,
-Plex, Google, the weather API and every other service it talks to, **it behaves
-as the user would, only automated**. It never behaves like a scraper. YouTube
-walled the hub's home IP on 2026-08-28 because the server's own background
-fan-out (discovery expansion, suggestion pools, warm-aheads, transcripts) far
-exceeded what a person could ever generate; every family member's player was
-dark for a day. These rules exist so that never repeats, on any service.
-
-- **A person's pace.** Budget every service to what one engaged human does:
-  a page every few seconds, not dozens a second. Every integration gets a
-  rate limiter (token bucket) at its single choke point, and all traffic to
-  that service goes through it - never a raw fetch on the side.
-- **Only what the user asked for, or would see next.** Foreground requests
-  serve the screen in front of someone. Background work (warming, expanding,
-  building pools, enriching) is bounded, staggered, and stops entirely when
-  the service pushes back. No fan-out that multiplies per item (related-of-
-  related, all-pages-now, every-thumbnail-now).
-- **Prefer the front door.** A signed-in official session (the user's linked
-  account, the platform's own feed, its official API with a token) beats
-  anonymous scraping every time: it is what the user's own app would do, it is
-  rate-limited generously, and it does not get the address flagged. Anonymous
-  access is the fallback, never the plan.
-- **Back off on the first signal.** A 429, a captcha, a "confirm you're not a
-  bot", a LOGIN_REQUIRED where none is expected: stop that class of traffic
-  immediately (quiet mode), keep only user-initiated requests, probe on a
-  schedule, and resume only when the service is answering normally. Never
-  retry through a block.
-- **Look like the user's client, honestly.** Real user agents, the client's
-  own headers, one identity per household session. No header spoofing tricks
-  beyond what the platform's own app sends, no rotating identities, no
-  proxies-as-evasion. If a service says no, the answer is to ask less, sign
-  in properly, or drop the feature - not to sneak around it.
-- **Cache like a client.** Once fetched, keep it (TTL by how fast it changes).
-  A refresh is a user action or a slow schedule, never "on every render".
-- **Prove it before shipping.** Any feature that adds traffic to a service
-  states its request budget in the PR/commit message and is checked against
-  the limiter; any block seen in prod is written up (cause, budget, fix) in
-  the repo's dev docs so the lesson stays.
+Toward YouTube, Reddit, TikTok, Plex, and every other service MaiPai talks
+to, it behaves as the user would, only automated: a person's pace, the
+front door over scraping, back off on the first signal. Load
+[docs/THIRD-PARTY-SERVICES.md](docs/THIRD-PARTY-SERVICES.md) before writing
+or changing code that fetches from an external service.
 
 ## Third-party code and assets (download, don't vendor)
 
@@ -807,76 +614,20 @@ arrive by bumping a version instead of hand-merging vendored copies.
 
 ## Rules, word lists and learned components (2026-09-16)
 
-From the chat architecture review (`home/docs/plans/
-chat-architecture-review-2026-09-16.md`): decisions live in code and
-the model writes, and that is right; the failure mode is a word list
-that grows forever and a rule nobody can prove ever fires.
-
-- **No rule without a counter and a row.** A deterministic rule that
-  reads the household's words (a regex family, a cue list, a shape) is
-  added with a hit counter on the turn's log line and a corpus row that
-  fires it. A rule with zero hits over the weekly report is retired in
-  that week's docs commit, not kept in case.
-- **Three phrasings in a week is a classifier, not a fourth regex.**
-  When a fix adds a third phrasing to the same open-class list
-  (emotion, stance, hedges, the lookup field classes) within a week,
-  the item is filed as a classifier candidate with the phrasings as
-  its first labels; the fourth regex is refused.
-- **Labels for a classifier come from people or a frontier model,
-  never from a small local model.** A frontier-labeled set reports its
-  disagreement rate against a human-labeled sample; a set labeled by
-  the household's own small model is not training data (the ACT-02
-  lesson: 4B-labeled acts scored near chance).
-- **A learned component never sits in the safety path, the consent
-  path or the privacy path.** Those stay deterministic and identical in
-  every house; a learned check may run beside them in shadow mode and
-  is adopted only when its measured false-positive rate beats the
-  rule's.
-- **A model judge is a trend line, never a gate.** The persona judge
-  and any LLM-as-judge score a bench or a nightly review; none decides
-  a live turn.
-- **Tone is set by the plan line, the companion's own example lines
-  and a measured steering vector per dial, not by prose.** A paragraph
-  of personality instructions is the weakest lever on a small model
-  (the prebuilt-over-hand-built rule, applied to voice).
+A deterministic rule needs a counter and a row, or it's retired; three
+phrasings in a week is a classifier candidate, not a fourth regex; a
+learned component never sits in the safety, consent, or privacy path. Load
+[docs/RULES-AND-LEARNED-COMPONENTS.md](docs/RULES-AND-LEARNED-COMPONENTS.md)
+before adding or editing a rule, word list, or classifier in a chat or turn
+pipeline.
 
 ## Training models (wake words, and anything like them)
 
-Learned the hard way on 2026-08-31, when a shipped "Hey MaiPai" detector scored
-0.955 on its own phrase and 0.979 on "hey my bike". These apply to any model we
-train, not just wake words.
-
-- **Verify the training data landed; never assume it.** Optional data packs are
-  downloaded best-effort so an unattended install cannot hard-fail, which means
-  a silent failure produces a quietly worse model and nothing says so. Every
-  detector on the hub had been trained with the room-impulse pack, the
-  real-noise pack and the 180 MB real-negative bank all absent. A training
-  entry point checks each component is present and refuses to run without them.
-- **Validate on real speech through the real microphone, before shipping.** The
-  broken model scored 0.98 on synthesised speech, which is how it passed. Its
-  own manifest recorded 0.977 accuracy, measured on synthetic validation data.
-  A number produced by the same generator that made the training set is not
-  evidence the thing works.
-- **Train against near misses, not just unrelated phrases.** The negatives had
-  volume of "hey <noun>" and not one possessive, so nothing taught the detector
-  that the syllable after "hey" being "my" was not enough. Negatives have to
-  include the confusions people actually produce, in the shapes they actually
-  say them.
-- **Harvest the real failures and train on those.** Audio from the household
-  that falsely triggered a detector is the highest-value negative data there
-  is: the right voice, the right room, the right microphone. Keep a path for
-  it, and use it on the next retrain.
-- **Never let unverified audio become training data.** Transcribe or otherwise
-  confirm every clip before it is used. A clip assumed to be a near miss but
-  actually containing the wake phrase teaches the model to reject its own name,
-  which is worse than the bug being fixed. When a clip cannot be confirmed,
-  drop it: certainty beats marginal data.
-- **Household audio never enters a repo.** Recordings live under a gitignored
-  data directory on the machine that needs them, and are copied, never
-  committed. This is the family-data rule, applied to training sets.
-- **When a model is retrained, retrain everything trained the same way.** A
-  data-level fault is never confined to the one model whose symptom was
-  noticed.
+Verify training data actually landed, validate on real speech through a
+real microphone, train against near misses, never let unverified audio
+become training data. Load
+[docs/TRAINING-MODELS.md](docs/TRAINING-MODELS.md) before training or
+retraining any model.
 
 ## READMEs
 

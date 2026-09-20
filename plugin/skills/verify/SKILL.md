@@ -10,13 +10,16 @@ gates below pass.
 
 ## Gate 1: checks
 
-Run `scripts/check.sh` at the repo root (lint, format, tests, gitleaks, PII
-wordlist). It must exit clean. If the repo predates `check.sh`, run the
-closest equivalents by hand and flag that the script is missing.
+Run `scripts/check.sh` at the repo root; it must exit clean (see
+`CLAUDE.md`'s Verification section for what it covers and the doc-only
+exception). If the repo predates `check.sh`, run the closest equivalents
+by hand and flag that the script is missing.
 
 ## Gate 2: exercised for real
 
-Static success is not verification. Pick what applies:
+Static success is not verification (`CLAUDE.md`: "exercised for real",
+"never hand Jesse something to check that you have not checked yourself").
+Pick what applies here:
 
 - **Web/backend (home)**: drive the real app against an isolated instance
   (never the owner's live `data/`). The repo carries the launch recipe (see
@@ -32,13 +35,6 @@ Static success is not verification. Pick what applies:
   screenshot rules, or a live browser/simulator pass), not just a green
   build. A UI change is not exercised until someone (you) has seen the
   pixels.
-
-**Never ask Jesse to do Gate 2 for you.** "Can you check if this looks
-right" or "can you try this" before you have tried it yourself is not a
-verification report, it is skipping the gate and handing it to him. Run
-it, look at it, then report what you saw. If a specific piece truly needs
-his hardware, device, or judgment, say precisely which piece and why the
-rest is already verified.
 
 ## Gate 3: what the diff removes, not just what it claims
 
