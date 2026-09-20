@@ -8,6 +8,7 @@ justification in that repo's dev docs.
 | Layer | Standard |
 |---|---|
 | Runtime | Bun |
+| Shared helpers | `@maipai/core` from `getmaipai/shared` (log, paths, secrets and keystore, throttles, the hardware probe), and `@maipai/spec` for every record and wire shape; pinned by tag, never copied |
 | HTTP framework | Hono, routes defined with Zod schemas via `@hono/zod-openapi` |
 | Validation | Zod (the same schemas that generate the OpenAPI spec) |
 | Database | SQLite via Drizzle ORM |
@@ -18,21 +19,18 @@ justification in that repo's dev docs.
 | Layer | Standard |
 |---|---|
 | Framework | React + Vite (TypeScript) |
-| Styling/components | The shared component catalog in `home`'s agents.md; build from it before building new |
+| Styling/components | `@maipai/ui` from `getmaipai/shared` (the kit: tokens, primitives, blocks, the shell, the settings renderer, its ESLint config), pinned by tag; build from it before building new |
 
 ## Desktop (MaiPai Desktop)
 
 Electron + electron-builder, unsigned phase-1 builds (ad-hoc signed on arm64).
 
-## Status app (MaiPai Stack's tray or menu-bar item)
+## Status app: none
 
-Tauri 2 (Rust shell, the web UI in its window, tray, native
-notifications, updater and sidecar plugins). A written deviation from
-Electron, decided 2026-09-17: the status app has no UI of its own and
-sits in the menu bar all day beside large models, where Electron's
-size and memory are the wrong trade; justification in
-`stack/docs/dev.md`, "The shipping shape". Services of every product
-follow [docs/SERVICES.md](docs/SERVICES.md).
+MaiPai Stack has no tray or menu-bar item and no interface of any kind (refocused 2026-09-20, `docs/DECISIONS.md`);
+the engines' state, updates and repairs appear on Home's own Engines
+page. Home's native notifications go through the notification
+system in `docs/NOTIFICATIONS.md`.
 
 ## TV / Phone (MaiPai Go)
 
