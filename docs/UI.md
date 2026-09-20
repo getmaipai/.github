@@ -47,9 +47,10 @@ tokens, the layout primitives, the settings and permission-prompt
 renderers, the pattern components, re-exports. It never reimplements a
 widget the library ships. Icons are lucide, by name, at three token sizes;
 no other set, no emoji as icons, no pasted SVG outside a companion avatar.
-The kit ships the ESLint config every repo and catalog CI run: no other
-component libraries, no raw colors, no inline layout outside the
-primitives, icons only from lucide by name. `@maipai/ui` and the shell
+The kit ships the ESLint config every repo and catalog CI run (`ui/eslint.config.js` in
+`getmaipai/shared`, imported by a consumer as
+`@maipai/ui/eslint.config.js`; `core/eslint.config.js` covers the backend helpers the same way): no other component libraries, no raw
+colors, no inline layout outside the primitives, icons only from lucide by name. `@maipai/ui` and the shell
 contract move together on `ui-v` tags; an app declares the kit version it
 built against.
 
