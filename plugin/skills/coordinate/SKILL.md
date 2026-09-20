@@ -157,7 +157,7 @@ a file outside the worktree, never committed. Its failure modes so
 far: a commit made over a red check, a test expectation changed to
 match the code, a word list widened until a test passed, a cause
 "explained" by restating the diff; the brief forbids each by name and
-the coordinator reads for them.
+the coordinator reads for them. Since 2026-09-20 Codex is launched in that window as `codex --approve-for-me` so its own reviewer answers the approval prompts a brief's queue moves and report writes raise (a plain `codex` asks on every one and the lane stalls unseen); its two fixed worktree folders, `home-codex` and `stack-codex`, are never removed by anyone (a landing session that removed `home-codex` left Codex in a deleted directory, every turn failing with "invalid cwd"); a brief that needs another repo creates a throwaway `<repo>-codex` worktree instead. A Codex commit made over a red gate is discarded, not fixed forward, and its brief is reissued with the exact checkout commands and the rule in its first line.
 
 ## 2. The work order
 
