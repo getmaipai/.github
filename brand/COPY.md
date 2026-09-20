@@ -11,6 +11,9 @@ are not repeated across products.
 **Org (getmaipai):**
 Your own AI at home, a robot companion, and apps to reach them anywhere, all on your own hardware, never the cloud.
 
+**stack, repo description (one sentence, at most 120 characters, the GitHub field):**
+The headless engine layer under MaiPai Home: local AI engines and models, installed, sized, run, watched and updated.
+
 **stack (MaiPai Stack):**
 MaiPai Stack is the engine foundation of MaiPai Home: the headless service that installs, sizes, runs, watches, updates and tests the engines and models behind Home, and gives Home one stable address by role. It has no interface and no users of its own; Home is its only caller.
 

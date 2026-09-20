@@ -223,9 +223,17 @@ event and the item id:
   unknown, is resolved with Jesse before "start".
 - **done**: the completion report: revision hash; each command run
   with its exit result (`check.sh`, the named tests, the review skill
-  and its findings' disposition); where the evidence is (dev.md
-  section, screenshot paths opened, bench table); what is left for
-  whom.
+  with its level, pass count and findings' disposition); where the
+  evidence is (dev.md section, screenshot paths opened, bench table);
+  what is left for whom; and the session's own context used, as a
+  rough percentage. **Context is budgeted like tokens (2026-09-20):**
+  a session past 60 percent is handed off at its next stop point (the
+  coordinator writes the handoff note, Jesse opens a fresh session with
+  it) rather than run to exhaustion, because every later turn re-reads
+  the whole window for nothing; the two token-free lanes are cleared
+  between briefs by the autofeed (Session C's messages deleted, Codex's
+  `/clear`), and a Claude session cannot clear itself, so the handoff
+  is the mechanism.
 - **blocked**: the exact failing assertion or error pasted, what was
   tried, and the session's own guess at the class (below).
 - **question**: the decision needed and the options seen.

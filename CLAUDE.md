@@ -37,7 +37,12 @@ home. Every technical and product decision honors that.
 
 Product descriptions come verbatim from [brand/COPY.md](brand/COPY.md), the
 single source for pitch copy (repo description fields, org profile, READMEs,
-docs). Logos come from [brand/](brand/), never redrawn.
+docs). Logos come from [brand/](brand/), never redrawn. **A GitHub repo
+description is succinct (2026-09-20):** one sentence, at most 120
+characters, in COPY.md under the product as its "repo description"; the
+longer one-liner is for READMEs, the profile and docs, never the
+description field (GitHub truncates it in lists and search, and a
+description that reads as a paragraph reads as marketing).
 
 ## Platform principles
 
@@ -247,6 +252,23 @@ or Opus may hold it when Jesse says so.
   (`plugin/hooks/README.md`), the same shape as the blind-staging gate,
   because a session remembering to review its own work does not survive a
   fresh session picking the task back up.
+  **Reviews are budgeted (2026-09-20).** One review invocation fans out
+  several subagents at roughly 100k tokens each, and on 2026-09-20 one
+  session ran three full passes per item, close to two million tokens
+  of review for a single S item, with four of five subagents stuck
+  searching for a tool. So: the level matches the item (`low` for an S
+  item or a docs-and-config change, `medium` for an M item or anything
+  that changes a route, a guard, or a wire shape, `high` only when the
+  coordinator names it); one pass per commit; after fixing findings the
+  re-review covers the fix hunks only (`git diff` of those files
+  against the reviewed state), never the whole diff again, and a third
+  pass never happens (a second pass that still finds real defects is a
+  finding about the item, reported to the coordinator, not a reason to
+  loop); a review whose subagents are "searching for" a tool or a file
+  for more than a minute is stopped and rerun once with the target
+  path, never left to run out its budget. The done report states the
+  level, the pass count and each finding's disposition, so the
+  coordinator can see the budget was kept.
 - **Push at natural boundaries** (a verified item merged to `main`, the end
   of a work session, or when Jesse says ship), never reflexively after
   every commit. A push needs no approval; a push that fails is reported
