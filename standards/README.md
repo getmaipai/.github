@@ -118,3 +118,5 @@ tracked `.md` file must fail it). The v0.2 schemas have their own suite:
 `bun test` and `uv run pytest tests/py -q`, round-tripping every fixture
 in `fixtures/` through both generated model sets, the same proof
 `home/spec/` uses for its own schemas.
+
+Every `uv run` in the gate is `--frozen`: the gate reads the lock, never rewrites it.

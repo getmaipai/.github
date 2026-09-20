@@ -18,10 +18,10 @@ if [ -d standards/schemas ]; then
   (cd standards && bun install --silent && bun test)
 
   echo "== standards: ruff"
-  (cd standards && uv run ruff check . && uv run ruff format --check .)
+  (cd standards && uv run --frozen ruff check . && uv run --frozen ruff format --check .)
 
   echo "== standards: pytest"
-  (cd standards && uv run pytest tests/py -q)
+  (cd standards && uv run --frozen pytest tests/py -q)
 fi
 
 # Leaves ../.github-tags/std-v0.1.0 in place on purpose for reuse.

@@ -6,7 +6,7 @@ set -euo pipefail
 cd "$(dirname "$0")/.."
 
 rm -rf gen/py
-uv run datamodel-codegen \
+uv run --frozen datamodel-codegen \
   --input schemas \
   --input-file-type jsonschema \
   --output gen/py \
