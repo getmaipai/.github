@@ -68,12 +68,16 @@ standard in [`CLAUDE.md`](../CLAUDE.md).
 - **The one PR carve-out.** `catalog` is the only repo in the org that
   accepts pull requests (see [`CLAUDE.md`](../CLAUDE.md) > Git workflow).
   Maintainers still land their own work directly on `main`.
-- **CI on every PR**: manifest lint, a permission diff rendered as a
-  comment, a banned-API scan, recipe conformance on both interpreters,
-  `deno test` against the host emulators, speech and prose lints, the PII
-  wordlist, a licence check, a vendoring scan, screenshot generation with
-  vision review of store images, and the scorecard. Merge needs a
-  maintainer review plus a green CLA check.
+- **CI on every PR** (`catalog/.github/workflows/check.yml`): the same
+  `scripts/check.sh` a contributor runs locally (manifest and recipe
+  lint, the scorecard, the vendoring scan, the licence check and the
+  banned-API scan over every package, then the standards core: gitleaks,
+  the PII wordlist, the prose lint), the permission diff posted as a
+  comment on the pull request, and the CLA check against
+  `signers.json`. Still to come: recipe conformance on both
+  interpreters, `deno test` against the host emulators, the speech
+  lint, and screenshot generation with vision review of store images.
+  Merge needs a maintainer review plus the green CLA check.
 - **Release and signing**: a tag per package version. The maintainer's
   machine rebuilds from the reviewed commit, packs it, computes the
   sha256, signs it with the offline Ed25519 key, and publishes. The index
