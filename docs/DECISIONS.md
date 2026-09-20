@@ -95,6 +95,28 @@ audience) fall with the audience; the cadence argument and the
 robot's need for the same layer are met by a private daemon inside
 Home's release.
 
+## 2026-09-20: reviews, repo descriptions and session context are budgeted
+
+Three rules from the owner in one afternoon, each after a measured
+waste. A code review invocation fans out several subagents at roughly
+100k tokens each; one session ran eight full passes on a single item,
+several with subagents stuck searching for a tool, so reviews now run
+at the level the item needs (low for an S item, medium for M or a
+route, guard or wire change), one pass per commit, a re-review of the
+fix hunks only, never a third pass, and a review stuck searching is
+stopped and rerun once with its target. The GitHub description field
+had been carrying the README's full one-liner, which GitHub truncates
+in lists, so a repo description is now one sentence under 120
+characters kept in `brand/COPY.md` beside the longer pitch. And a
+Claude session's context is budgeted like tokens: every done report
+states the percentage used, and a session past 60 percent is handed
+off at its next stop point instead of run to exhaustion, because
+every later turn re-reads the whole window; the two token-free lanes
+are cleared between briefs by the autofeed, and a Claude session
+cannot clear itself, so the handoff is the mechanism. The rules live
+in `CLAUDE.md` (Git workflow, the products) and the `coordinate`
+skill; this entry is the why.
+
 ## 2026-09-17 (evening): the shipping shape, no Docker, the tray on Tauri, the services standard
 
 **Decision.** Every MaiPai daemon ships as three pieces: one compiled
