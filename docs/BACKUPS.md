@@ -10,6 +10,8 @@ cold pauses the package, exclude for rebuildable caches). Media libraries
 declare themselves `library` (referenced, not copied by default). The
 Storage page shows what a backup will contain and its size.
 
+MaiPai Stack declares its precious state and takes no backup itself: `stack.db` (the settings' values, every model record with its provenance and measured footprint, the open health items) and `data/keys/`; the engine builds and model files are rebuildable from their pins and are declared rebuildable, so a backup never carries gigabytes of weights. Home reads that declaration (`/stack/v1/backup`), includes the two paths in the household backup it takes and encrypts, and on restore puts them back before the Stack starts, after which the Stack reinstalls what the pins name.
+
 ## Targets
 
 Through a backup-agent port: `local` (a second disk or folder), `hub`
