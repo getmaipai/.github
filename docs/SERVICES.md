@@ -45,6 +45,8 @@ The daemon exits 0 on a deliberate stop and non-zero on failure, so
 readiness and `WATCHDOG=1` datagrams to `$NOTIFY_SOCKET` itself; no
 libsystemd.
 
+MaiPai Stack is the first daemon built to this section and shows the shape on both systems (`stack/docs/dev.md`): on macOS a launchd agent installed, started, stopped, inspected and removed by the daemon's own subcommands, restarted on failure, logging under its data directory; on Linux a `systemd --user` unit of `Type=notify` with `Restart=on-failure`, a five second restart delay, a thirty second watchdog, five starts per five minutes, enabled for the default target, the daemon answering the manager itself (READY when its server is up, the watchdog beat at half the interval, STOPPING on stop) over the notify socket with no libsystemd, and the manager chosen by platform at start. Home's installer installs the Stack; a person never installs it by itself.
+
 ## The watchdog layers
 
 Three, none of them a second daemon: the service manager restarts on
