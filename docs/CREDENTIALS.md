@@ -1,6 +1,6 @@
 # Credentials and secrets (hard rules)
 
-Pinned from `CLAUDE.md`'s "Topic docs" index. Load this whenever a session
+Referenced from `CLAUDE.md`'s "Credentials and secrets" section. Load this whenever a session
 touches auth, tokens, OAuth, API keys, session cookies, or anything else
 that stores or handles a credential.
 

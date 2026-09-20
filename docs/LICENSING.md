@@ -1,6 +1,6 @@
 # Licensing
 
-Pinned from `CLAUDE.md`'s "Topic docs" index. Load this at repo setup,
+Referenced from `CLAUDE.md`'s "Licensing" section. Load this at repo setup,
 release time, or when adding a dependency and its license is in doubt.
 
 - **Every repo carries a LICENSE from its first commit: AGPL-3.0.** It fits

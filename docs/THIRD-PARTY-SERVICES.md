@@ -1,6 +1,7 @@
 # Third-party services: we are the user (hard rules)
 
-Pinned from `CLAUDE.md`'s "Topic docs" index. Load this whenever a session
+Referenced from `CLAUDE.md`'s "Third-party services: we are the user"
+section. Load this whenever a session
 writes or changes code that fetches from an external service (YouTube,
 Reddit, TikTok, Vimeo, Plex, Google, a weather API, or the like).
 

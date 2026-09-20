@@ -1,6 +1,7 @@
 # Trademarks and platform references
 
-Pinned from `CLAUDE.md`'s "Topic docs" index. Load this whenever a session
+Referenced from `CLAUDE.md`'s "Trademarks and platform references" section.
+Load this whenever a session
 writes copy, UI, or code that mentions a third-party platform (YouTube,
 TikTok, Plex, Spotify, Reddit, and the rest) or styles an integration tile.
 

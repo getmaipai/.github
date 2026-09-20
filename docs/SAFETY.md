@@ -1,6 +1,7 @@
 # Safety invariants (generation features)
 
-Pinned from `CLAUDE.md`'s "Topic docs" index. Load this whenever a session
+Referenced from `CLAUDE.md`'s "Safety invariants (generation features)"
+section. Load this whenever a session
 touches generation, chat, child profiles, or anything gated by an adult
 acknowledgment.
 

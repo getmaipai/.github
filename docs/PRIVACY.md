@@ -1,6 +1,6 @@
 # Privacy architecture (the promise, kept structurally)
 
-Pinned from `CLAUDE.md`'s "Topic docs" index. Load this whenever a session
+Referenced from `CLAUDE.md`'s "Privacy architecture" section. Load this whenever a session
 adds or changes an outbound network connection (an integration, an update
 check, a model download).
 

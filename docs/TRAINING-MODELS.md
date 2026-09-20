@@ -1,6 +1,7 @@
 # Training models (wake words, and anything like them)
 
-Pinned from `CLAUDE.md`'s "Topic docs" index. Load this whenever a session
+Referenced from `CLAUDE.md`'s "Training models (wake words, and anything
+like them)" section. Load this whenever a session
 trains or retrains a model (wake words, detectors, or anything similar).
 
 Learned the hard way on 2026-08-31, when a shipped "Hey MaiPai" detector scored

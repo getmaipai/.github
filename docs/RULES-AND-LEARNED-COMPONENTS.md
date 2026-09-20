@@ -1,6 +1,7 @@
 # Rules, word lists and learned components (2026-09-16)
 
-Pinned from `CLAUDE.md`'s "Topic docs" index. Load this whenever a session
+Referenced from `CLAUDE.md`'s "Rules, word lists and learned components
+(2026-09-16)" section. Load this whenever a session
 adds or edits a deterministic rule (a regex family, a cue list, a word list)
 in a chat or turn pipeline, or is deciding whether something needs a
 classifier instead.
