@@ -48,13 +48,19 @@ One GPU listed instead of two, and `boltctl` showing the Core X Chroma
 enclosure(s) as `status: disconnected`, is the eGPU physically dropped
 off the Thunderbolt link. **This is not remotely fixable.** systemd is
 already auto-restarting every ~15s and will pick the service back up on
-its own the moment the cable reconnects; do not stop that loop, do not
+its own the moment the link comes back; do not stop that loop, do not
 attempt a PCI or Thunderbolt rescan (a "disconnected" bolt status means
 the physical link is down, not just unauthorized, and a rescan will not
-bring it back). Report the exact `boltctl` output and that it needs
-Jesse to physically check the Thunderbolt cables on the enclosure(s),
-then stop. Route the item to Codex or a Haiku-floor Claude session
-instead (`CLAUDE.md`, Roles).
+bring it back).
+
+**The action to report is a power cycle, not "check the cables."**
+Jesse controls the eGPU enclosure's power through a Kasa smart plug and
+has said this is the fix he wants named directly: tell him to power-cycle
+the eGPU enclosure(s) via Kasa (off, a few seconds, back on), not a vaguer
+"check the Thunderbolt connection." State it as the one sentence he needs
+to act on with zero context ("the eGPU dropped off Thunderbolt again -
+power-cycle it via Kasa"), then stop. Route the item to Codex or a
+Haiku-floor Claude session instead (`CLAUDE.md`, Roles).
 
 ## 4. Anything else: read and report, don't guess
 
