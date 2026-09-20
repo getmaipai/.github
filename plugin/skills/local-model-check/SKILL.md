@@ -79,16 +79,26 @@ script above. Full detail, exact grub/udev fixes, and the two-Fingerbot-
 vs-one-cable distinction live in the homelab repo; don't duplicate them
 here, read that doc when a session actually needs them.
 
-**Both of those need root and this session does not have it.** Checked
-by hand, not assumed: `sudo -n` on `laptop-linux` fails with "a
-password is required", and a bare `sudo systemctl reboot` /
-`sudo bash egpu-wake.sh` fail with "interactive authentication
-required." Until Jesse adds a narrow NOPASSWD grant for these two
-specific commands to the `maipai-admin` account (never broad sudo),
-report the diagnosis and ask him to run whichever of A or B applies,
-or provide the sudo password interactively in his own session. Never
-guess at working around the missing grant (no privilege escalation, no
-alternate account probing).
+**Both of those need root.** Check first whether the scoped grant
+exists before assuming it doesn't:
+
+```
+ssh laptop-linux 'sudo -n systemctl restart maipai-chat.service --help >/dev/null 2>&1 && echo GRANT_OK || echo NO_GRANT'
+```
+
+If `NO_GRANT`: `laptop/linux/grant-egpu-sudo.sh` in the homelab repo
+installs a NOPASSWD rule scoped to exactly the four commands this
+skill needs (`systemctl restart maipai-chat.service`,
+`systemctl reboot`, `poweroff`,
+`bash /home/maipai-admin/egpu-wake.sh`) - never broader sudo. It's
+already copied to `~/grant-egpu-sudo.sh` on the laptop; ask Jesse to
+run `sudo bash grant-egpu-sudo.sh` there once, with his own password
+(2026-09-20: as of this writing that one-time step hasn't been run
+yet, so `sudo -n` still fails - confirm live, don't assume it's done).
+Once it's installed, run A or B directly over the same `laptop-linux`
+SSH connection instead of asking Jesse to type either command. Never
+guess at working around a missing grant (no privilege escalation, no
+alternate account probing, no asking for his password in chat).
 
 **Jesse's smart plug is the one he controls** (he's said this
 directly: he does the physical/remote toggle, this skill's job is to
