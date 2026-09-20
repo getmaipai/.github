@@ -117,6 +117,25 @@ cannot clear itself, so the handoff is the mechanism. The rules live
 in `CLAUDE.md` (Git workflow, the products) and the `coordinate`
 skill; this entry is the why.
 
+## 2026-09-20: the music role's candidate is ACE-Step 1.5; Jev is a no until it ships weights
+
+The owner asked whether two projects should be used. Jev (TypeSafe
+AI's "System One" model, released 2026-09-18) makes fast, calibrated,
+typed decisions rather than text, which is exactly the classifier the
+org's rules want in place of a fourth regex or a small-model judge;
+but it is served only from TypeSafe's metered API with no published
+weights, and a hosted-only model cannot sit anywhere in a product
+whose promise is that nothing leaves the house. Verdict: no, revisited
+only if weights ship or an open reproduction publishes a calibration
+study against human labels. For the Stack's `music` role, YuE2 is the
+more capable model on paper but is a Linux and NVIDIA product with
+CC BY-NC weights and no Apple silicon path outside low-provenance
+forks; ACE-Step 1.5 (MIT code and weights, an official MLX backend, a
+REST server, an ungated download, full songs with vocals) fits every
+Stack constraint and is the candidate, pinned only after a measured
+run on the Studio (stack STACK-99). The research with its citations
+is `stack/docs/plans/jev-and-yue-2026-09-20.md`.
+
 ## 2026-09-17 (evening): the shipping shape, no Docker, the tray on Tauri, the services standard
 
 **Decision.** Every MaiPai daemon ships as three pieces: one compiled
