@@ -38,7 +38,10 @@ store card says "web only"; iPhone shows it in a web view; Apple TV shows a
 
 `@maipai/ui` lives in `getmaipai/shared` as the `ui` workspace (decided
 2026-09-20; the kit and shell moved there from the Stack's reconciled
-copy, and Home imports it like every other product). It is a thin layer
+copy, and Home imports it like every other product). The kit's approved
+design specification is `shared/ui/docs/spec.md` (the 2026-09-19
+reconciliation, moved from `stack/docs/plans/ui-spec-2026-09-19/` with
+`ui-v0.1.0`). It is a thin layer
 over shadcn/ui on Radix and Tailwind v4: the
 tokens, the layout primitives, the settings and permission-prompt
 renderers, the pattern components, re-exports. It never reimplements a
