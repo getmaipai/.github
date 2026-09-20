@@ -460,3 +460,22 @@ bounded recovery check after a missed acknowledgment is allowed;
 progress polling is not.
 
 **Commits.** `getmaipai/.github` 36617a5, 7eb174a, b364172, 3906f14.
+
+## 2026-09-20: Home follows the kit's design specification exactly, page by page
+
+After the kit adoption the owner opened Home beside the approved
+reference (`shared/ui/docs/reference/overview-dashboard.png`) and
+found the shell bones and tokens present but the pages still
+composed as before: no icon tiles, no panel headers, no page title
+and subtitle in the header, no footer bar, an uppercase eyebrow and
+an oversized greeting. His ruling: Home follows the specification's
+look and feel exactly (colors, shading, icon tiles, sizing, layout,
+weights, cards, the header, the footer, the pane headers), while its
+own navigation, routes, records and actions fill those patterns; the
+reference's menu items and pane contents were the Stack console's
+and are not copied. The mapping of every Home route onto the
+patterns, with a non-negotiable style block, is the "Home's pages
+under the kit" section (`home/docs/design/home-pages-2026-09-20.md`,
+appended to the kit spec); each page is one item, judged by a capture
+placed beside the reference, and a page that reads as the old Home
+page with new colors fails.
