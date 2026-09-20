@@ -65,9 +65,7 @@ second copy of its rules here.
 
 ## What v0.3 added
 
-- The prose lint now skips inline code spans, HTML comments, and Markdown
-  image syntax when checking exclamation points, eliminating three kinds of
-  false positives for consumers.
+- The prose lint no longer flags exclamation points inside inline code spans, HTML comments or Markdown image syntax.
 - The prose lint's line scanner was rewritten in awk, reducing runtime from
   60 seconds to under 0.1 seconds for consumers.
 - Gitleaks is scoped to the working tree for each commit, so consumers get
