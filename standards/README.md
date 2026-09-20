@@ -85,6 +85,10 @@ steps first, then calls the core:
 ```bash
 STANDARDS_REPO="${MAIPAI_STANDARDS_DIR:-../.github}"
 STD_TAG="std-v0.3.0"
+if [ ! -x "$STANDARDS_REPO/standards/bin/ensure-tag.sh" ]; then
+  echo "getmaipai/.github is missing at $STANDARDS_REPO or older than std-v0.3.0 (set MAIPAI_STANDARDS_DIR to a checkout that has standards/bin/ensure-tag.sh)"
+  exit 1
+fi
 STANDARDS_DIR="$(bash "$STANDARDS_REPO/standards/bin/ensure-tag.sh" "$STD_TAG")"
 if [ "$(cat "$STANDARDS_DIR/standards/VERSION")" != "${STD_TAG#std-v}" ]; then
   echo "@maipai/standards at $STANDARDS_DIR is $(cat "$STANDARDS_DIR/standards/VERSION"), but the tag is $STD_TAG"
@@ -92,6 +96,8 @@ if [ "$(cat "$STANDARDS_DIR/standards/VERSION")" != "${STD_TAG#std-v}" ]; then
 fi
 bash "$STANDARDS_DIR/standards/bin/check-core.sh" "$(pwd)"
 ```
+
+The guard is what a contributor sees on a machine without the checkout; without it the call fails as a bare shell error.
 
 The pin is the git tag. `MAIPAI_STANDARDS_DIR` names where the `.github` repo is (the sibling checkout by default); `ensure-tag.sh` resolves the tag to a read-only worktree under `../.github-tags/`, so a gate never runs whatever the working checkout happens to have, and the `VERSION` compare catches a tag cut against the wrong commit. Bumping a pin is one edit, the tag string.
 
