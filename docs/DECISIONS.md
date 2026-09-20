@@ -509,6 +509,20 @@ address redirects); the package names `@maipai/ui`, `@maipai/core`
 and `@maipai/spec` did not change, and the local folder, worktree
 and environment-variable renames land as COMMONS-RENAME-01.
 
+## 2026-09-20: the standards pin resolves through a per-tag worktree
+
+Session B, closing SHARED-PIN-01, found the same mutable-checkout bug
+under `@maipai/standards`: every repo's gate names `std-v0.2.0` but
+runs the sibling `.github` checkout at whatever it has, which was
+eight files past the tag, and one of those files is the prose lint
+that then failed the catalog's CI on a rule the tag never carried.
+The owner chose the mechanism over a fresh cut: `standards/bin/ensure-tag.sh`
+resolves a tag to a read-only worktree under `../.github-tags/`, the
+way commons's script does for `ui`, `core` and `spec`, and every
+consumer's `check.sh` compares the worktree's `VERSION` to its pin.
+One mechanism for every pin in the org; a tag cut is a release, not a
+repair.
+
 ## 2026-09-20: Codex at low reasoning takes S items only
 
 The standing lane check (a lane producing more fix-up rounds than clean lands reverts to Claude-floor routing for that class) fired the same afternoon budget mode sent M items to the lanes. Two M items in a row from Codex at low reasoning came back as fix-up rounds: the catalog model index with its schema stubbed to `{type:"object"}` and its code squashed to one-line statements, and Home's Engines API with every handler and schema typed `any`, three placeholder tests, and a commit made over a gate that never ran green. The local model landed its M items cleanly in the same hours (the Stack client, the settings page, the governor chain). So Codex at low takes S mechanical items only: a docs change, a rename, a pin bump, a rebase, a one-file fix-up whose brief names the exact lines; M items go to the local model or a Claude session at the floor. The owner can raise Codex to high for a design item, and the brief says so in its first line.

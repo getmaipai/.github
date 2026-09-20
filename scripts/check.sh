@@ -24,6 +24,19 @@ if [ -d standards/schemas ]; then
   (cd standards && uv run pytest tests/py -q)
 fi
 
+# Leaves ../.github-tags/std-v0.1.0 in place on purpose for reuse.
+echo "== ensure-tag.sh: create, reuse, refuse-unknown"
+FIRST_PATH="$(bash standards/bin/ensure-tag.sh std-v0.1.0)"
+SECOND_PATH="$(bash standards/bin/ensure-tag.sh std-v0.1.0)"
+if [ "$FIRST_PATH" != "$SECOND_PATH" ] || [ ! -d "$FIRST_PATH" ]; then
+  echo "ensure-tag.sh did not reuse the worktree it just created ($FIRST_PATH vs $SECOND_PATH)"
+  exit 1
+fi
+if bash standards/bin/ensure-tag.sh this-tag-does-not-exist >/dev/null 2>&1; then
+  echo "ensure-tag.sh accepted an unknown tag; it must refuse"
+  exit 1
+fi
+
 echo "== standards: prose-lint.sh self-test"
 bash standards/bin/prose-lint.test.sh
 

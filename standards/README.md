@@ -69,20 +69,17 @@ A consuming repo's `scripts/check.sh` runs its own build, lint, and test
 steps first, then calls the core:
 
 ```bash
-STANDARDS_DIR="${MAIPAI_STANDARDS_DIR:-../.github}"
-if [ ! -d "$STANDARDS_DIR/standards" ]; then
-  echo "missing @maipai/standards checkout at $STANDARDS_DIR (pin std-v0.2.0)"
+STANDARDS_REPO="${MAIPAI_STANDARDS_DIR:-../.github}"
+STD_TAG="std-v0.2.0"
+STANDARDS_DIR="$(bash "$STANDARDS_REPO/standards/bin/ensure-tag.sh" "$STD_TAG")"
+if [ "$(cat "$STANDARDS_DIR/standards/VERSION")" != "${STD_TAG#std-v}" ]; then
+  echo "@maipai/standards at $STANDARDS_DIR is $(cat "$STANDARDS_DIR/standards/VERSION"), but the tag is $STD_TAG"
   exit 1
 fi
 bash "$STANDARDS_DIR/standards/bin/check-core.sh" "$(pwd)"
 ```
 
-The pin is the git tag: a repo states which `std-vX.Y.Z` it targets in its
-own dev docs, and `MAIPAI_STANDARDS_DIR` points at a checkout of `.github` at
-that tag (the sibling checkout on the dev machine, or a shallow clone in CI).
-`check-core.sh` does not itself verify the tag; that is the honesty of the
-pin, the same way a `package.json` version range is honesty until someone
-runs `npm outdated`.
+The pin is the git tag. `MAIPAI_STANDARDS_DIR` names where the `.github` repo is (the sibling checkout by default); `ensure-tag.sh` resolves the tag to a read-only worktree under `../.github-tags/`, so a gate never runs whatever the working checkout happens to have, and the `VERSION` compare catches a tag cut against the wrong commit. Bumping a pin is one edit, the tag string.
 
 ## Why shell, not an npm package
 
