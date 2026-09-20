@@ -53,9 +53,14 @@ how its codegen resolves it, including a real gotcha (a blanket JSON
 Schema resolver over the whole document breaks an unrelated schema's
 internal `oneOf`) worth reading before repeating the pattern elsewhere.
 
-Later versions add: the kit lint, the screenshot pipeline pieces (viewport
-matrix, overflow and clipping checks, the vision-review runner), and the
-design tokens' source, per the platform plan chapter 2.1.
+Later versions add the screenshot pipeline pieces (viewport matrix,
+overflow and clipping checks, the vision-review runner), per the platform
+plan chapter 2.1. The kit lint and the design tokens' source do not live
+here: they ship with the kit itself as `@maipai/ui` in `getmaipai/shared`
+(`ui/eslint.config.js`, exported as `@maipai/ui/eslint-config`, and
+`ui/src/tokens.css`), since a lint that names the kit's own primitives
+belongs beside them, and every consumer pins the kit's tag rather than a
+second copy of its rules here.
 
 ## How a repo pins this
 
