@@ -24,3 +24,5 @@ check, a model download).
   and who receives it. Plain dad-test language. Adding or changing an
   outbound endpoint updates this page in the same commit, no exceptions
   (this is the docs-with-the-change rule applied to privacy).
+
+MaiPai Stack keeps no privacy page. It publishes its outbound endpoints as rows (`/stack/v1/privacy`: the signed Catalog index checks, the pinned downloads, a provenance read before an install, a voice or its cloning weights fetched once on an explicit need), each saying when it happens, what it carries, who receives it and the setting that governs it, and Home's own page shows those rows in the same table as everything else that leaves the house. Adding or changing a Stack endpoint changes that data in the same commit, which is the docs-with-the-change rule applied to a daemon with no docs of its own.
