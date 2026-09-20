@@ -5,7 +5,7 @@ repo pins by tag and calls from its own `scripts/check.sh`. The prose half
 (what the rules say and why) lives in [`../CLAUDE.md`](../CLAUDE.md) and the
 `docs/` tree beside it; this package is what actually runs.
 
-Current version: **std-v0.2.0** (see [`VERSION`](VERSION)).
+Current version: **std-v0.3.0** (see [`VERSION`](VERSION)).
 
 ## What v0.1 shipped
 
@@ -63,6 +63,20 @@ here: they ship with the kit itself as `@maipai/ui` in `getmaipai/shared`
 belongs beside them, and every consumer pins the kit's tag rather than a
 second copy of its rules here.
 
+## What v0.3 added
+
+- The prose lint now skips inline code spans, HTML comments, and Markdown
+  image syntax when checking exclamation points, eliminating three kinds of
+  false positives for consumers.
+- The prose lint's line scanner was rewritten in awk, reducing runtime from
+  60 seconds to under 0.1 seconds for consumers.
+- Gitleaks is scoped to the working tree for each commit, so consumers get
+  findings from the files they are checking rather than unrelated paths.
+- The kit lint and design tokens now live with the kit in commons, so
+  consumers pin and run the kit's own rules beside its primitives.
+- `bin/ensure-tag.sh` and the pin block resolve the standards tag through a
+  per-tag worktree, so consumers run the exact immutable release they pin.
+
 ## How a repo pins this
 
 A consuming repo's `scripts/check.sh` runs its own build, lint, and test
@@ -70,7 +84,7 @@ steps first, then calls the core:
 
 ```bash
 STANDARDS_REPO="${MAIPAI_STANDARDS_DIR:-../.github}"
-STD_TAG="std-v0.2.0"
+STD_TAG="std-v0.3.0"
 STANDARDS_DIR="$(bash "$STANDARDS_REPO/standards/bin/ensure-tag.sh" "$STD_TAG")"
 if [ "$(cat "$STANDARDS_DIR/standards/VERSION")" != "${STD_TAG#std-v}" ]; then
   echo "@maipai/standards at $STANDARDS_DIR is $(cat "$STANDARDS_DIR/standards/VERSION"), but the tag is $STD_TAG"

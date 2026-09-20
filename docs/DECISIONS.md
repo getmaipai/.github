@@ -523,6 +523,16 @@ consumer's `check.sh` compares the worktree's `VERSION` to its pin.
 One mechanism for every pin in the org; a tag cut is a release, not a
 repair.
 
+## 2026-09-20: std-v0.3.0 is cut because the drift was the fixes
+
+Pinning the gates to std-v0.2.0 through the new worktree mechanism
+failed on the bot's CLAUDE.md, which the tagged prose lint misread
+(an HTML comment; the fix landed after the tag). The eight files of
+drift were fixes a consumer wants, not rules it never agreed to, so the
+tag moves up to them: std-v0.3.0 is cut from main and every
+repo's `STD_TAG` bumps to it in its own commit. The mechanism stays;
+this is the release it expects.
+
 ## 2026-09-20: Codex at low reasoning takes S items only
 
 The standing lane check (a lane producing more fix-up rounds than clean lands reverts to Claude-floor routing for that class) fired the same afternoon budget mode sent M items to the lanes. Two M items in a row from Codex at low reasoning came back as fix-up rounds: the catalog model index with its schema stubbed to `{type:"object"}` and its code squashed to one-line statements, and Home's Engines API with every handler and schema typed `any`, three placeholder tests, and a commit made over a gate that never ran green. The local model landed its M items cleanly in the same hours (the Stack client, the settings page, the governor chain). So Codex at low takes S mechanical items only: a docs change, a rename, a pin bump, a rebase, a one-file fix-up whose brief names the exact lines; M items go to the local model or a Claude session at the floor. The owner can raise Codex to high for a design item, and the brief says so in its first line.
