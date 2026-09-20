@@ -129,6 +129,18 @@ backlog line found already shipped while looking for work is ticked
 in the coordinator's next docs commit, never left to mislead the next
 search.
 
+**An idle lane is checked, never assumed acceptable (2026-09-20).**
+Before treating either lane's idleness as fine, the coordinator
+confirms why, the same discipline for both: for the local model, run
+`local-model-check` rather than guessing it's down for the known
+eGPU reason - it may already be healthy and simply waiting on a
+brief. For Codex, read the tmux pane for a credits, quota, or
+rate-limit message rather than assuming it's paused on purpose. A
+real block (the local model down for a confirmed hardware reason,
+Codex out of credits) is reported to Jesse by name, not left as
+silent idle time; it is never a reason to stop writing that lane's
+next brief once the block clears.
+
 **Codex**, in Jesse's visible window, driven by the coordinator. Codex
 has no API for a running TUI, so it runs inside a tmux session named
 `codex` started once by Jesse (`tmux new -s codex -c <the codex
