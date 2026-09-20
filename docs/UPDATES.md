@@ -27,6 +27,8 @@ household notification per day at most through the digest (see
 a static file, logged locally, and listed on the privacy page as the only
 periodic outbound call.
 
+Engines and models follow the same shape through MaiPai Stack: for each engine build and model the Stack reports installed X, available Y (read from the Catalog's signed engine and model indexes, never from a project's release page), last checked at T, and whether it can go back; Home's Updates page shows those rows beside the app's own, Home's schedule decides when to check, and the button tells the Stack to apply, which drains the engine, swaps the build, runs the post-load identity check and rolls back on its own if that check fails. The Stack keeps no schedule and shows no page.
+
 ## Install mechanics
 
 Verify signature and sha256 first (a robot re-verifies what the hub pushed,
