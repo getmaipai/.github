@@ -15,9 +15,14 @@ cd "$REPO_ROOT"
 
 STATUS=0
 
-echo "== standards: gitleaks"
+echo "== standards: gitleaks (working tree)"
+# Per-commit gate scans the working tree, not committed history: every prior
+# commit already passed this same gate when it was made, so rescanning all of
+# history on every commit is pure repeat work that grows with repo size. The
+# release skill's preflight runs the full-history `gitleaks git` audit once
+# per release instead.
 if command -v gitleaks >/dev/null 2>&1; then
-  gitleaks dir --no-banner --redact . && gitleaks git --no-banner --redact .
+  gitleaks dir --no-banner --redact .
   if [ $? -ne 0 ]; then
     echo "gitleaks found problems"
     STATUS=1
