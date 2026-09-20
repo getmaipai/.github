@@ -152,9 +152,26 @@ omission.
 
 ## Responsive layout, PWA, tabs, icons
 
-- Four surfaces, one set of breakpoints owned by the kit (phone under 640,
-  tablet to 1024, desktop above, TV by input mode). Packages never write a
-  breakpoint.
+**One product on every screen.** The phone is not a second design. A
+page on a phone is the same page as on the desktop: the same tokens,
+type scale, icons, wording, order of content and actions, and the same
+states, so a person who knows the desktop already knows the phone.
+What changes is only what the small screen forces: one column instead
+of three, the rail collapses to the phone tab bar with the rest under
+More, a table becomes labeled rows with the same fields in the same
+order, a side pane becomes a sheet, hover actions become a long press,
+targets grow to 48 px and body type never drops below 16 px. Nothing
+that matters on the desktop is hidden on the phone; a field the desktop
+shows in a secondary column moves into the row's detail, it does not
+disappear. The screenshot matrix captures every page at both widths,
+and the review judges each pair as one design: a phone capture that
+would not be recognized as the desktop page is a failure, and so is a
+wide screen left empty by a page designed phone-first.
+
+- Four surfaces, one set of breakpoints owned by the kit and pinned in
+  its `tokens.css` (`sm` 640, `md` 720, `lg` 960, `xl` 1280: phone under
+  640, tablet to 960, desktop above, TV by input mode); the kit's
+  `responsive.ts` follows the tokens. Packages never write a breakpoint.
 - No fixed widths or heights on content; text wraps by default; images and
   video are fluid with declared aspect ratios.
 - Density budgets per surface live in the primitives (one column on phone,
