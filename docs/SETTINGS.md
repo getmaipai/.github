@@ -15,6 +15,8 @@ Every package's settings are also reachable from the central package list
 (Household → Store, Profile → Apps) as the same renderer pointed at that
 package.
 
+MaiPai Stack's settings are the same `SettingsKey` declaration, restricted to keys under `stack.*` (scope device, lives in the Stack, the three levels, the four selectors) with three fields of its own: `needs_restart`, `in_effect` and `pending`. Home's generic renderer draws the Engines page's settings from that declaration exactly as it draws every other section; a secret key (`stack.engines.tts.hf_token`) is stored encrypted by the Stack and read back redacted; a change to a `needs_restart` key is stored as pending and applied when the engine restarts. No second form, no second schema.
+
 ## Rule 2: central pages hold only what is central
 
 - **Profile**: identity, appearance, my voice and volume, notifications, my
