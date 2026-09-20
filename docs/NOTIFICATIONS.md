@@ -13,6 +13,8 @@ catalog lint refuses a notification without a level and a template.
 Repairs, Updates, backups, credentials, and robot health all use the same
 declarations, nothing bespoke.
 
+MaiPai Stack is one producer, never a second center: it emits one typed event feed (`/stack/v1/events`, replayable by `Last-Event-Id`) and has no channels, audiences or history of its own. Home's bridge (`backend/src/lib/stack/events.ts`) turns four of its events into declared notification types for household admins (`engines.update_available`, `engines.update_applied`, `engines.update_failed`, `engines.problem` for a health item opened at warning or critical), each with a repeat key so one item fires once, and passes the rest to the Engines page's live view. Everything a person sees about the engines is Home's notification system doing what it does for every other producer.
+
 ## Levels
 
 - **`immediate`**: delivers now, everywhere, through quiet hours. Someone
