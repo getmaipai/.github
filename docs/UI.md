@@ -227,7 +227,12 @@ wide screen left empty by a page designed phone-first.
   app-shell service worker that caches only shell and kit, never household
   data; an offline page that says which packages work offline; iOS quirks
   (install hint, standalone navigation, audio and wake-lock, viewport
-  height) handled once.
+  height) handled once. A new worker never waits: `install` calls
+  `skipWaiting()` unconditionally and `activate` claims the clients, so
+  the build just fetched is the one that serves the next load, and the
+  shell's reload-once guard brings each open tab onto it; a worker left in
+  `waiting` for a client handshake that never comes is how Chrome served a
+  days-old shell (home#128, 2026-09-21).
 
 ## Settings live with the thing they configure
 
