@@ -61,9 +61,12 @@ radius and spacing are the base the tokens start from, byte-for-byte
 from the pinned commit, and a house palette is a preset beside them
 (`ui.look`), never a replacement of the defaults, because a replaced
 default hides every later comparison with the source (DECISIONS.md,
-2026-09-21, "the template's own palette is the default look"). The
-one exception is the tile radius that `studio` and `calm` set, the
-two Home geometry presets, which change no color.
+2026-09-21, "the template's own palette is the default look"). A look
+(`ui.look`) is a named theme from the source's own catalog: shadcn's
+seven base colors under their own names, `neutral` the default (the
+template's own palette and shadcn's dashboard-01 are both Neutral),
+plus `navy`, Home's former set; no Home name stands in front of a theme
+that already has one (DECISIONS.md, 2026-09-21).
 
 `@maipai/ui` lives in `getmaipai/commons` as the `ui` workspace (decided
 2026-09-20; the kit and shell moved there from the Stack's reconciled
