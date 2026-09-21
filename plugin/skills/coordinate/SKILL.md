@@ -129,6 +129,23 @@ backlog line found already shipped while looking for work is ticked
 in the coordinator's next docs commit, never left to mislead the next
 search.
 
+**The lane check is scheduled, not remembered (2026-09-21).** After
+a morning in which both lanes went idle twice while the coordinator
+was on other work and the owner had to say so each time, the
+coordinator runs a scheduled lane check every twenty minutes (a cron
+prompt in its own session, re-created before it expires) that does,
+without asking anyone: lists `open/`, `taken/` and `done/`; reads
+every new `*-REPORT.md` and, for each accepted one, lands it through a
+throwaway `<repo>-land` worktree of `origin/main` (`git worktree add`,
+`cherry-pick <hash>`, `push origin HEAD:main`, `worktree remove`) and
+deletes the lane branch, or writes the fix-up brief; refills `open/`
+to at least two local-model briefs and one Codex brief; confirms the
+local model's session is busy when it holds an item and the autofeed
+process is running, restarting either when not; reads the Codex pane
+for a credits or approval prompt; and ends with the status block. A
+lane found idle by the owner rather than by the check is a defect in
+the check, fixed there.
+
 **An idle lane is checked, never assumed acceptable (2026-09-20).**
 Before treating either lane's idleness as fine, the coordinator
 confirms why, the same discipline for both: for the local model, run
