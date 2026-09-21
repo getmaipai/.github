@@ -317,6 +317,18 @@ or Opus may hold it when Jesse says so.
   The one exception: a commit that touches only docs (Markdown, a prompt,
   a backlog line) needs the standards core (prose lint, PII wordlist,
   gitleaks, `standards/bin/check-core.sh`), which runs in seconds.
+- **One full gate at a time on a shared machine (2026-09-21).** Two
+  full `check.sh` runs at once on the dev machine, beside the running
+  hub's engines, put the OS under memory pressure and made one run
+  fail on an ephemeral port ("Failed to start server. Is port 0 in
+  use?") in a test the change never touched. So a session starts a
+  full gate only when `pgrep -f scripts/check.sh` prints nothing, or
+  when the coordinator has handed it the slot; the docs-only gate
+  (seconds, no server) may run beside anything. A gate that fails
+  only in a test the diff did not touch, with a port or memory error,
+  is rerun once alone before anything is concluded; a second such
+  failure is reported as an environment finding, never fixed forward
+  in the test.
 - **A check, test, bench, or screenshot script never changes the machine
   outside the repo and its own data directory.** No system preferences
   (`defaults write`), no global config, no installs, no environment
