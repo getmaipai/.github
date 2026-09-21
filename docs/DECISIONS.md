@@ -599,3 +599,18 @@ reference run's time) before it starts, and the lane is never aborted
 mid-item for a test: its queue is held and the current item finishes
 first, because the two aborts of 2026-09-20 cost the lane
 its uncommitted rewrite of a four-hour item.
+
+## 2026-09-21: vendored code is never reviewed
+
+The morning the kit gained two vendored snapshots (shadcndashboard,
+assistant-ui's Elements) a medium review of a commit that was mostly
+those files fanned out five finder subagents at about eighty thousand
+tokens each, and they spent it grepping the template's own imports.
+The owner saw the list and asked why. The answer is the rule already
+in CLAUDE.md's review budget, now explicit: a snapshot used exactly as
+it ships is not our code, so it is not reviewed; a diff that only
+adds or updates vendored files gets no review, a mixed diff is
+reviewed with the vendored paths excluded, a review whose finders
+are reading vendored files is stopped, and a config, preset, pin or
+docs diff gets `low` or none. Review effort goes where our own
+judgment was exercised, nowhere else.
