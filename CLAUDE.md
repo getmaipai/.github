@@ -293,7 +293,13 @@ or Opus may hold it when Jesse says so.
   for more than a minute is stopped and rerun once with the target
   path, never left to run out its budget. The done report states the
   level, the pass count and each finding's disposition, so the
-  coordinator can see the budget was kept.
+  coordinator can see the budget was kept. **Vendored code is never
+  reviewed (2026-09-21):** a snapshot used as it ships (the kit's
+  `dashboard/` and `elements/` folders, any future vendored source)
+  is not our code, so a diff that only adds or updates vendored files
+  gets no review, a mixed diff is reviewed with the vendored paths
+  excluded, and a review whose finders are reading vendored files is
+  stopped; a config, preset, pin or docs diff gets `low` or none.
 - **Push at natural boundaries** (a verified item merged to `main`, the end
   of a work session, or when Jesse says ship), never reflexively after
   every commit. A push needs no approval; a push that fails is reported
