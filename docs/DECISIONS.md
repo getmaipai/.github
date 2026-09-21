@@ -579,6 +579,19 @@ snapshot; it uses shadcn's Base UI primitives while the kit's
 vendored set was on Radix, so the kit moves to the template's
 primitives rather than carrying two.
 
+Two rulings the same morning. The shell and the chat switch together
+under one flag, `ui.shell.next`, never two: a household that turns the
+new shell on gets the Elements chat inside it in the same reload, and
+a household that turns it off gets the whole old surface back, because
+half a switch (the old chat inside the new shell, or the reverse) is a
+third design nobody chose and nobody would test. And Home supports
+every base color shadcn publishes on its theming page (ui.shadcn.com/
+docs/theming) as a `ui.look` preset beside the kit's own studio and
+calm, added as tokens only through the template's own style-variant
+mechanism; the set is whatever that page lists at the time the kit
+tag is cut, and a color the page drops is retired with a changelog
+line, not kept as a fork.
+
 ## 2026-09-21: one full-context coding lane is what the laptop's two cards hold
 
 Three attempts to get a second free coding lane out of the llmhost's
