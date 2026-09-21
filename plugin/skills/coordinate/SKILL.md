@@ -146,6 +146,21 @@ for a credits or approval prompt; and ends with the status block. A
 lane found idle by the owner rather than by the check is a defect in
 the check, fixed there.
 
+**Codex is fed in batches, and its full gate waits for an empty
+machine (2026-09-21).** At low reasoning a docs brief takes Codex
+about three minutes, so two briefs per twenty-minute check left it
+idle for most of the afternoon; the check now queues at least five
+briefs at a time, and a batch that will run out before the next check
+is topped up in the same turn. A Codex brief that needs the full
+`check.sh` names the wait first (`while pgrep -f 'scripts/check.sh|bun
+test|vite build' >/dev/null; do sleep 30; done`), because two of its
+full gates in one afternoon went red only in tests the diff never
+touched (a port refusal, a five-second timeout) while a Claude
+session's gate ran beside them; a red gate of that shape is rerun
+alone, never committed over and never fixed forward in the test. Docs
+briefs, which gate in seconds, go before any brief that needs the
+full gate, so the lane stays busy while it waits for the window.
+
 **An idle lane is checked, never assumed acceptable (2026-09-20).**
 Before treating either lane's idleness as fine, the coordinator
 confirms why, the same discipline for both: for the local model, run
