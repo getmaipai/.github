@@ -648,3 +648,24 @@ so nothing is lost. The general rule this leaves behind: a vendored
 surface's default look is what it ships with, and a house palette is
 always a preset beside it, never a replacement of its defaults, because
 a replacement hides every later comparison with the source.
+
+## 2026-09-21: the owner's one deviation from the source, fewer lines
+
+With the template's own palette restored (the entry above), the owner
+looked at Home's `/next` beside two references, shadcndashboard's demo
+and shadcn's own dashboard-01 block, and ruled twice: still too many
+lines, tone it down, and the grid fill must not show outside a card's
+rounded corners. Measured, the template lines every card twice (the
+card's own `ring-1 ring-foreground/10` plus a square wrapper's
+`bg-border` hairline fill that peeks at each rounded corner), boxes the
+sidebar with its own border, and outlines the content panel;
+dashboard-01 is the same inset layout with none of those three. The
+deviation is recorded as the one owner-ruled departure from "identical to the
+source": kit-side rules in the kit's own layer make those three fills
+transparent (the hairline-grid wrappers, the sidebar panel's border,
+the content panel's outline), leaving one faint ring per card and the
+header's bottom border; no vendored file is edited, and every other
+pixel stays the source's. The rule it leaves: a departure from a
+vendored surface is the owner's call, made on a measured side-by-side,
+implemented as the smallest kit-side rule, and written here the day it
+is made.
