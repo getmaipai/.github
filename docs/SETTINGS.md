@@ -65,6 +65,8 @@ central page that renders it), and `honoured_by: [home, bot]`. Robot-only
 keys are declared by the robot in the same format and sent on `hello`; the
 hub stores no copy.
 
+The generic renderer is the one consumer of the registry's selector names, and its mapping from selector to field primitive is a table, not a component: with the shell on shadcndashboard (2026-09-21, SHELL-05) Home's settings page maps `boolean` to the template's Switch, `select` to its Select, `number` and `text` to its Input, a secret to a write-only Input, each as shipped, and the grouping (three levels, the advanced fold, section titles) is the kit's own `groupSettings` logic reused unchanged; a selector the table does not know renders the registry's fallback and never crashes the page. A page that hand-draws a field for one key is the defect Rule 1 exists to prevent, in a different coat.
+
 ## Storage
 
 Values by scope with per-field last-writer-wins on the oplog (see the link
