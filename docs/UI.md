@@ -44,6 +44,19 @@ component where a shipped one exists is returned with the name of the
 shipped one. Home's shell and pages are `shadcndashboard` as shipped
 (DECISIONS.md, 2026-09-21); the chat is assistant-ui Elements.
 
+**Vendored sources (2026-09-21).** The kit carries two upstream
+snapshots, each used exactly as it ships and pinned by commit in
+`commons/ui/docs/dashboard-upstream.md`: `shadcndashboard` (MIT; the
+shell, the pages, its shadcn primitives on Base UI) under
+`ui/src/dashboard/`, and assistant-ui's Elements (MIT; every element
+of the catalog, installed from its registry) under `ui/src/elements/`.
+Both are attributed in `commons/NOTICE`. The kit's own lint rules do
+not apply inside those folders (an eslint override per folder says
+so); an upstream update is a manual merge of the snapshot against the
+pinned commit, done in the monthly dependency sweep, never a hand
+edit of a vendored file. Demo content and marketing pieces are
+stripped at vendoring and listed in the upstream note; stripping is
+not editing.
 
 `@maipai/ui` lives in `getmaipai/commons` as the `ui` workspace (decided
 2026-09-20; the kit and shell moved there from the Stack's reconciled
