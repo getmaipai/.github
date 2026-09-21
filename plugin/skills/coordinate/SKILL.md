@@ -166,7 +166,14 @@ message; a session starts its full gate when `pgrep -f
 'scripts/check.sh|bun test|vite build'` prints nothing, waits in a
 loop otherwise, and a session that needs the machine quiet for
 something else (a bench, a capture run) says so in its status line so
-the coordinator can hold the others.
+the coordinator can hold the others. A pointer typed into the Codex
+window is verified, never assumed: the Enter can be swallowed while
+Codex is still finishing or compacting its previous turn, and the text
+then sits as an unsent draft with the lane idle (2026-09-21, ten
+minutes, noticed by the owner); so within a minute of every pointer the
+coordinator confirms the first brief moved to `taken/` or the pane shows
+"Working", and re-sends Enter once if not, and never types a pointer
+while the pane shows "Compacting context".
 
 **An idle lane is checked, never assumed acceptable (2026-09-20).**
 Before treating either lane's idleness as fine, the coordinator
