@@ -15,7 +15,13 @@ that grows forever and a rule nobody can prove ever fires.
   reads the household's words (a regex family, a cue list, a shape) is
   added with a hit counter on the turn's log line and a corpus row that
   fires it. A rule with zero hits over the weekly report is retired in
-  that week's docs commit, not kept in case.
+that week's docs commit, not kept in case.
+The first real weekly report (Home, 2026-09-21) had 47 labelled turns
+and 55 zero-hit rules, most of them guards for situations that did not
+occur that week, so "zero hits" alone is not a retire signal: a rule is
+retire-eligible only after consecutive zero-hit weeks past a cumulative
+floor of labelled turns (Home's RVW-1b sets both numbers in one place;
+until it lands, nothing retires on a single week).
 - **Three phrasings in a week is a classifier, not a fourth regex.**
   When a fix adds a third phrasing to the same open-class list
   (emotion, stance, hedges, the lookup field classes) within a week,
