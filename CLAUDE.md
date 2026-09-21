@@ -322,8 +322,7 @@ or Opus may hold it when Jesse says so.
   hub's engines, put the OS under memory pressure and made one run
   fail on an ephemeral port ("Failed to start server. Is port 0 in
   use?") in a test the change never touched. So a session starts a
-  full gate only when `pgrep -f scripts/check.sh` prints nothing, or
-  when the coordinator has handed it the slot; the docs-only gate
+  full gate only when `pgrep -f '[s]cripts/check.sh|[b]un test|[v]ite build'` prints nothing (the bracketed first letter keeps the pattern from matching the waiting shell's own command line: on 2026-09-21 two sessions each waited eighteen minutes on the other's wait loop with no gate running, until the coordinator killed both), waits in a capped loop otherwise (ten seconds between checks, sixty checks at most, then it reports instead of waiting on); the docs-only gate
   (seconds, no server) may run beside anything. A gate that fails
   only in a test the diff did not touch, with a port or memory error,
   is rerun once alone before anything is concluded; a second such
