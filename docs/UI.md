@@ -36,6 +36,14 @@ store card says "web only"; iPhone shows it in a web view; Apple TV shows a
 
 ## The kit
 
+**No hand-built UI (2026-09-21).** A surface is an assistant-ui
+Element, a kit primitive, or a kit block composed of those, used as
+shipped and styled by tokens alone; see CLAUDE.md, platform principle
+6, and DECISIONS.md, 2026-09-21. A pull that adds a hand-written
+component where a shipped one exists is returned with the name of the
+shipped one.
+
+
 `@maipai/ui` lives in `getmaipai/commons` as the `ui` workspace (decided
 2026-09-20; the kit and shell moved there from the Stack's reconciled
 copy, and Home imports it like every other product). The kit's approved

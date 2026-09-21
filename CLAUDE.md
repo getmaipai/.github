@@ -72,6 +72,21 @@ platform plan; this is the standing summary every session should carry.
    normalization library instead of asking the model to spell out numbers
    reliably) is hand-built too, and loses to the prebuilt answer on the
    same terms: slower, more tokens, less predictable.
+   **No hand-built UI, from 2026-09-21 on (owner's rule).** Every
+   surface is a shipped component used exactly as it ships: an
+   assistant-ui Element for anything a chat or an assistant does, a
+   kit primitive (the vendored shadcn set) or a kit block composed of
+   those for everything else. A component written by hand where a
+   maintained one exists is a defect, found in review and replaced,
+   never kept because it already works; a shipped component is never
+   edited (the kit wraps and composes, it does not fork), and the
+   look comes only from the tokens the component already reads. When
+   nothing shipped does the job, the gap is named in the design record
+   before a line is written, and the smallest composition of shipped
+   parts wins. Why: the chat rebuilt by hand on assistant-ui's runtime
+   (2026-09-13 to 2026-09-21) was ugly and buggy where the library's
+   own Elements were neither, and every hand-built piece cost review
+   rounds the shipped one would not have.
 7. **Hub first, robot for parity, Go last.** Every hub step is in family use
    before its robot counterpart; nothing early may close the door on the
    later clients. The Stack sits under all three and follows the same

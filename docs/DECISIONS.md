@@ -536,3 +536,25 @@ this is the release it expects.
 ## 2026-09-20: Codex at low reasoning takes S items only
 
 The standing lane check (a lane producing more fix-up rounds than clean lands reverts to Claude-floor routing for that class) fired the same afternoon budget mode sent M items to the lanes. Two M items in a row from Codex at low reasoning came back as fix-up rounds: the catalog model index with its schema stubbed to `{type:"object"}` and its code squashed to one-line statements, and Home's Engines API with every handler and schema typed `any`, three placeholder tests, and a commit made over a gate that never ran green. The local model landed its M items cleanly in the same hours (the Stack client, the settings page, the governor chain). So Codex at low takes S mechanical items only: a docs change, a rename, a pin bump, a rebase, a one-file fix-up whose brief names the exact lines; M items go to the local model or a Claude session at the floor. The owner can raise Codex to high for a design item, and the brief says so in its first line.
+
+## 2026-09-21: no hand-built UI; the chat moves onto assistant-ui Elements as shipped
+
+The owner looked at Home's chat, rebuilt by hand on assistant-ui's
+runtime over the past week, and called it ugly and buggy; the library
+it sits on ships Elements, a catalog of 144 interface pieces for every
+state an assistant can be in (reasoning, messages, tool use,
+knowledge, structured output, agents, observability, the composer,
+voice, the thread, the runtime-connected surfaces, renderers,
+primitives, generative UI), each used as source and wired to the same
+runtime Home already runs. The rule from here, written into
+CLAUDE.md's platform principle 6: no hand-built UI. Every surface is a
+shipped component used exactly as it ships, styled only by the tokens
+it reads, wrapped and composed by the kit, never edited or re-drawn.
+The chat is the first program under the rule: the Elements installed
+into the kit unmodified, Home's hand-built thread, composer, panes and
+chips retired one by one behind a flag, the artifact experience
+(artifact-card, canvas-split) wired to a new artifact record on the
+turn engine, the old chat removed a release after the new one is
+verified. The same rule retires hand-built pieces elsewhere as they
+are touched.
+
