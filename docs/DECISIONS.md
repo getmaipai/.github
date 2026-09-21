@@ -627,3 +627,24 @@ reviewed with the vendored paths excluded, a review whose finders
 are reading vendored files is stopped, and a config, preset, pin or
 docs diff gets `low` or none. Review effort goes where our own
 judgment was exercised, nowhere else.
+
+## 2026-09-21: the template's own palette is the default look
+
+The owner put Home's `/next/people` beside shadcndashboard's own
+user-profile demo and saw two things wrong at once: our page rendered
+the phone layout at desktop width (a build defect, two Tailwind roots
+in one app, whose lazy chunk re-emitted plain utilities after the
+entry sheet's responsive ones), and everything on ours was lit and
+lined where the source is one dark sheet with faint hairlines. The
+second had a cause upstream of any token: when the template was
+vendored, its `:root` and `.dark` palette was swapped for the navy set
+from the 2026-09-20 design doc, so the default look had never been
+the source's. Ruling, from the standing "identical to the source": the
+default palette is the template's own, byte-for-byte from the upstream
+commit the snapshot was taken at, light and dark, translucent borders
+included; `studio` and `calm` keep only their tile radius over that
+palette; the navy set survives as its own `ui.look` preset, `navy`,
+so nothing is lost. The general rule this leaves behind: a vendored
+surface's default look is what it ships with, and a house palette is
+always a preset beside it, never a replacement of its defaults, because
+a replacement hides every later comparison with the source.
