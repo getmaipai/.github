@@ -680,3 +680,28 @@ over the same palette, and the 12px tile is the template's own
 default), and a stored `studio` or `calm` reads back as `neutral`. The
 rule: a look is a named theme from the source's own catalog, so a
 person reading the setting knows what they are getting, and a house name never stands in front of a theme that already has one.
+
+## 2026-09-21: an answer's register follows the surface, and there is no switch
+
+The humanistic chat program tuned every reply to the spoken register,
+a few sentences the way a person talks, and the owner, comparing a
+typed weather question with ChatGPT's answer, saw that a typed screen
+judged by that rule looks incomplete. ChatGPT itself gives long
+structured answers when typed and two sentences in Voice, and nobody
+calls Voice short. The ruling: the register follows the surface. A
+typed screen gets the full answer (structure, sources, folded
+thinking, the generative parts, artifacts); voice gets the answer in
+one to three spoken sentences and an offer, with the full answer on
+the nearest screen and the model's thinking never spoken; a glance
+hub gets a two-second card plus the spoken lead, with the full answer
+a tap away. The controls are exactly ChatGPT's and nothing more,
+the owner's ruling revised the same evening ("follow what ChatGPT does
+exactly"): a thinking-effort control and a model picker in the
+composer, from the shipped Elements, fed by the Stack's models; no
+answer-length setting anywhere, because ChatGPT has none; beyond the
+two controls the override is plain language ("shorter", "tell me
+more"), honored for that turn and the next few. Voice has no controls,
+as ChatGPT Voice has none. A child's answers stay
+short on every surface, which is a parental control, not a mode. The
+record is home's `docs/plans/response-contract-by-surface-2026-09-21.md`
+(RESP-01 to RESP-04).
