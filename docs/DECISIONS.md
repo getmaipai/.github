@@ -558,3 +558,24 @@ turn engine, the old chat removed a release after the new one is
 verified. The same rule retires hand-built pieces elsewhere as they
 are touched.
 
+## 2026-09-21: Home's shell and pages come from shadcndashboard, as shipped
+
+Same evening, same reasoning extended from the chat to the whole
+application: the owner chose `shadcndashboard` (WrapPixel's MIT
+admin template on React 19, Vite, Tailwind v4 and shadcn/ui with
+Base UI primitives, the same stack Home runs) as the one source of
+Home's shell and pages, used exactly as it ships. Its sidebar and
+header are the shell, its widgets, data tables, form layouts,
+profile and settings pages are the pages, its auth pages are the
+sign-in, and the tokens are the only thing Home changes about them.
+The kit keeps the tokens, the two looks, the icons, and wraps the
+vendored template and the assistant-ui Elements; its hand-built
+shell, DetailPane, ThingsTable and blocks retire page by page. The
+2026-09-20 design doc's numbers stay as the tokens' targets (spacing,
+radii, the palette) but no longer describe components Home draws
+itself. Known trades, accepted: the template is a clone, not a
+registry, so upstream updates are manual merges of a vendored
+snapshot; it uses shadcn's Base UI primitives while the kit's
+vendored set was on Radix, so the kit moves to the template's
+primitives rather than carrying two.
+

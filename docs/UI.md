@@ -41,7 +41,8 @@ Element, a kit primitive, or a kit block composed of those, used as
 shipped and styled by tokens alone; see CLAUDE.md, platform principle
 6, and DECISIONS.md, 2026-09-21. A pull that adds a hand-written
 component where a shipped one exists is returned with the name of the
-shipped one.
+shipped one. Home's shell and pages are `shadcndashboard` as shipped
+(DECISIONS.md, 2026-09-21); the chat is assistant-ui Elements.
 
 
 `@maipai/ui` lives in `getmaipai/commons` as the `ui` workspace (decided

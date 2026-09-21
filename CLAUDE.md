@@ -86,7 +86,17 @@ platform plan; this is the standing summary every session should carry.
    parts wins. Why: the chat rebuilt by hand on assistant-ui's runtime
    (2026-09-13 to 2026-09-21) was ugly and buggy where the library's
    own Elements were neither, and every hand-built piece cost review
-   rounds the shipped one would not have.
+   rounds the shipped one would not have. **The application shell and
+   every non-chat page of Home come from `shadcndashboard`
+   (github.com/shadcndashboard/shadcndashboard, MIT, React 19, Vite,
+   Tailwind v4, shadcn/ui on Base UI), used as it ships (owner's rule,
+   2026-09-21):** its layouts (sidebar, header, theme toggle), its
+   dashboard widgets, data tables, form layouts, profile, settings and
+   auth pages are the pages Home composes from, vendored into the kit
+   as a snapshot with attribution in NOTICE, restyled by the tokens
+   alone; the kit's own hand-built shell, panes and blocks retire as
+   each page moves. Home writes routes, data and copy, never a
+   component; the chat inside that shell is assistant-ui Elements.
 7. **Hub first, robot for parity, Go last.** Every hub step is in family use
    before its robot counterpart; nothing early may close the door on the
    later clients. The Stack sits under all three and follows the same
