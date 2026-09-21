@@ -669,3 +669,14 @@ pixel stays the source's. The rule it leaves: a departure from a
 vendored surface is the owner's call, made on a measured side-by-side,
 implemented as the smallest kit-side rule, and written here the day it
 is made.
+
+Later the same day the owner saw the restored default beside shadcn's
+own dashboard-01 block and ruled once more: the black is right, and it
+must be a theme, not a Home name. The template's palette is shadcn's
+Neutral, so `ui.look` now lists shadcn's seven base colors by their
+own names with `neutral` as the default, plus `navy` for Home's former
+set; `studio` and `calm` leave the list (they were geometry presets
+over the same palette, and the 12px tile is the template's own
+default), and a stored `studio` or `calm` reads back as `neutral`. The
+rule: a look is a named theme from the source's own catalog, so a
+person reading the setting knows what they are getting, and a house name never stands in front of a theme that already has one.
