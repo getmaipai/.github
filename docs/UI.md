@@ -56,12 +56,19 @@ so); an upstream update is a manual merge of the snapshot against the
 pinned commit, done in the monthly dependency sweep, never a hand
 edit of a vendored file. Demo content and marketing pieces are
 stripped at vendoring and listed in the upstream note; stripping is
-not editing.
+not editing. A vendored surface keeps its shipped defaults: its own palette,
+radius and spacing are the base the tokens start from, byte-for-byte
+from the pinned commit, and a house palette is a preset beside them
+(`ui.look`), never a replacement of the defaults, because a replaced
+default hides every later comparison with the source (DECISIONS.md,
+2026-09-21, "the template's own palette is the default look"). The
+one exception is the tile radius that `studio` and `calm` set, the
+two Home geometry presets, which change no color.
 
 `@maipai/ui` lives in `getmaipai/commons` as the `ui` workspace (decided
 2026-09-20; the kit and shell moved there from the Stack's reconciled
 copy, and Home imports it like every other product). The kit's approved
-design specification is `shared/ui/docs/spec.md` (the 2026-09-19
+design specification is `commons/ui/docs/spec.md` (the 2026-09-19
 reconciliation, moved from `stack/docs/plans/ui-spec-2026-09-19/` with
 `ui-v0.1.0`). It is a thin layer
 over shadcn/ui on Base UI (the primitives shadcndashboard ships; the kit carries one primitive set, never two) and Tailwind v4: the
