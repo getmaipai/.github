@@ -70,7 +70,8 @@ GitHub Pages. Three content tiers (`user/`, `dev/`, `api/`) per
 
 | Layer | Standard |
 |---|---|
-| Kit | `@maipai/ui`, a thin layer over shadcn/ui on Radix and Tailwind v4 |
+| Kit | `@maipai/ui`: shadcn/ui on Base UI and Tailwind v4, with the application shell and every non-chat page vendored from shadcndashboard as shipped (MIT, `commons/ui/src/dashboard/`) and restyled by tokens only |
+| Chat | assistant-ui's Elements, all of them vendored as shipped (`commons/ui/src/elements/`) on the assistant-ui runtime; a capability is wired to its Element (reasoning, tool, artifact, image generation, and the rest), never to a hand-built part |
 | Icons | lucide, referenced by name, no other set |
 | Web-only escape hatch | Module Federation 2.0, so a custom React page shares the React and `@maipai/ui` singletons with the shell |
 | iPhone/Apple TV rendering | SwiftUI, rendering the same declared UI schema natively |
