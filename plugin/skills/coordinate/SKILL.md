@@ -159,7 +159,14 @@ touched (a port refusal, a five-second timeout) while a Claude
 session's gate ran beside them; a red gate of that shape is rerun
 alone, never committed over and never fixed forward in the test. Docs
 briefs, which gate in seconds, go before any brief that needs the
-full gate, so the lane stays busy while it waits for the window.
+full gate, so the lane stays busy while it waits for the window. The
+same clearing is every Claude session's gate slot too: since the
+afternoon of 2026-09-21 the coordinator no longer hands the slot by
+message; a session starts its full gate when `pgrep -f
+'scripts/check.sh|bun test|vite build'` prints nothing, waits in a
+loop otherwise, and a session that needs the machine quiet for
+something else (a bench, a capture run) says so in its status line so
+the coordinator can hold the others.
 
 **An idle lane is checked, never assumed acceptable (2026-09-20).**
 Before treating either lane's idleness as fine, the coordinator
