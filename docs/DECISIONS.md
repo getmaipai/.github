@@ -579,3 +579,23 @@ snapshot; it uses shadcn's Base UI primitives while the kit's
 vendored set was on Radix, so the kit moves to the template's
 primitives rather than carrying two.
 
+## 2026-09-21: one full-context coding lane is what the laptop's two cards hold
+
+Three attempts to get a second free coding lane out of the llmhost's
+3070 and 2070 all failed on measurement, not opinion. A ternary
+27B (PrismML's Bonsai family) sat at 7.46 GiB on one card before
+generating a token and looped the same planning block 39 times on the
+fixture's task 6, and its second run, on the Bonsai 2 build of the
+lane's own Qwen3.8 base, was not measured because a stale setup line in
+the task prompt sent it hunting for a file that did not exist. Two
+llama-server slots on the lane's own IQ3_XXS build at 65536 context
+crashed with a CUDA out-of-memory on the first pair of concurrent
+decodes, and two slots at 49152 would halve each slot to 24K, which
+task 9 had already shown too small. So the lane stays one full-context
+server at 49152 with one slot; a second lane needs more memory, not a
+different flag. Two rules came out of the night:
+every bench runbook names a per-task wall-clock cutoff (three times the
+reference run's time) before it starts, and the lane is never aborted
+mid-item for a test: its queue is held and the current item finishes
+first, because the two aborts of 2026-09-20 cost the lane
+its uncommitted rewrite of a four-hour item.

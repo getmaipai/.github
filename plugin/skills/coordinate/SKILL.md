@@ -115,7 +115,7 @@ sessions are each either running a brief or the status block says what
 it is waiting on, and neither "the coordinator has not written the next
 brief" nor "the next item waits on something not yet landed" is an
 allowed reason: a dependency wait means pulling the next independent
-item, or an item from the other lane's queue. A background monitor
+item, or an item from the other lane's queue. A GPU test or bench on the lane's own server waits for the lane's current item to report: the coordinator holds the queue, never aborts the lane mid-item (2026-09-20: two aborts lost a four-hour item's rewrite), and every bench runbook names a per-task cutoff of three times the reference run before it starts. A background monitor
 watches both lanes and nags the coordinator every three minutes while
 either is idle; the next brief goes out in the same turn as the idle
 event. The coordinator keeps at least two briefs
