@@ -64,7 +64,7 @@ copy, and Home imports it like every other product). The kit's approved
 design specification is `shared/ui/docs/spec.md` (the 2026-09-19
 reconciliation, moved from `stack/docs/plans/ui-spec-2026-09-19/` with
 `ui-v0.1.0`). It is a thin layer
-over shadcn/ui on Radix and Tailwind v4: the
+over shadcn/ui on Base UI (the primitives shadcndashboard ships; the kit carries one primitive set, never two) and Tailwind v4: the
 tokens, the layout primitives, the settings and permission-prompt
 renderers, the pattern components, re-exports. It never reimplements a
 widget the library ships. Icons are lucide, by name, at three token sizes;
