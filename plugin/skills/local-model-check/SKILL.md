@@ -148,6 +148,25 @@ Jesse or the coordinator verbatim (the log line, not a paraphrase) as a
 blocker classified *environment* per the `coordinate` skill's blocker
 classes. Don't try fixes beyond the ones named above without asking.
 
+**The host is healthy but Session C still says "Cannot connect to API"
+(2026-09-22).** Symptom: step 1's health check returns 200 from this
+Mac, `curl "$url/v1/models"` (the host address `localcode-serve` sets)
+returns 200, yet the
+OpenCode session's status sits in `retry` with "Cannot connect to API:
+Was there a typo in the url or port?" and the turn ends in `APIError`.
+Cause seen: the `opencode serve` process (started by
+`home/data-scratch/bin/localcode-serve`, a week old, parent launchd)
+kept failing to reach the host after the host's engine process had
+exited and come back; nothing on the host side was wrong. Fix: restart
+the server only, never the session (sessions live on disk and survive
+it): `kill <pid of "opencode serve">`, then from the `home` checkout
+`nohup data-scratch/bin/localcode-serve > data-scratch/c/serve-<date>.log
+2>&1 &`, wait for `curl 127.0.0.1:4097/session` to list "Session C
+(coordinator-driven)", re-post the brief with `session-c-post`, and
+confirm `/session/status` shows `busy` rather than `retry`. Jesse's
+attached TUI drops when the server restarts; he re-runs the same
+`opencode attach http://127.0.0.1:4097` from the `home` folder.
+
 ## Why there's no standing watchdog here
 
 systemd's own `Restart=on-failure` on `maipai-chat.service` already
