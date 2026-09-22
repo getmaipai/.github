@@ -1,6 +1,6 @@
 ---
 name: local-model-check
-description: Check whether the household's local coding model (Qwen3.8-27B on the laptop, behind maipai-chat.service on :8791) is up, and diagnose why when it isn't - including the known Thunderbolt eGPU-drop failure mode and its verified recovery. Use before routing an S or small-M item to the local-model lane (coordinate skill section 1b), when the lane is reported down or sits idle for no stated reason, or when Jesse asks whether Qwen or the local model is working.
+description: The one procedure for the household's local coding model (Qwen3.8-27B behind maipai-chat.service on :8791, split across the laptop's internal RTX 2070 Super and an RTX 3070 in a Thunderbolt enclosure) - health check, diagnosis, the known eGPU-drop failure and its verified one-command recovery, and the rules for running anything heavy on that host. Read it on the SYMPTOM, never on a judgment about the cause: any time nvidia-smi shows fewer than two GPUs, the :8791 health check does not return 200, the service is stuck in activating/auto-restart, the host stops answering ssh or ping, OR you are about to run any build, download, bench or restart on it - even when you already know why, and especially when you caused it yourself. Also before routing an item to the local-model lane, and when Jesse asks whether Qwen or the local model is working.
 ---
 
 # Check and diagnose the local model lane
@@ -69,6 +69,15 @@ and rescans the PCI bus:
 ssh laptop-linux 'sudo bash /home/maipai-admin/egpu-wake.sh'
 ```
 
+**Trust `nvidia-smi`, not the script's last line.** Until 2026-09-22
+that line grepped for the RTX 5060 Ti's PCI id and so printed "no eGPU
+yet" on a *successful* wake, because the enclosure holds an RTX 3070
+now. It has been fixed to test `/dev/nvidia1`, but the lesson stands:
+proof of recovery is two cards in `nvidia-smi` plus a 200 from the
+health check, never a script's own summary. A wake that worked also
+shows the Thunderbolt controller back on the bus (`8086:15e8`,
+`8086:15e9`) and the Core X Chroma entries at `auth=1`.
+
 **B. The full verified sequence (when A doesn't clear it, or the
 kernel needs a clean start)**: smart plug off, a *clean* reboot
 (`sudo systemctl reboot` or `poweroff`, never forced - a forced
@@ -86,19 +95,17 @@ exists before assuming it doesn't:
 ssh laptop-linux 'sudo -n systemctl restart maipai-chat.service --help >/dev/null 2>&1 && echo GRANT_OK || echo NO_GRANT'
 ```
 
-If `NO_GRANT`: `laptop/linux/grant-egpu-sudo.sh` in the homelab repo
-installs a NOPASSWD rule scoped to exactly the four commands this
-skill needs (`systemctl restart maipai-chat.service`,
+**The grant IS installed** - confirmed live 2026-09-22
+(`/etc/sudoers.d/maipai-admin-egpu`, put in place 2026-09-20). So run
+step A yourself; do not ask Jesse to type it. It is scoped to exactly
+four commands (`systemctl restart maipai-chat.service`,
 `systemctl reboot`, `poweroff`,
-`bash /home/maipai-admin/egpu-wake.sh`) - never broader sudo. It's
-already copied to `~/grant-egpu-sudo.sh` on the laptop; ask Jesse to
-run `sudo bash grant-egpu-sudo.sh` there once, with his own password
-(2026-09-20: as of this writing that one-time step hasn't been run
-yet, so `sudo -n` still fails - confirm live, don't assume it's done).
-Once it's installed, run A or B directly over the same `laptop-linux`
-SSH connection instead of asking Jesse to type either command. Never
-guess at working around a missing grant (no privilege escalation, no
-alternate account probing, no asking for his password in chat).
+`bash /home/maipai-admin/egpu-wake.sh`) and nothing wider. If
+`NO_GRANT` ever comes back, `laptop/linux/grant-egpu-sudo.sh` in the
+homelab repo reinstalls it and Jesse runs that one line with his own
+password. Never guess at working around a missing grant (no privilege
+escalation, no alternate account probing, no asking for his password
+in chat).
 
 **Jesse's smart plug is the one he controls** (he's said this
 directly: he does the physical/remote toggle, this skill's job is to
@@ -156,3 +163,57 @@ against hand-built work duplicating a prebuilt mechanism, applied here
 too). If Jesse grants the scoped sudo noted above, the next addition
 is running A or B automatically from this skill rather than asking him
 to run it - not a new daemon.
+
+## Read this skill on the SYMPTOM, never on your judgment of the cause
+
+This is the most important line in the file, because on 2026-09-22 a
+session had every fact below available and used none of them.
+
+**Trigger on any of these, full stop:**
+
+- `nvidia-smi` lists fewer than two GPUs on that host
+- the health check on `:8791` does not return 200
+- `maipai-chat` is `activating (auto-restart)` or its `ExecStartPre`
+  `test -e /dev/nvidia1` is failing
+- you are about to run *anything* heavy on that host
+
+**Do not** first ask why it happened. The 2026-09-22 session skipped
+this skill precisely because it *knew* the cause - it had caused the
+reboot itself - so it classified the situation as "my incident to
+debug" rather than "the local model is down." One missing card after a
+reboot is this failure class no matter who caused the reboot. Knowing
+the cause is not a reason to skip the procedure; it is usually the
+reason people skip it.
+
+The second half of that miss: the session had been driving the host
+all day with raw `ssh`, `lspci` and `nvidia-smi` for benchmarking, so
+reaching for a runbook felt like a step backwards. Fluency with the
+primitives is not a substitute for the procedure. It re-derived the
+whole diagnosis from kernel logs, told Jesse to power-cycle hardware
+he did not need to touch, and only found this file when he said "you
+have a procedure for this." Cost: about forty minutes and the lane.
+
+## Never run heavy work on that host while the lane is live
+
+Same day, the cause of the above. A session started a 12-way parallel
+CUDA build (`cmake --build -j 12`) plus an 11 GB model download while
+`maipai-chat` was actively serving Session C. `ggml-cuda` is
+template-heavy and each `nvcc` costs several GB; twelve of them on a
+31 GB box already holding the model took the machine out entirely - no
+SSH, no ping - and the reboot that followed dropped the eGPU.
+
+`nproc` is not a budget. Before any build, download, or bench there:
+
+1. **Cost the job, don't count cores.** CUDA compilation is the
+   specific trap: several GB per parallel job. Never exceed `-j 4` on
+   this machine.
+2. **Stop the service first** for anything heavy, and restart it after;
+   `systemctl restart maipai-chat.service` is granted. A build racing a
+   live model server is the failure above.
+3. **Fence the lane before stopping the service** - park the open
+   briefs, stop `lanes-autofeed` - so Session C is not mid-request when
+   the engine disappears. Put them back afterwards.
+4. **Watch remote work to its first real output.** The build above died
+   at *configure* (nvcc is not on a non-interactive shell's PATH; it
+   needs `-DCMAKE_CUDA_COMPILER=/usr/local/cuda/bin/nvcc`), and the
+   blind retry is what killed the box.
