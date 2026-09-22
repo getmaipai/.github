@@ -725,3 +725,14 @@ behaviour) is not this; that stays a named gap or a composition. The
 test of the rule is the PR link: without one the edit is a fork and is
 reverted.
 
+What the first such PR taught the next day (assistant-ui#7962, the
+Sources layout prop and a duplicate-key fix): the PR carries the issue
+link the upstream project asks for on a non-trivial feature, no
+changeset naming a package their config marks private, a colocated
+test in their own style covering the default path and the edge a
+reviewer will imagine, the element's own docs page updated in the same
+PR, and a green CI including whatever docstring coverage their bots
+require. And the part that matters most here: a review finding about
+the patch is a finding about our own copy, so the fix comes back as a
+kit tag rather than living upstream only, and if their review moves
+the design, we follow their design.
