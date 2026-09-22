@@ -193,6 +193,39 @@ whole diagnosis from kernel logs, told Jesse to power-cycle hardware
 he did not need to touch, and only found this file when he said "you
 have a procedure for this." Cost: about forty minutes and the lane.
 
+## Check the temperature, not just the service (2026-09-22)
+
+That host shuts ITSELF down under sustained load, and it looks nothing
+like a crash: no panic, no OOM line, just Intel Dynamic Tuning ACPI
+errors (`\_TZ.ETMD`, `\_SB.IETM._OSC`) and two seconds later an
+orderly `systemd-shutdown`. Twice in one afternoon.
+
+Measured while merely serving inference: `acpitz` **92 C against a
+100 C trip point**, both GPUs cool at 58-63 C. The CPU is the
+constraint, not the cards, not VRAM.
+
+So when the host is unreachable and you are reconstructing why, or
+before you ask it to do anything sustained:
+
+```
+ssh laptop-linux 'cat /sys/class/thermal/thermal_zone0/temp'
+```
+
+Divide by 1000. Anything over about 85 C means it is close to the
+edge and should not be given a build, a bench suite, or a long
+benchmark. A previous boot's ending is worth reading too, because the
+evidence is only there:
+
+```
+ssh laptop-linux 'journalctl -b -1 --no-pager | tail -5'
+```
+
+An orderly "Shutting down / Syncing filesystems" at the end means it
+was not a crash - look for the thermal ACPI lines just above it rather
+than hunting for a kernel fault that is not there. Full detail and the
+measured table are in the homelab repo, `docs/hosts/maipai-home.md`,
+"Thermal: this chassis shuts itself down under sustained load".
+
 ## Never run heavy work on that host while the lane is live
 
 Same day, the cause of the above. A session started a 12-way parallel
