@@ -193,7 +193,48 @@ whole diagnosis from kernel logs, told Jesse to power-cycle hardware
 he did not need to touch, and only found this file when he said "you
 have a procedure for this." Cost: about forty minutes and the lane.
 
-## Check the temperature, not just the service (2026-09-22)
+## The thermal problem is SOLVED - here is the state (2026-09-22)
+
+That host shut itself down three times in one afternoon. It was not a
+crash, a dead fan, dust, or paste: **Cooler Boost was simply off**, and
+Linux could not see the cooling controls at all because `msi-ec`
+refused to bind over a one-revision firmware mismatch (machine is
+`17G3EMS1.108`, driver ships `.110/.113/.115` for the same board).
+
+It is fixed and persistent. If the host is hot or shutting down again,
+check these before anything else:
+
+```
+ssh laptop-linux 'P=/sys/devices/platform/msi-ec; cat $P/cooler_boost $P/shift_mode; cat $P/cpu/realtime_temperature $P/cpu/realtime_fan_speed'
+```
+
+Healthy looks like `on`, `turbo`, and under load a CPU that plateaus
+around 75 C with the fan at 65%. Before the fix it sat at 89 C with the
+fan at 75% and climbed to a 100 C shutdown.
+
+If `cooler_boost` reads `off` or the path does not exist, the module
+did not load. It needs the forced profile, which lives in
+`/etc/modprobe.d/msi-ec.conf`, plus `msi-cooling.service` to re-apply
+the settings (the EC resets them on every power cycle):
+
+```
+ssh laptop-linux 'sudo modprobe msi-ec firmware=17G3EMS1.110; systemctl status msi-cooling'
+```
+
+After a KERNEL UPDATE, DKMS rebuilds the module and re-signs it with
+the enrolled MOK key automatically. If it ever stops loading with
+"Key was rejected by service", the key needs re-enrolling, which is a
+blue firmware screen at boot and cannot be done over SSH.
+
+Full detail, the measured before/after table and the install path are
+in the homelab repo, `docs/hosts/maipai-home.md`, "Thermal: SOLVED".
+
+**The Razer pad was never the problem.** Its service has run correctly
+since it was installed, pinned at 100% above 75 C. It cannot
+compensate for internal fans nobody asked to spin up, and a session
+that finds the pad running should not conclude cooling is handled.
+
+## Reading the temperature (kept: still the right first check)
 
 That host shuts ITSELF down under sustained load, and it looks nothing
 like a crash: no panic, no OOM line, just Intel Dynamic Tuning ACPI
