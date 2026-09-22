@@ -736,3 +736,39 @@ require. And the part that matters most here: a review finding about
 the patch is a finding about our own copy, so the fix comes back as a
 kit tag rather than living upstream only, and if their review moves
 the design, we follow their design.
+
+## A wake word is never always on (2026-09-22)
+
+The owner's ruling, in his words: it "shouldn't always be on and the
+user should be in control and know when it's on." That is not a
+preference about a toggle. A microphone listening passively in a
+family's home is the most privacy-sensitive thing this product can
+do, and the promise the whole platform is built on is that nothing
+leaves the house and the house is yours. A hub that quietly listens
+breaks that promise even if no byte ever leaves it, because the
+person no longer knows what their own house is doing.
+
+So passive listening carries invariants, the same shape as the
+child-safety ones in SAFETY.md: architecture, not settings. It is off
+by default and stays off, so installing a wake-word package does not
+enable it, an update never enables it, and no default-restore may turn
+it on. Enabling it is an explicit opt-in by an adult, one device at a
+time, never household-wide in a single click, and never available to a
+child profile. While the microphone is open there is a persistent,
+unmissable indicator on screen for as long as it lasts, not a toast
+that fades, so someone walking into the room can tell. Turning it off
+is one action from that indicator, never a trip into settings. And
+nothing before the wake word is kept: the detector's rolling buffer
+lives in memory, is never written to disk, never becomes a turn, and
+never reaches the memory judge.
+
+The indicator and the off switch are part of the feature's definition
+of done. A build that listens without showing it is a defect, not an
+unfinished polish item, and it does not ship.
+
+Why this is written down rather than left to the item: the pressure to
+soften it will come later and will sound reasonable each time. A
+household-wide toggle is fewer taps. An indicator that fades is
+tidier. Keeping a few seconds of pre-wake audio makes detection
+better. Each is a small trade against the one thing the product is
+actually selling, and the answer to all of them is already here.
