@@ -42,6 +42,19 @@ Adult freedom comes with three standing pieces:
   alongside the conversation without blocking or censoring what an adult can
   discuss. This overlay is part of the safety architecture: it is not
   configurable off.
+- **A model's reasoning is a second output, gated like the first (owner's
+  ruling, 2026-09-22).** A thinking stream can hold exactly what the
+  answer was built to withhold (how to tell a child that Santa is not
+  real, a memory the child may not read), and anything sent to a client
+  is visible in it. So: a minor's turn never receives reasoning, because
+  the hub does not emit it (never a client-side hide); reasoning passes
+  the same output gate and the same disclosure filter as the answer
+  before any adult sees it, a recalled memory quoted in the thinking
+  included; no voice, glance or shared-screen surface shows reasoning,
+  and a shared screen with a child possibly present counts as shared;
+  and the turn's record says when reasoning was withheld and why. This is
+  architecture, not a setting: no admin switch, flag or mode may send a
+  child a reasoning stream.
 
 Neutrality rule: MaiPai ships neutral. No jailbreak presets, no
 harm-optimized prompt packs, nothing that curates toward dangerous uses.
