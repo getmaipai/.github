@@ -772,3 +772,41 @@ household-wide toggle is fewer taps. An indicator that fades is
 tidier. Keeping a few seconds of pre-wake audio makes detection
 better. Each is a small trade against the one thing the product is
 actually selling, and the answer to all of them is already here.
+
+## A temporary chat leaves nothing behind, not even a row (2026-09-22)
+
+A temporary chat already shipped (Chat 55, `d892052a`): no turns are
+written, the thread list excludes it, minors get a 403, and the memory
+judge can never see it. But it still writes a `conversations` row,
+content-free, sitting hidden until some future sweep.
+
+That row stays out of the new design. What it leaks is not content, it
+is metadata: this person had a conversation, on this surface, at this
+time. On a household hub that is exactly the wrong thing to keep,
+because the person reaching for a temporary chat is usually doing so
+because of who else uses the machine, and "there is a hidden
+conversation from 9:42pm" answers the question they were trying not to
+leave answerable. Content-free is not the same as absent, and the
+promise this product makes is the stronger one.
+
+ChatGPT keeps temporary chats for about thirty days for safety review.
+That is a reasonable choice for a service carrying abuse obligations
+across millions of strangers. It is not our situation and it is not
+what we sold.
+
+So a temporary conversation touches no table at all. Its multi-turn
+window lives in process, keyed, size-capped and idle-expired, dying on
+restart, extending the pattern `resumeSessions` and `inFlightTurns`
+already establish rather than inventing a second store. That window
+matters: a temporary chat whose second turn forgets the first is not a
+privacy feature, it is a broken chat.
+
+None of this touches safety. The full pipeline runs against the
+in-memory window, the safety floor and the role floors and the content
+ceilings included, and a child still cannot create one. What
+"temporary" removes is persistence and memory, nothing else.
+
+Why this is written down: the cheaper option will sound reasonable
+every time it comes up. A content-free row is nearly nothing. Keeping
+it makes retention simpler. Each is a small trade against the one
+property that makes the feature worth having, and the answer is here.
