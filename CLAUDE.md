@@ -300,6 +300,19 @@ or Opus may hold it when Jesse says so.
   gets no review, a mixed diff is reviewed with the vendored paths
   excluded, and a review whose finders are reading vendored files is
   stopped; a config, preset, pin or docs diff gets `low` or none.
+  **Reviews are fast (owner's rule, 2026-09-22).** A review never
+  becomes the long pole of an item, so: `low` is the default, and
+  `medium` needs a named reason (a route, a guard, a wire shape, auth or
+  safety); the target is always the exact diff about to be committed
+  (the staged diff, or `main...HEAD` in a worktree), never the repo or
+  the branch's history; the review starts while the gate runs, never
+  after it, because the review is model time and the gate is machine
+  time (a finding that needs a code change reruns only the tests it
+  touches, then the gate once); a mechanical follow-up (a manifest
+  line, a registry entry, a one-line mirror of an already-reviewed
+  guard) gets a `low` pass on that diff alone (the commit hook needs a
+  review on record), never a `medium` one. The done report states the review's wall time beside
+  its level and pass count.
 - **Push at natural boundaries** (a verified item merged to `main`, the end
   of a work session, or when Jesse says ship), never reflexively after
   every commit. A push needs no approval; a push that fails is reported
