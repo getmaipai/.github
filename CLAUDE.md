@@ -693,7 +693,13 @@ arrive by bumping a version instead of hand-merging vendored copies.
 
 A deterministic rule needs a counter and a row, or it's retired; three
 phrasings in a week is a classifier candidate, not a fourth regex; a
-learned component never sits in the safety, consent, or privacy path. Load
+learned component never sits in the safety, consent, or privacy path.
+**No hacky rules (owner's rule, 2026-09-22):** understanding language is
+the model's job, never a word rule's; a failed chat becomes a replay row
+and a root-cause trace, never a patch that makes one phrasing pass; the
+gate's rule-budget lint only lets the count go down; and once a design is
+accepted, the pipeline it replaces is frozen that day except for safety
+defects. Load
 [docs/RULES-AND-LEARNED-COMPONENTS.md](docs/RULES-AND-LEARNED-COMPONENTS.md)
 before adding or editing a rule, word list, or classifier in a chat or turn
 pipeline.

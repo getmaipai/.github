@@ -40,6 +40,39 @@ until it lands, nothing retires on a single week).
 - **A model judge is a trend line, never a gate.** The persona judge
   and any LLM-as-judge score a bench or a nightly review; none decides
   a live turn.
+## No hacky rules: a bad chat is fixed at its root (owner's rule, 2026-09-22)
+
+Why: on 2026-09-22 a day of live chat failures was "fixed" one phrasing
+at a time (a capital-letter rule, a pronoun list, a "search *" pattern, a
+role-of-place regex), and each fix broke a phrasing nobody tested; the
+owner stopped the work and the chat was rebuilt on the accepted design
+(`home/docs/plans/simple-turn-pipeline-2026-09-22.md`). These rules keep
+the rebuild clean and apply to every product's turn pipeline.
+
+- **Understanding language is the model's job, never a word rule's.**
+  No regex, word list or phrase pattern decides what a person means:
+  their intent, whether a turn needs a lookup, what to search for, who
+  "he" or "it" is, whether an answer repeats one. Code decides only
+  closed, exact things: exact commands (matched whole or not at all),
+  the safety, consent and privacy floors (deterministic on purpose,
+  above), and a counted closed-vocabulary property only when an
+  accepted design record names it.
+- **A failed chat is a replay row and a trace, never a patch.** In
+  order: the turn joins the replay set in the owner's exact words and
+  fails; the trace names the layer that owns the wrong decision, with
+  file and line; the fix changes that layer's design. A change whose
+  only effect is to make one phrasing pass is refused in review, by the
+  coordinator, and by the gate.
+- **Enforced by the gate, not by memory.** The rule-budget lint (U0b)
+  counts regex literals and word lists per turn-path file against a
+  baseline that only goes down; a new rule outside the protected
+  modules fails the gate unless its marker names the design record that
+  accepted it. The rebuilt path (`turnNext.ts`) starts at zero.
+- **Once a design is accepted, the part it replaces is frozen the same
+  day.** No patch lands in a pipeline that an accepted design is
+  replacing, except a safety defect; everything else waits for, or is
+  built into, the new path. The coordinator stops routing such patches
+  the day the design is accepted.
 - **Tone is set by the plan line, the companion's own example lines
   and a measured steering vector per dial, not by prose.** A paragraph
   of personality instructions is the weakest lever on a small model
