@@ -705,3 +705,23 @@ as ChatGPT Voice has none. A child's answers stay
 short on every surface, which is a parental control, not a mode. The
 record is home's `docs/plans/response-contract-by-surface-2026-09-21.md`
 (RESP-01 to RESP-04).
+
+## 2026-09-22: a vendored file is edited only as an upstream-bound patch
+
+The first real gap in a shipped Element arrived the night the chat's
+sources card went in: the owner wanted shadcn.io's shape (a one-line
+"Used 8 sources" trigger, a compact list on expand) and assistant-ui's
+Sources Element ships only a card grid, with no variant prop and no
+exposed item parts to compose. The session added a `layout` prop to
+the kit's copy of the Element (ui-v0.5.26, additive, the default
+unchanged). The ruling keeps the rule and names the one door through
+it: a vendored file is edited only when the edit is a patch bound for
+upstream, opened as a pull request on the upstream project the same
+day, recorded in the kit's upstream note under "Patches pending
+upstream" (file, the diff in one sentence, the PR link), re-applied or
+dropped at every snapshot merge, and retired the moment upstream ships
+it. A patch nobody would send upstream (a house look, a Home-specific
+behaviour) is not this; that stays a named gap or a composition. The
+test of the rule is the PR link: without one the edit is a fork and is
+reverted.
+
