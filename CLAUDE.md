@@ -330,6 +330,19 @@ or Opus may hold it when Jesse says so.
   The one exception: a commit that touches only docs (Markdown, a prompt,
   a backlog line) needs the standards core (prose lint, PII wordlist,
   gitleaks, `standards/bin/check-core.sh`), which runs in seconds.
+- **Scoped gates (owner's rule, 2026-09-23).** The gate runs the checks the
+  diff can touch, decided from the staged diff (or `main...HEAD` in a
+  worktree), never by a session's own judgment: a diff confined to the
+  frontend runs the frontend lint, tests and build; a diff confined to the
+  backend runs the backend suite; a docs-only diff runs the standards core
+  (already the rule); a diff that crosses packages, or touches shared
+  config, a pin, a lockfile, `scripts/`, or a spec workspace, runs the full
+  gate. The secrets scan and the PII wordlist run on every scope. Why: on
+  2026-09-22 to 23 four sessions landed about thirty mostly frontend-only
+  commits through one four-minute full gate, one at a time, with flaky
+  reruns, and each item waited twenty to sixty minutes from done to live
+  behind a backend suite no frontend file can break. `check.sh` prints the
+  scope it chose and why in its first line, and the done report repeats it.
 - **One full gate at a time on a shared machine (2026-09-21).** Two
   full `check.sh` runs at once on the dev machine, beside the running
   hub's engines, put the OS under memory pressure and made one run
