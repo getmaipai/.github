@@ -111,9 +111,12 @@ them. Owner's rule, 2026-09-23.
 - **A person's output is a household record, never package data.**
   Anything a person made through a package (a picture, a video, a story,
   an export) is written into the household's own store as the spec's
-  media record (commons `MEDIA-RECORD-01`: owner, kind, bytes below the
-  household data directory, integrity digest, retention, and provenance
-  naming the package, the turn and the job), owned by the person. It is
+  `file` record (home's `docs/plans/household-storage-2026-09-23.md`,
+  commons `STORE-SPEC-01`: one owner, origin, kind, bytes below the
+  household data directory, integrity digest, retention, sharing, and
+  provenance naming the package, the turn and the job), owned by the
+  person; ownership, sharing and the caps are that record's rules, not
+  restated here. It is
   never kept inside the package's own data directory.
 - **Uninstall removes code, keeps state, never touches records.**
   Uninstall removes the package's code and hides its surfaces (its app
