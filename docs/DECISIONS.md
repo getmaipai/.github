@@ -810,3 +810,34 @@ Why this is written down: the cheaper option will sound reasonable
 every time it comes up. A content-free row is nearly nothing. Keeping
 it makes retention simpler. Each is a small trade against the one
 property that makes the feature worth having, and the answer is here.
+
+## Gate per push, and a narrow hold (2026-09-23)
+
+Jesse, 2026-09-23 evening: "we waste a bunch of time making small
+commits and then waiting for gates on each commit." Two org rules
+change (CLAUDE.md, Verification).
+
+**Gate per push.** `scripts/check.sh` must pass on the tree a push
+sends, before the push, rather than before every commit. A lane edits a
+block of items, gates the whole tree once, commits each logical change
+on its own from that unchanged tree, and pushes; any edit after the
+gate means the gate runs again before the push. Commits stay one
+logical change each with their own message and docs, so history and
+the changelog read as before; what is proven green is the tip that
+reaches `main`, which is the thing the hub deploys from. The
+GATE-HOOK-01 commit hook already stamps the gated tree, so the batch's
+commits pass it while the tree stays as gated (GATE-HOOK-02 makes that
+allowance explicit and tested).
+
+**The hold is narrow.** A gate waits for a running bench only when the
+bench measures time (latency rows, wall-time tables, the U6 rerun) or
+Jesse has called a hold. Token counts, ratios, pass/fail and reply-text
+measurements run beside a gate; the bench's record says which kind it
+is. The rule's origin, two full gates clashing on a port beside the
+engines, was fixed by FLAKE-PORT-01; what remained was a lane waiting
+an hour behind a token-count measurement.
+
+Not changed: one full gate at a time on the shared machine (memory),
+the docs-only gate beside anything, the review before a code commit,
+one logical change per commit, and Jesse's word for a release or a
+deploy.

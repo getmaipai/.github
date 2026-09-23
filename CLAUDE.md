@@ -326,9 +326,19 @@ or Opus may hold it when Jesse says so.
 ## Verification (definition of done)
 
 - Every repo exposes **`scripts/check.sh`**: lint + format check + tests +
-  gitleaks + the PII wordlist scan (below). It must pass before any commit.
-  The one exception: a commit that touches only docs (Markdown, a prompt,
-  a backlog line) needs the standards core (prose lint, PII wordlist,
+  gitleaks + the PII wordlist scan (below). **It must pass on the tree a
+  push sends, before that push (owner's rule, 2026-09-23: gate per push,
+  not per commit).** A lane may make several commits from one gated
+  tree: edit the block of items, run the gate once on the whole tree,
+  then commit each logical change on its own from that unchanged tree,
+  then push; a further edit after the gate means the gate runs again
+  before the push. Each commit stays one logical change with its own
+  message and docs; what is proven green is the tip that reaches
+  `main`. Why: on 2026-09-23 four S items each paid a four-minute
+  backend gate plus a review and a report to land, and the lanes spent
+  more time waiting on gates than typing. The docs-only case is
+  unchanged: a commit that touches only docs (Markdown, a prompt, a
+  backlog line) needs the standards core (prose lint, PII wordlist,
   gitleaks, `standards/bin/check-core.sh`), which runs in seconds.
 - **Scoped gates (owner's rule, 2026-09-23).** The gate runs the checks the
   diff can touch, decided from the working tree's diff against the
@@ -356,7 +366,15 @@ or Opus may hold it when Jesse says so.
   only in a test the diff did not touch, with a port or memory error,
   is rerun once alone before anything is concluded; a second such
   failure is reported as an environment finding, never fixed forward
-  in the test.
+  in the test. **The hold for a live measurement is narrow (owner's
+  rule, 2026-09-23):** a gate waits for a running bench only when that
+  bench measures time (a latency row, a wall-time table, the U6 rerun)
+  or Jesse has called a hold; a bench that measures tokens, ratios,
+  pass/fail or reply text (the parity and bisect arms, a replay of
+  outcomes) runs beside a gate, and the bench's own record names which
+  kind it is. Why: the port clashes that started the rule were fixed by
+  FLAKE-PORT-01, and on 2026-09-23 a lane waited an hour behind a
+  token-count measurement the gate could not have disturbed.
 - **A check, test, bench, or screenshot script never changes the machine
   outside the repo and its own data directory.** No system preferences
   (`defaults write`), no global config, no installs, no environment
