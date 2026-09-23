@@ -27,8 +27,10 @@ until it lands, nothing retires on a single week).
   (emotion, stance, hedges, the lookup field classes) within a week,
   the item is filed as a classifier candidate with the phrasings as
   its first labels; the fourth regex is refused.
-- **Labels for a classifier come from people or a frontier model,
-  never from a small local model.** A frontier-labeled set reports its
+- **Labels for a classifier come from people, or from a frontier model
+  over roster-based synthetic data only, never over household
+  transcripts (egress; owner's ruling 2026-09-22), and never from a
+  small local model.** A frontier-labeled set reports its
   disagreement rate against a human-labeled sample; a set labeled by
   the household's own small model is not training data (the ACT-02
   lesson: 4B-labeled acts scored near chance).
