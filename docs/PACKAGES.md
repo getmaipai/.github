@@ -101,6 +101,38 @@ standard in [`CLAUDE.md`](../CLAUDE.md).
   rolled-back index, and an unknown signer are all refused on hub and
   robot, with a clear message and no partial unpack.
 
+## Uninstall, and a person's files
+
+Why this section exists: a role turned off in the setup wizard or under
+Settings removes every package that needs it (the hub's capability
+reconcile), and a family's pictures, videos and stories must not go with
+them. Owner's rule, 2026-09-23.
+
+- **A person's output is a household record, never package data.**
+  Anything a person made through a package (a picture, a video, a story,
+  an export) is written into the household's own store as the spec's
+  media record (commons `MEDIA-RECORD-01`: owner, kind, bytes below the
+  household data directory, integrity digest, retention, and provenance
+  naming the package, the turn and the job), owned by the person. It is
+  never kept inside the package's own data directory.
+- **Uninstall removes code, keeps state, never touches records.**
+  Uninstall removes the package's code and hides its surfaces (its app
+  page, its launcher entry, its tools); it keeps the package's own
+  settings and state so a reinstall restores them; it never touches a
+  person's records, which stay reachable from the household's library
+  and files pages with the package gone.
+- **The confirmation says what goes and what stays.** Before an
+  allocation change or an uninstall, the confirmation lists the packages
+  being removed in these words, "the following will be uninstalled and
+  users will lose access", then states what stays, "your pictures stay
+  in Library" (or the kinds the records carry). Nothing is applied before
+  the person confirms.
+- **The mechanism is a shape check, not a promise.** A package that
+  stores a person's output anywhere but the household's media record
+  (its own data directory, a file path of its choosing) fails the
+  manifest lint: a manifest declares its outputs as media kinds, and the
+  host's record API is the only write path for them.
+
 ## The copyright assignment (CLA)
 
 Every `catalog` contribution needs the signed copyright assignment before
