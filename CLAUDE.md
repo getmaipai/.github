@@ -331,8 +331,11 @@ or Opus may hold it when Jesse says so.
   a backlog line) needs the standards core (prose lint, PII wordlist,
   gitleaks, `standards/bin/check-core.sh`), which runs in seconds.
 - **Scoped gates (owner's rule, 2026-09-23).** The gate runs the checks the
-  diff can touch, decided from the staged diff (or `main...HEAD` in a
-  worktree), never by a session's own judgment: a diff confined to the
+  diff can touch, decided from the working tree's diff against the
+  merge-base with `origin/main` (a commit is staged and made in one step
+  in this workflow, so a staged-only diff would usually be empty), plus a
+  check that no frontend file imports backend code, never by a session's
+  own judgment: a diff confined to the
   frontend runs the frontend lint, tests and build; a diff confined to the
   backend runs the backend suite; a docs-only diff runs the standards core
   (already the rule); a diff that crosses packages, or touches shared
