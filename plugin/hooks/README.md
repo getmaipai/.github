@@ -125,6 +125,24 @@ to run it any better than "review before committing" did.
   otherwise silently overwrite each other's still-valid stamp with a
   narrower one, denying a commit that was genuinely covered a moment
   earlier.
+
+  **The batch allowance (GATE-HOOK-02):** the org's own "gate per
+  push, not per commit" rule needs several commits to land off one
+  gate run, so a scope-covering, recent-enough stamp is not itself the
+  whole check - every file about to be committed also has to still
+  carry exactly the content that run tested. Two `git commit` calls
+  from the same tree, unchanged since the stamp, both go through on
+  it; an edit to a tracked file after the stamp (even a file the gate
+  already saw dirty, edited again) fails the next commit and names the
+  file. `mark-gate-checked.sh` records `HEAD` at stamp time plus every
+  dirty tracked file's own working-tree blob hash (`git hash-object`,
+  not `git diff --raw`'s new-blob-hash column - that field reads all
+  zeros for an uncommitted working-tree change, found live, since a
+  raw diff only ever computes a real hash for a tree or the index); a
+  path with no entry was clean (matched `HEAD`) at stamp time, so
+  `require-gate-before-commit.sh` checks it against `HEAD`'s own blob
+  there instead. Proven in `standards/tests/ts/gateHook.test.ts`, both
+  scripts spawned for real against a scratch git repo.
 - **`mark-gate-checked.sh`** (PostToolUse, `Bash`): stamps
   `<git-dir>/maipai-gate-checked-<session_id>` with the scope the run
   actually covered, read from `check.sh`'s own first output line
