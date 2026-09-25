@@ -24,9 +24,11 @@ derived view, never a second place status gets decided.
    ```
    bun run parse-backlog.ts <repo> ~/Developer/github.com/getmaipai/<repo>
    ```
-   Prints `{ repo, phase, areas: [{ area, done, open, status, built, missing }] }`,
+   Prints `{ repo, phase, areas: [{ area, done, open, status, built, missing, waiting }] }`,
    already excluding empty/meta sections (the parser drops any area where
-   `done + open === 0` itself - not a step to remember by hand).
+   `done + open === 0` itself - not a step to remember by hand). `waiting`
+   is real, parsed output too - see "Waiting on you" below, not a
+   coordinator-tracked field like `active`/`next`.
 2. Get each repo's open issue count:
    `gh issue list --repo getmaipai/<repo> --state open --limit 500 --json number --jq 'length'`
 3. For each area, write one doc to collection `areas` with
@@ -35,7 +37,8 @@ derived view, never a second place status gets decided.
    so every field below must be present, not just the parser's own output:
    ```json
    {"repo": "<repo>", "area": "<area>", "phase": "<phase>", "status": "<green|yellow|red>",
-    "done": 0, "open": 0, "built": ["..."], "missing": ["..."], "updated_at": "<ISO timestamp>"}
+    "done": 0, "open": 0, "built": ["..."], "missing": ["..."], "waiting": ["..."],
+    "updated_at": "<ISO timestamp>"}
    ```
    For each repo, one doc to collection `repos` with `doc_id: "<repo>"`:
    `{ repo, phase, open_issues, issues_url, updated_at }`. Use the
@@ -74,6 +77,50 @@ matching area's `active`/`next` fields inside `INITIAL` (a targeted
 edit of that one area's JSON, not a full re-dump, is enough) and
 redeploy. Doing only the first half is the bug that prompted this
 paragraph.
+
+## Waiting on you (added 2026-09-25)
+
+`parse-backlog.ts` itself detects, per area, every open item whose own
+text says `Jesse's call` or `owner's call` in its lead-in (the bold
+title plus the sizing parenthetical right after - a mention buried
+deep in an item's body, recording a past decision on some sub-point,
+does not count; see the parser's own `WAITING_RE` comment). Unlike
+`active`/`next`, this is real parsed output, not coordinator-tracked -
+never hand-edit a `waiting` array, it comes from `docs/BACKLOG.md`'s
+own words. Two things `WAITING_RE` deliberately excludes, found live
+2026-09-25 reviewing this feature against real BACKLOG.md text: a
+trailing number ("owner's call 5") is a citation to an already-made,
+numbered decision recorded elsewhere with the answer quoted right
+there, not a live question; a nested checklist sub-item (`  - [ ]
+(1) ...`, split out from a parent item for separate tracking) is its
+own item with its own lead-in, scanned the same as a top-level one -
+the parser previously dropped nested items from the counts entirely,
+a real accuracy gap beyond just this feature.
+
+`dashboard.html` renders every non-empty `waiting` array from every
+repo's every area as one persistent banner near the top of the page,
+**always visible whenever anything is waiting, never buried inside a
+lane card** - this is the whole point: Jesse asked, 2026-09-25, for
+these to always be clear on the dashboard, after a night where seven
+of them sat answered-only-when-asked, scattered across a 9,800-line
+BACKLOG.md with no visibility. The banner is empty (and hidden) when
+nothing is waiting - that is the goal state, not a bug.
+
+**Found live, 2026-09-25: once Jesse answers a `Jesse's call` item,
+reword its BACKLOG.md title to drop the phrase** (or move it out of
+the lead-in) **the same commit that records the decision** - otherwise
+it keeps showing as "waiting" forever, even though the question is
+answered and only the follow-up work is what's actually still open. A
+`- [x]` tick alone isn't enough here: the follow-up implementation item
+this decision unblocks is a new, separate `- [ ]` row, which the
+parser scans fresh and would flag again if it echoed the same phrase
+in its own lead-in.
+
+Same `INITIAL`-resync rule as `active`/`next` applies, and for the
+identical reason: `write_db` alone is invisible to a viewer with no
+live `db` connection. Whenever a `waiting` array changes for any area
+(an item resolved, a new one found), patch that area's `waiting` field
+inside `INITIAL` and redeploy, in the same step as the `write_db` call.
 
 ## When to run it
 

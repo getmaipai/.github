@@ -40,6 +40,9 @@ fi
 echo "== standards: prose-lint.sh self-test"
 bash standards/bin/prose-lint.test.sh
 
+echo "== plugin: bun test"
+bun test plugin/skills/status-dashboard/parse-backlog.test.ts
+
 echo "== standards core (local)"
 bash standards/bin/check-core.sh "$(pwd)"
 
