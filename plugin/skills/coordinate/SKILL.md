@@ -52,10 +52,95 @@ notes, decisions, messages, and docs.
    text (never two contradictory paragraphs kept "both sides"), runs
    `check.sh` on the combined `main`, pushes, and removes temporary
    branches and worktrees. The coordinator reviews its evidence.
-5. Coder sessions are launched by Jesse with
-   `claude --dangerously-skip-permissions` (with `--continue` to resume
-   one started without the flag). Pick the model from the floor table
-   in `CLAUDE.md`; the ready handshake (section 3) confirms it.
+5. A Claude-model item is dispatched with the Agent tool (section 1a),
+   not a second terminal session, unless Jesse wants to watch this one
+   directly or is resuming one he already has open (`claude
+   --dangerously-skip-permissions`, `--continue` to resume one started
+   without the flag). Pick the model from the floor table in
+   `CLAUDE.md` at the lowest tier it allows; the ready handshake
+   (section 3) confirms it.
+
+## 1a. Dispatch: agent, not a second terminal (owner's rule, 2026-09-26)
+
+For a Claude-model item, the coordinator's default is the Agent tool,
+not a second `claude --dangerously-skip-permissions` terminal:
+
+```
+Agent({
+  subagent_type: "general-purpose",  // or "fork" to inherit this session's context
+  model: "sonnet",                    // the floor-meeting tier, never a default upward
+  isolation: "worktree",              // for anything that touches repo files
+  description: "<item id>",
+  prompt: "<the work order, section 2, in full>",
+})
+```
+
+It reports back the same way a terminal session would: it shows up in
+`ListAgents`, and `SendMessage` to its name resumes it (ready, done,
+blocked, question, low context, same five events, section 3). The
+difference from a terminal session is provenance: the coordinator wrote
+the prompt it is running, so there is never a question of "whose work
+order is this" the way there was on 2026-09-26, when three independent
+terminal sessions spent a night unable to say for certain who had
+assigned what to whom. Reserve an actual terminal session for what
+Jesse wants to watch directly, or for resuming one he already has open
+with `--continue`; either way it still gets a work order and follows
+the same reporting contract below.
+
+Codex and OpenCode are not Claude Code and have no Agent-tool
+equivalent: they stay on the tmux- and server-driven session pattern
+in section 1b, unchanged.
+
+**Order of preference, cheapest first.** For an item either token-free
+lane could take (its size cap, section 1b), check Codex before the
+local model; check both before reaching for a Claude agent at all. Once
+a Claude agent is the right call, its model is the lowest tier the
+floor table clears (Haiku before Sonnet before Opus), not a default
+habit of reaching for a stronger one.
+
+**Lane locks (Codex, OpenCode).** Unlike a Claude session, neither
+Codex nor OpenCode has a per-caller identity `ListAgents` can show, so
+two coordinators (a mid-flight handoff, a second session started by
+mistake) can type into the same pane or server session and corrupt
+each other's turn. Before sending anything to `codex` or the OpenCode
+session, read the lock at `<repo>/data-scratch/lane-locks/<lane>.lock`:
+
+- Missing, or it already names this coordinator: write `<coordinator
+  name>\t<item id>\t<ISO timestamp>` and proceed.
+- Names a different coordinator: do not touch the lane. Message that
+  coordinator by name instead (`ListAgents` finds it); it either
+  confirms it is done with the lane (and clears the lock itself) or
+  takes the new item into its own queue.
+
+Clear the lock (delete the file, or overwrite with an empty line) the
+moment that item reports done, blocked, or is handed off; a lock held
+past that is a bug the next coordinator to find it should flag and
+clear.
+
+**Item claims (every lane).** Before dispatching *any* item, whether to
+an agent, Codex, or OpenCode, write a claim at
+`<repo>/data-scratch/claims/<ITEM-ID>.claim` (`<owner name>\t<lane>\t
+<worktree path>\t<started-at>`), after confirming none already exists
+for that id in any repo the item touches. This is the registry Codex,
+OpenCode, and a shared checkout do not otherwise have: a session or
+agent that finds unclaimed, uncommitted work sitting in a shared
+checkout checks `data-scratch/claims/` before assuming, finishing, or
+discarding it, and reports the diff to the coordinator if no claim
+matches (see 2026-09-26's own example below). Remove the claim when the
+item lands, or when its owner reports it done, blocked, or handed off.
+
+**Why this matters, concretely (2026-09-26).** In one evening, three
+independently-launched terminal sessions (one running a pinned
+PROJECT-RUN-01 brief, one mid-flight on a commons tag fix, one fresh
+onto INCOGNITO-04/07) each found uncommitted or tagged work in a shared
+checkout that none of them had assigned, and spent several
+round-trips through the coordinator just identifying whose it was
+before any of them could safely proceed. None of that time diagnosed
+or built anything; a claim file each could have grepped in one command
+would have answered it immediately. Agents dispatched directly by the
+coordinator do not have this problem in the first place, since the
+coordinator already knows every agent's assignment; claims exist for
+Codex, OpenCode, and any terminal session Jesse opens himself.
 
 ## 1b. Small isolated items: the two non-Claude lanes (2026-09-15)
 

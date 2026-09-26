@@ -209,12 +209,73 @@ or Opus may hold it when Jesse says so.
   exhaustion gets a handoff, an environmental blocker gets fixed, an
   unclear requirement gets a decision. When the strongest permitted
   model stalls, the item is re-scoped (chunked, or given a design
-  note) rather than retried.
+  note) rather than retried. **The floor is a minimum, not a default:**
+  the coordinator always reaches for the lowest-costing lane and model
+  that clears it (Codex over the local model over a Claude agent,
+  Haiku over Sonnet over Opus), and moves up only when the floor
+  itself demands it or a session reports below it.
+- **Dispatch: agents for Claude, sessions for Codex and OpenCode
+  (owner's rule, 2026-09-26).** A Claude-model item is dispatched with
+  the Agent tool (a fresh agent, or a fork when the coordinator's own
+  context is the right base to inherit), never by asking Jesse to open
+  a second `claude --dangerously-skip-permissions` terminal. An agent
+  is addressable and resumable the same way a terminal session is
+  (`ListAgents`, `SendMessage`), and costs the same tokens for the same
+  work, but the coordinator dispatched it itself and knows exactly what
+  it was told, instead of inheriting a session with its own independent
+  history the coordinator never wrote (the confusion three sessions
+  spent a night untangling on 2026-09-26 was exactly this: none of them
+  could say for certain who had assigned what). `isolation: "worktree"`
+  gives the agent its own worktree automatically; a `model` override
+  picks the floor-meeting tier. Codex and OpenCode are not Claude Code
+  and have no Agent-tool equivalent, so they keep the tmux- and
+  server-driven session pattern in the `coordinate` skill unchanged.
+  Between the two token-free lanes, Codex is checked first, then the
+  local OpenCode model when healthy, for whichever tier of item each
+  can actually take (this does not relax either lane's existing size
+  cap, it only orders which is tried first); a Claude agent is the
+  fallback when neither lane fits. A terminal session Jesse opens
+  himself, because he wants to watch it directly or because a handoff
+  resumes one with `--continue`, still follows the same reporting
+  contract; only the coordinator's own default mechanism changes.
+- **Lane locks, so only one coordinator drives a given Codex or
+  OpenCode target (owner's rule, 2026-09-26).** Codex and OpenCode have
+  no per-caller identity the way `ListAgents` gives Claude sessions, so
+  two coordinators (a handoff mid-flight, a second session started by
+  mistake) can type into the same pane or server session and corrupt
+  each other's turn. Each lane target keeps a lock file at
+  `<repo>/data-scratch/lane-locks/<codex|opencode>.lock` (coordinator
+  name, item id, acquired-at). Before sending anything to that lane,
+  the coordinator reads the lock: empty or already its own name, it
+  writes itself in and proceeds; held by another name, it does not
+  touch the lane and messages that coordinator instead. The lock is
+  held for the lane's current item and cleared when that item reports
+  done, blocked, or is handed off; it is never left stale past that.
+- **Item claims, so two lanes never collide on the same work or the
+  same files (owner's rule, 2026-09-26).** Before dispatching any item
+  (agent, Codex, or OpenCode), the coordinator writes a claim at
+  `<repo>/data-scratch/claims/<ITEM-ID>.claim` (owner name, lane,
+  worktree path, started-at), after checking that none already exists
+  for that id anywhere the item touches. A claim answers "who has
+  this" the way `ListAgents` answers "who is running" for Claude
+  sessions, but Codex, OpenCode, and a shared checkout have no registry
+  of their own. A session or agent that finds unclaimed, uncommitted
+  work sitting in a shared checkout does not guess whose it is and does
+  not finish it: it reads `data-scratch/claims/` for a match, and if
+  none exists, reports the diff to the coordinator rather than touching
+  it (this is exactly what cost a night's worth of cross-session
+  messages on 2026-09-26, when three sessions independently tried to
+  identify one uncommitted diff none of them had claimed). The claim is
+  removed when the item lands, or when its owner reports the item done,
+  blocked, or handed off elsewhere.
 - **Coder sessions are launched with
   `claude --dangerously-skip-permissions`**, so no one sits clicking
   approve; the worktree, port, and data-directory isolation in the
   work order is what keeps that safe. A session found asking for
-  approvals is restarted with the flag and `--continue`.
+  approvals is restarted with the flag and `--continue`. This applies
+  only to a terminal session Jesse opens himself; an agent the
+  coordinator dispatches runs under the coordinator's own permission
+  mode and needs no separate flag.
 - **At a stop point, make the state durable, then reset the context.**
   When a block of work is finished and the next has not started, the
   session first confirms the status is written down (docs, backlog,
