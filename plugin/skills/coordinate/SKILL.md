@@ -11,7 +11,10 @@ procedure. The coordinator architects, decides, instructs, unblocks, and
 checks evidence. It never edits source or tests, never writes scripts,
 never runs suites, benches, engines, builds, `check.sh`, or servers.
 Quick read-only inspection is fine. Its outputs are work orders, handoff
-notes, decisions, messages, and docs.
+notes, decisions, messages, and docs. The lock/claim/clear helpers in
+`scripts/` (section 1a) are the one exception, the same way docs are:
+infrastructure for the coordinator role itself, not product code for
+an item.
 
 ## 1. Setup
 
@@ -98,36 +101,50 @@ a Claude agent is the right call, its model is the lowest tier the
 floor table clears (Haiku before Sonnet before Opus), not a default
 habit of reaching for a stronger one.
 
-**Lane locks (Codex, OpenCode).** Unlike a Claude session, neither
-Codex nor OpenCode has a per-caller identity `ListAgents` can show, so
-two coordinators (a mid-flight handoff, a second session started by
-mistake) can type into the same pane or server session and corrupt
-each other's turn. Before sending anything to `codex` or the OpenCode
-session, read the lock at `<repo>/data-scratch/lane-locks/<lane>.lock`:
+**Lane locks (Codex, OpenCode), via `scripts/lane-lock.sh`.** Unlike a
+Claude session, neither Codex nor OpenCode has a per-caller identity
+`ListAgents` can show, so two coordinators (a mid-flight handoff, a
+second session started by mistake) can type into the same pane or
+server session and corrupt each other's turn. Before sending anything
+to `codex` or the OpenCode session:
 
-- Missing, or it already names this coordinator: write `<coordinator
-  name>\t<item id>\t<ISO timestamp>` and proceed.
-- Names a different coordinator: do not touch the lane. Message that
-  coordinator by name instead (`ListAgents` finds it); it either
-  confirms it is done with the lane (and clears the lock itself) or
-  takes the new item into its own queue.
+```
+scripts/lane-lock.sh acquire <repo> <codex|opencode> <coordinator name> <item id>
+```
 
-Clear the lock (delete the file, or overwrite with an empty line) the
-moment that item reports done, blocked, or is handed off; a lock held
-past that is a bug the next coordinator to find it should flag and
-clear.
+Exits 0 and proceeds if the lock was free or already this coordinator's;
+exits 1 and prints the current owner otherwise, in which case the lane
+is not touched, and that owner is messaged by name instead (`ListAgents`
+finds it) to confirm it is done with the lane or to take the new item
+into its own queue. Clear it the moment the item reports done, blocked,
+or is handed off:
 
-**Item claims (every lane).** Before dispatching *any* item, whether to
-an agent, Codex, or OpenCode, write a claim at
-`<repo>/data-scratch/claims/<ITEM-ID>.claim` (`<owner name>\t<lane>\t
-<worktree path>\t<started-at>`), after confirming none already exists
-for that id in any repo the item touches. This is the registry Codex,
-OpenCode, and a shared checkout do not otherwise have: a session or
-agent that finds unclaimed, uncommitted work sitting in a shared
-checkout checks `data-scratch/claims/` before assuming, finishing, or
-discarding it, and reports the diff to the coordinator if no claim
-matches (see 2026-09-26's own example below). Remove the claim when the
-item lands, or when its owner reports it done, blocked, or handed off.
+```
+scripts/lane-lock.sh release <repo> <codex|opencode> <coordinator name>
+```
+
+A lock still held past that point (`scripts/lane-lock.sh status <repo>
+<lane>`) is a bug the next coordinator to find it flags and clears.
+
+**Item claims (every lane), via `scripts/claim.sh`.** Before dispatching
+*any* item, whether to an agent, Codex, or OpenCode:
+
+```
+scripts/claim.sh new <repo> <item id> <owner name> <agent|codex|opencode|session> [worktree]
+```
+
+Fails loudly with the existing owner if the item is already claimed
+anywhere the item touches, instead of silently double-dispatching it.
+`scripts/claim.sh list <repo>` is the one-command way to see every
+active claim in a repo, cheaper than a round of cross-session messages
+just to ask "who has what." This is the registry Codex, OpenCode, and a
+shared checkout do not otherwise have: a session or agent that finds
+unclaimed, uncommitted work sitting in a shared checkout runs
+`scripts/claim.sh check <repo> <item id>` before assuming, finishing,
+or discarding it, and reports the diff to the coordinator if it comes
+back "unclaimed" (see 2026-09-26's own example below). Remove the claim
+(`scripts/claim.sh clear <repo> <item id> <owner name>`) when the item
+lands, or when its owner reports it done, blocked, or handed off.
 
 **Why this matters, concretely (2026-09-26).** In one evening, three
 independently-launched terminal sessions (one running a pinned
@@ -276,12 +293,14 @@ next brief once the block clears.
 has no API for a running TUI, so it runs inside a tmux session named
 `codex` started once by Jesse (`tmux new -s codex -c <the codex
 worktree>`, then `codex` inside it) and the coordinator types into it:
-`tmux send-keys -t codex "/clear" Enter`, a two-second wait, the
-pointer line ("Read <brief path> and do exactly what it says.") sent
-as text, a one-second wait, then `Enter` on its own (text typed while
-`/clear` runs is lost), and reads the screen with `tmux capture-pane
--t codex -p` to see when it is done and what it printed. One fixed
-worktree folder for Codex, kept forever; the coordinator re-points its
+`scripts/codex-clear.sh codex` (waits out a mid-compact state, then
+sends `/clear` and a settling pause, instead of the coordinator
+hand-timing that sequence itself), then the pointer line ("Read <brief
+path> and do exactly what it says.") sent as text, a one-second wait,
+then `Enter` on its own (text typed while `/clear` runs is lost), and
+reads the screen with `tmux capture-pane -t codex -p` to see when it is
+done and what it printed. One fixed worktree folder for Codex, kept
+forever; the coordinator re-points its
 branch between briefs (`git checkout -b codex/<item> <base>` in that
 folder) so Jesse never changes directory or restarts it. Reports go to
 a file outside the worktree, never committed. Its failure modes so
@@ -373,8 +392,16 @@ event and the item id:
 
 Handling, within the coordinator's own turn:
 
-- **done**: verify before accepting (section 4). Then assign the next
-  item, or the integration step.
+- **done**: verify before accepting (section 4). Release this item's
+  claim (`scripts/claim.sh clear <repo> <item id> <owner name>`) and,
+  for a persistent lane (Codex, OpenCode), its lane lock
+  (`scripts/lane-lock.sh release <repo> <lane> <coordinator name>`)
+  and clear the lane itself (`scripts/codex-clear.sh codex`, or the
+  OpenCode message-delete) before the next brief goes out: all three
+  required steps, not something left for later if it seems needed (a
+  lock or claim left held past this point blocks the next dispatch on
+  work that already finished). Then assign the next item, or the
+  integration step.
 - **blocked**: classify first. *Environment* (missing dependency, port,
   tool, data): arrange the fix, no model change. *Unclear requirement*:
   decide, or dispatch `design-resolver`, and answer. *Context

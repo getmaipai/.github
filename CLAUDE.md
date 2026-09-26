@@ -283,6 +283,43 @@ or Opus may hold it when Jesse says so.
   things: compact and continue, when the next item continues this one
   and unwritten working detail would be lost; or a fresh session with
   the handoff note, when the next item is a different task.
+- **Coordinator cost hygiene (owner's rule, 2026-09-26).** Researched
+  against the Claude Code and Agent SDK docs first (there is no
+  programmatic `/model` or `/clear`; both are interactive-only, so
+  these rules work with that, not around it):
+  - **Session clearing is a required step, not something to remember.**
+    Processing a done, blocked, or handoff report from a persistent
+    lane (Codex, OpenCode) clears that lane before the next brief goes
+    out, every time, using `coordinate/scripts/lane-lock.sh` and the
+    lane's own clear mechanism (Codex's `/clear` in its tmux pane,
+    OpenCode's message-delete via its server API), never left for a
+    later "if it needs it." A Claude session cannot clear itself; its
+    equivalent is the handoff above.
+  - **Monitoring stays event-driven, and a scheduled check stays
+    cheap.** `notify_when_idle` and cross-session messages are the
+    signal; nothing polls `ListAgents` or re-reads a lane's state on a
+    timer waiting for a change. The one scheduled exception, the
+    20-minute lane check (`coordinate` skill, section 1b), exists only
+    because Codex and OpenCode cannot self-report the way `ListAgents`
+    lets a Claude session or agent do; it stays a fixed-cost read
+    (`open/`, `taken/`, `done/` listings, a `tmux capture-pane`), never
+    a full re-read of docs, and a tick that finds nothing changed is
+    logged as a no-op, not written up as if something happened.
+  - **The coordinator runs the model the current phase needs, not the
+    strongest one still open.** At every stop point, it asks itself
+    whether what's ahead is a design or architecture judgment call
+    (Fable's or Opus's job) or pure directing, unblocking, and
+    verifying already-decided work (Sonnet's, sometimes Haiku's). When
+    it's the latter and the session is still on a stronger model out
+    of inertia, the coordinator says so and names the exact model to
+    switch to (there is no way to switch a running session's model but
+    the human typing `/model`, so the coordinator asks for it
+    explicitly rather than staying quiet and letting the stronger
+    model keep coordinating by default). This is the same move Fable
+    made on 2026-09-26, stepping back to Sonnet once the day's design
+    passes were written and only the build-out remained; it should
+    happen every time the same condition is true, not only when Jesse
+    happens to ask.
 
 ## Git workflow
 
