@@ -6,7 +6,7 @@ contradicts this one, the repo file wins for that repo, but flag the conflict.
 
 ## The products
 
-The platform is being rebuilt fresh on the design in `home/spec/design/`
+The platform is being rebuilt fresh on the design in `home/docs/design/`
 (seeded from the platform plan). On 2026-09-03, `home` and `bot` were reset
 to a clean history to start over on that design: the pre-rebuild code is
 not on GitHub at all, only a full local git mirror of each
