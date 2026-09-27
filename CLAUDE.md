@@ -372,6 +372,19 @@ or Opus may hold it when Jesse says so.
   docs title, then a pathspec commit that took A's unstaged backlog
   hunks). After every commit, `git show --stat HEAD` is read before
   the done report.
+  **Never run `git rebase`, `git reset`, or `git checkout` in a shared
+  checkout without checking `git status`/`git diff --cached` for
+  another session's staged or uncommitted work first** (2026-09-27,
+  `home`: a session's own staged `docs/BACKLOG.md` correction was
+  silently wiped when another session ran a plain `git rebase` on the
+  same shared checkout mid-edit - recovered only because the staged
+  blob was still reachable via `git fsck --dangling`; the first version
+  of this exact loss earlier the same day was not recoverable the same
+  way and had to be redone by hand). A rebase/reset/checkout operates
+  on the whole working tree and index at once, the same blast radius a
+  blind `git add -A` has, so it gets the same check first: read the
+  status, and if anything is staged or modified that isn't yours, stop
+  and let that session land or clear it before touching the tree.
 - **Run a code review before committing code** (not a doc-only change): the
   `code-review` skill, at least medium effort, on the diff about to be
   committed. In a worktree, pass the review an explicit target (the
