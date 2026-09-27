@@ -75,6 +75,22 @@ second copy of its rules here.
 - `bin/ensure-tag.sh` and the pin block resolve the standards tag through a
   per-tag worktree, so consumers run the exact immutable release they pin.
 
+## Unreleased (next tag)
+
+- `bin/gate-lock.sh`: the machine-wide full-gate mutex (org `CLAUDE.md` >
+  Verification, "One full gate at a time"; `docs/DECISIONS.md`,
+  2026-09-27). A repo's `check.sh` runs `gate-lock.sh acquire <label>
+  [item]` before any non-docs scope, which blocks FIFO behind any other
+  repo's full gate, and `gate-lock.sh release <label>` from an `EXIT`
+  trap. State lives in `~/.local/state/maipai/gate-lock/` (`holder`,
+  `queue`); a holder or waiter whose PID is dead is reclaimed, and a wait
+  past its allowance (6 minutes per queue position, 30 at most) exits 1
+  so the gate fails and reports. `gate-lock.sh status` shows the holder
+  and the queue. Until a tag carries it, consumers call it from the
+  sibling `.github` checkout rather than their pinned tag worktree: the
+  lock is one shared machine resource, so every caller must agree on it
+  regardless of which standards tag it pins.
+
 ## How a repo pins this
 
 A consuming repo's `scripts/check.sh` runs its own build, lint, and test

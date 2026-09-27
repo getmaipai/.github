@@ -4,6 +4,19 @@
 set -euo pipefail
 cd "$(dirname "$0")/.."
 
+# One full gate at a time on this machine (org CLAUDE.md > Verification;
+# docs/DECISIONS.md, 2026-09-27). This gate has no docs-only scope, so it
+# always takes the machine-wide lock, blocking FIFO behind any other
+# repo's full gate, and frees it on every exit path, a failure or a kill
+# included. GATE_LOCK_ITEM, when a caller sets it, names the item in
+# `gate-lock.sh status`.
+GATE_LOCK_LABEL="$(basename "$(pwd)")-$$"
+trap 'bash standards/bin/gate-lock.sh release "$GATE_LOCK_LABEL" >/dev/null 2>&1 || true' EXIT
+if ! GATE_LOCK_PID=$$ bash standards/bin/gate-lock.sh acquire "$GATE_LOCK_LABEL" "${GATE_LOCK_ITEM:-}"; then
+  echo "== gate-lock: could not take the machine-wide full-gate lock (see above); not running the gate"
+  exit 1
+fi
+
 if [ -d standards/schemas ]; then
   echo "== standards: regenerate and check for drift"
   (cd standards && bun run gen:ts >/dev/null)
