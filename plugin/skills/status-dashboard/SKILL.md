@@ -31,20 +31,47 @@ derived view, never a second place status gets decided.
    coordinator-tracked field like `active`/`next`.
 2. Get each repo's open issue count:
    `gh issue list --repo getmaipai/<repo> --state open --limit 500 --json number --jq 'length'`
-3. For each area, write one doc to collection `areas` with
-   `doc_id: "<repo>--<slug(area)>"` (lowercase, non-alphanumeric to `-`) and
-   **this exact shape** - `dashboard.html`'s live view groups docs by `repo`,
-   so every field below must be present, not just the parser's own output:
+3. List what is there first: `ArtifactData` `action: "list"` on `areas`
+   (`query.limit` 200) and on `repos`, with `out_dir` set to a scratch
+   folder. The listing prints each doc's `version`; every write below to
+   an existing doc must carry it as `if_version`, or the whole batch is
+   refused (found live 2026-09-27, when an unpinned refresh wrote
+   nothing twice). The saved files hold the content only, not the
+   version, so take the versions from the listing itself.
+4. For each area, write one doc to collection `areas` with
+   `doc_id: "<repo>--<slug(area)>"` and **this exact shape** -
+   `dashboard.html`'s live view groups docs by `repo`, so every field
+   below must be present, not just the parser's own output:
    ```json
    {"repo": "<repo>", "area": "<area>", "phase": "<phase>", "status": "<green|yellow|red>",
     "done": 0, "open": 0, "built": ["..."], "missing": ["..."], "waiting": ["..."],
     "updated_at": "<ISO timestamp>"}
    ```
+   The slug is the area heading lowercased, every run of one or more
+   non-alphanumeric characters collapsed to a single `-`, leading and
+   trailing `-` trimmed: "The chat rebuild (2026-09-22)" is
+   `home--the-chat-rebuild-2026-09-22`, never
+   `home--the-chat-rebuild--2026-09-22-`. A slug that does not match the
+   listing's ids forks a duplicate card beside the real one (found live
+   2026-09-27), so check the generated ids against the listing before
+   writing; every generated id but a genuinely new area must already
+   exist.
    For each repo, one doc to collection `repos` with `doc_id: "<repo>"`:
-   `{ repo, phase, open_issues, issues_url, updated_at }`. Use the
-   `Artifact` tool's `write_db` with `db_op: "batch"` against the dashboard
-   URL above - one batch call for everything, not one write per doc.
-5. Do not touch the HTML unless the visual layout itself needs to change.
+   `{ repo, phase, open_issues, issues_url, updated_at }`.
+5. Write with the `ArtifactData` tool, `action: "batch"`, each entry
+   `{op, collection, doc_id, file_path, if_version}` pointing at the
+   per-doc JSON file written in step 4 (never retype the docs inline).
+   Use `op: "update"` for an area doc, not `set`: `update` merges, so
+   the coordinator-tracked `active`/`next` fields below survive a data
+   refresh, where `set` silently drops them. A batch holds at most 50
+   writes and the five repos produce about 70 docs, so a full refresh is
+   two batches; both commit atomically or not at all.
+6. Do not touch the HTML unless the visual layout itself needs to change.
+
+The plugin cache under `~/.claude/plugins/cache/maipai/` can lag this
+file (on 2026-09-27 the cached 0.8.0 copy still listed four repos and
+no `waiting` field); when the skill loads from the cache, read this
+source file and `parse-backlog.ts` from the `.github` checkout instead.
 
 ## Active work and next-up (added 2026-09-24)
 
