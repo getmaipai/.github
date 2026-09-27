@@ -29,7 +29,7 @@ The libraries every product imports (`ui`, `core`, `spec`) live in
 | `home` | MaiPai Home | The self-hosted family AI hub: the platform and the household's master (identity, people, memory, the turn engine, settings, the package host, the shell). Every feature ships as a catalog package. |
 | `catalog` | MaiPai Catalog | The public package catalog: every plugin, app, companion, integration, model, wake word, voice, and theme, signed and indexed. Hub and robot install from it. Pins `spec` from `commons` for the manifest shapes; keeps no schema mirror of its own. |
 | `go` | MaiPai Go | Apple TV and iPhone client. Renders the same UI schema natively. Built last, once the hub and robot have packages with schema pages. |
-| `bot` | MaiPai Bot | Robot companion. Pairs with the hub like a pod (a full replica, the hub as its brain when reachable), stands alone complete when not. Bench-proven, rebuilt fresh on the platform design. |
+| `bot` | MaiPai Bot | Robot companion, on any supported body. Pairs with the hub like a pod (a full replica, the hub as its brain when reachable), stands alone complete when not: that standalone promise is the MaiPai build's; a purchased body (Reachy Mini, 2026-09-27) is a connected body whose turns the hub runs, until a measurement says its compute carries more. One body layer in `bot`, a profile per body, never a fork above it. Bench-proven, rebuilt fresh on the platform design. |
 | `.github` | (this repo) | Org standards, `@maipai/standards` tooling, the shared Claude plugin, org profile |
 
 MaiPai's promise: private, local AI that's actually yours. Nothing leaves the
