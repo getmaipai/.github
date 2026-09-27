@@ -633,20 +633,34 @@ These apply to docs, UI copy, comments, commit messages, changelogs, issues.
 - User-facing copy passes the dad test: would a busy parent with basic tech
   knowledge understand it on first read, without feeling stupid?
 - **End every reply to Jesse with the status block** (2026-09-14
-  shape): three lines, uppercase labels, in this order, nothing after
-  it. `STATE:` opens with one word, `active`, `waiting` or
-  `blocked [<owner>: <what>]`, then each session with its item and
-  condition in parentheses (running with a time, holding and behind
-  what, blocked), and `landed <item>` when something shipped since
-  the last block. `PROGRESS:` the path to the current milestone on
-  one line: its name, a bar of done and remaining items, the count,
-  `now` and `next` in order. `YOU:` the only place an ask ever
-  appears: `nothing`, or each ask tagged `(whenever)` or
-  `(blocking: <what it holds>)`, written so a reader who saw no
-  earlier message can act on it (the exact command or decision,
-  never "still yours"). `blocked` is used only when work has stopped
-  and always names the owner; a fact that stops nothing is never a
-  block.
+  shape, words fixed 2026-09-27): three lines, uppercase labels, in
+  this order, nothing after it. `STATE:` opens with exactly one of
+  four words, each meaning one thing:
+  - `done`: everything asked for has landed, nothing is running,
+    nothing is owed by anyone. The reply can be the last one.
+  - `active`: work is running right now (a session, an agent, a
+    gate, a bench), and it will report on its own.
+  - `waiting [<what>]`: work is stopped until a named thing happens
+    that is not Jesse's to do (a gate slot, a peer's push, a
+    lane's report). The bracket is mandatory: a bare `waiting` is a
+    defect, because it reads as "waiting on you" (2026-09-27, a
+    finished session wrote `waiting` for lack of an idle word and
+    Jesse read it as something still owed).
+  - `blocked [<owner>: <what>]`: work has stopped and cannot restart
+    until the named owner does the named thing. Used only when work
+    has stopped; a fact that stops nothing is never a block.
+  After the word, each session with its item and condition in
+  parentheses (running with a time, holding and behind what,
+  blocked), and `landed <item>` when something shipped since the
+  last block. `PROGRESS:` the path to the current milestone on one
+  line: its name, a bar of done and remaining items, the count, `now`
+  and `next` in order. `YOU:` the only place an ask ever appears:
+  `nothing`, or each ask tagged `(whenever)` or `(blocking: <what it
+  holds>)`, written so a reader who saw no earlier message can act on
+  it (the exact command or decision, never "still yours"). `STATE:
+  done` and `YOU: nothing` go together: if `YOU:` carries an ask the
+  state is not `done`, and if the state is `done` there is nothing
+  left to ask.
 
 ## Privacy and PII (hard rules)
 

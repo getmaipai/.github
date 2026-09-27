@@ -6,6 +6,24 @@ incident or review that prompted each. The rule itself lives in
 why, so the rule can be revisited on the facts rather than re-argued
 from memory. Newest first.
 
+## 2026-09-27: the status block gets a `done` word, and `waiting` must name its wait
+
+**Decision.** `STATE:` (org `CLAUDE.md`, Writing style) opens with
+one of four words with one meaning each: `done` (landed, idle,
+nothing owed; pairs with `YOU: nothing`), `active` (work running
+that will report on its own), `waiting [<what>]` (stopped until a
+named thing that is not Jesse's happens; the bracket is mandatory),
+`blocked [<owner>: <what>]` (unchanged). The `coordinate` skill's
+shape line carries the same four words.
+
+**Why.** The 2026-09-14 shape had no idle word, so a session that had
+finished everything and had nothing running wrote `waiting`, the
+nearest fit. Read cold, `waiting` means "waiting on you", and on
+2026-09-27 Jesse read a finished session's block exactly that way and
+had to ask what was still owed. A status line a reader has to
+interrogate is not a status line; each word now answers "is anything
+owed, and by whom" on its own.
+
 ## 2026-09-27: the full-gate mutex becomes a real lock, not a pgrep poll
 
 **Decision.** "One full gate at a time on a shared machine" (org

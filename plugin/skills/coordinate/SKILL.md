@@ -511,7 +511,7 @@ was told, what is open, and where the notes are. Every reply to Jesse
 ends with the status block in CLAUDE.md's shape (Writing style):
 
 ```
-STATE: active | waiting | blocked [<owner>: <what>] · <session>: <item> (running ~<when> | holding, behind <what> | blocked) · landed <item>
+STATE: done | active | waiting [<what>] | blocked [<owner>: <what>] · <session>: <item> (running ~<when> | holding, behind <what> | blocked) · landed <item>
 PROGRESS: <milestone>  ▰▰▰▱▱▱  3/6  ·  now <item>  ·  next <items in order>
 YOU: nothing | <ask> (whenever) | <ask> (blocking: <what it holds>)
 ```
@@ -520,6 +520,8 @@ YOU: nothing | <ask> (whenever) | <ask> (blocking: <what it holds>)
 a reader who saw no earlier message (the exact command or decision;
 never "still yours"); `State: blocked` is used only when work has
 stopped and names the owner; a fact that stops nothing is never a
-block. The old four-section block put asks in two places and blocks
+block. `done` means landed, idle and nothing owed (it pairs with
+`YOU: nothing`); `waiting` always names what it waits on in brackets,
+never Jesse, because a bare `waiting` reads as an ask (2026-09-27). The old four-section block put asks in two places and blocks
 where nothing was blocked (2026-09-13 twice, 2026-09-14 once); this
 shape exists to end that.
