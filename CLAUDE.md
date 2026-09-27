@@ -454,17 +454,30 @@ or Opus may hold it when Jesse says so.
   reruns, and each item waited twenty to sixty minutes from done to live
   behind a backend suite no frontend file can break. `check.sh` prints the
   scope it chose and why in its first line, and the done report repeats it.
-- **One full gate at a time on a shared machine (2026-09-21).** Two
-  full `check.sh` runs at once on the dev machine, beside the running
-  hub's engines, put the OS under memory pressure and made one run
-  fail on an ephemeral port ("Failed to start server. Is port 0 in
-  use?") in a test the change never touched. So a session starts a
-  full gate only when `pgrep -f '[s]cripts/check.sh|[b]un test|[v]ite build'` prints nothing (the bracketed first letter keeps the pattern from matching the waiting shell's own command line: on 2026-09-21 two sessions each waited eighteen minutes on the other's wait loop with no gate running, until the coordinator killed both), waits in a capped loop otherwise (ten seconds between checks, sixty checks at most, then it reports instead of waiting on); the docs-only gate
-  (seconds, no server) may run beside anything. A gate that fails
-  only in a test the diff did not touch, with a port or memory error,
-  is rerun once alone before anything is concluded; a second such
-  failure is reported as an environment finding, never fixed forward
-  in the test. **The hold for a live measurement is narrow (owner's
+- **One full gate at a time on a shared machine, enforced by a real lock
+  (2026-09-21, mechanized 2026-09-27).** Two full `check.sh` runs at
+  once on the dev machine, beside the running hub's engines, put the
+  OS under memory pressure and made one run fail on an ephemeral port
+  ("Failed to start server. Is port 0 in use?") in a test the change
+  never touched. The advisory form of this rule (a session self-
+  policing a `pgrep` check before starting) held up only as long as a
+  handful of sessions were actively watching each other; by
+  2026-09-27, with several peer sessions each dispatching their own
+  agents, it produced sessions stuck reporting "waiting" on a gate
+  that had already freed, with nothing to wake them (see
+  [DECISIONS.md](DECISIONS.md), 2026-09-27). `check.sh` now calls
+  `@maipai/standards`'s `bin/gate-lock.sh` before any non-`docs`
+  scope: it takes a real machine-wide mutex
+  (`~/.local/state/maipai/gate-lock/`, not per-repo), queues a waiter
+  FIFO instead of racing a bare `pgrep` the instant the pattern looks
+  clear, and releases in an `EXIT` trap so a killed gate frees the
+  slot. A session never hand-rolls the wait itself; it runs
+  `scripts/check.sh` and the lock is transparent. The docs-only gate
+  (seconds, no server) still runs beside anything, untouched by the
+  lock. A gate that fails only in a test the diff did not touch, with
+  a port or memory error, is rerun once alone before anything is
+  concluded; a second such failure is reported as an environment
+  finding, never fixed forward in the test. **The hold for a live measurement is narrow (owner's
   rule, 2026-09-23):** a gate waits for a running bench only when that
   bench measures time (a latency row, a wall-time table, the U6 rerun)
   or Jesse has called a hold; a bench that measures tokens, ratios,

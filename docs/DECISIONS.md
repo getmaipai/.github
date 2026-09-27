@@ -6,6 +6,47 @@ incident or review that prompted each. The rule itself lives in
 why, so the rule can be revisited on the facts rather than re-argued
 from memory. Newest first.
 
+## 2026-09-27: the full-gate mutex becomes a real lock, not a pgrep poll
+
+**Decision.** "One full gate at a time on a shared machine" (org
+`CLAUDE.md`, Verification) moves from advisory prose a session
+remembers to follow into a mechanical primitive: `@maipai/standards`
+ships `bin/gate-lock.sh`, sourced by every repo's `scripts/check.sh`
+before it runs any non-`docs` scope. It holds a real mutex (`mkdir`
+under `~/.local/state/maipai/gate-lock/`, atomic across the whole
+machine, not per repo) with the holder's session name, item id, PID
+and acquired-at written inside once the `mkdir` succeeds; a waiter
+appends itself to a FIFO `queue` file instead of racing a bare
+`pgrep` the instant the pattern looks clear, and rechecks on a
+schedule sized to its queue position (not a flat capped-then-give-up
+window) so it keeps a legitimate wait alive instead of stalling.
+Staleness is judged by `kill -0` on the recorded PID, never by
+elapsed time alone, so a crashed holder's lock is reclaimed without
+guessing. `check.sh` releases the lock (and drops its own line from
+the queue if it was still on it) in an `EXIT` trap, so a killed gate
+still frees the slot. The `docs`-scope gate is unchanged: it never
+touches the lock.
+
+**Why.** The 2026-09-21 rule was written for two sessions colliding
+by accident; by 2026-09-27 the org runs four or more peer sessions,
+each dispatching its own agents, and `GATE-SCOPE-01`'s own escalation
+rules (a lockfile touch, a `scripts/` edit, or a diff crossing
+`frontend`/`backend`) put ordinary feature items on the same
+contended `full` path far more often than the rule anticipated.
+Advisory `pgrep`-polling has no ownership record (a pattern match
+can't tell a live holder from a stale one) and no wake signal (a
+session that hit its capped wait just sits reporting "waiting," with
+nothing to tell it the gate later freed). Live that night: one
+session's status block read "waiting (released the gate window;
+NOTIFY-SHARE-02 finishing elsewhere)" while `pgrep` for the gate
+pattern was empty machine-wide (a stale wait, not a real block), and
+two other sessions independently confirmed hitting the same capped-
+wait-with-no-wake pattern during the same window, one saying it "only
+worked because everyone was actively rechecking and communicating
+rather than trusting a stale wait." That is not a coordination
+strategy that scales past a handful of sessions watching each other by
+hand.
+
 ## 2026-09-20: the `shared` repo (`ui`, `core`, `spec`)
 
 **Decision.** The libraries every product imports live in one new
