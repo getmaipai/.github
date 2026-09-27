@@ -527,6 +527,20 @@ or Opus may hold it when Jesse says so.
   is runnable from here, run it. Ask him to run something only when it
   truly requires his own session, device, or credentials (an interactive
   login, a physical action).
+- **A second "try it again" needs re-read proof, not a repeated hope
+  (owner's rule, 2026-09-27).** The first time a live symptom is fixed,
+  a dispatched session's own live-run report is real evidence. The
+  moment that same symptom comes back after a "fixed, try again" was
+  already sent, the bar changes: the next message to Jesse is not sent
+  on a green gate or a subagent's own claim alone. The coordinator
+  reads the actual evidence itself first (the stored record, the
+  quoted model output, the real file), confirms it says what's
+  claimed, and only then says anything is ready. Telling Jesse to
+  retry something on hope, twice, is worse than taking longer once
+  (2026-09-27: a `start_project` incident got "fixed, try again" sent
+  twice before the real cause, a second forced model round with the
+  wrong prompt entirely, was found by reading the actual stored turn
+  directly).
 - At release time, the release skill additionally does a **clean-clone build**
   (fresh clone in a temp dir must build and boot) to catch works-on-my-machine
   and over-eager gitignore mistakes.
