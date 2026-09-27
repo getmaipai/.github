@@ -305,6 +305,17 @@ or Opus may hold it when Jesse says so.
     (`open/`, `taken/`, `done/` listings, a `tmux capture-pane`), never
     a full re-read of docs, and a tick that finds nothing changed is
     logged as a no-op, not written up as if something happened.
+    **Codex can be the one exception to "cannot self-report," once
+    wired (2026-09-27, not yet done on the dev machine):** its own
+    `notify`/hooks mechanism can push a turn-complete event the
+    coordinator watches with the `Monitor` tool (`coordinate` skill,
+    section 1b, `codex-notify.sh`), making Codex-done detection
+    event-driven like a Claude agent's. Until the config is wired and
+    a `Monitor` watch is running, Codex-done detection still falls
+    back to the 20-minute tick's pane read; the tick keeps its other
+    jobs regardless (queue refill, landing reports, the local model's
+    health). OpenCode has no equivalent hook, so it stays on the tick
+    alone either way.
   - **The coordinator runs the model the current phase needs, not the
     strongest one still open.** At every stop point, it asks itself
     whether what's ahead is a design or architecture judgment call

@@ -291,15 +291,23 @@ next brief once the block clears.
 
 **Codex**, in Jesse's visible window, driven by the coordinator. Codex
 has no API for a running TUI, so it runs inside a tmux session named
-`codex` started once by Jesse (`tmux new -s codex -c <the codex
-worktree>`, then `codex` inside it) and the coordinator types into it:
+`codex`, opened or re-pointed with one command,
+`scripts/codex-launch.sh <worktree> [session] [launch-cmd]` (defaults
+to session `codex`, command `codexd`), instead of a separate `tmux
+new` followed by a separate `codex`/`codexd` command (2026-09-27: this
+was two manual steps every time a lane opened). It creates the session
+if none exists, or waits out a mid-compact state and re-points an
+existing one the same way `codex-clear.sh` does. Once open, the
+coordinator types into it:
 `scripts/codex-clear.sh codex` (waits out a mid-compact state, then
 sends `/clear` and a settling pause, instead of the coordinator
 hand-timing that sequence itself), then the pointer line ("Read <brief
 path> and do exactly what it says.") sent as text, a one-second wait,
-then `Enter` on its own (text typed while `/clear` runs is lost), and
-reads the screen with `tmux capture-pane -t codex -p` to see when it is
-done and what it printed. One fixed worktree folder for Codex, kept
+then `Enter` on its own (text typed while `/clear` runs is lost). Turn
+completion itself is now a push, not a read of the pane (below); `tmux
+capture-pane -t codex -p` is still how the coordinator reads what a
+finished turn printed, and how it checks for a credits, quota, or
+approval prompt. One fixed worktree folder for Codex, kept
 forever; the coordinator re-points its
 branch between briefs (`git checkout -b codex/<item> <base>` in that
 folder) so Jesse never changes directory or restarts it. Reports go to
@@ -308,6 +316,39 @@ far: a commit made over a red check, a test expectation changed to
 match the code, a word list widened until a test passed, a cause
 "explained" by restating the diff; the brief forbids each by name and
 the coordinator reads for them. Since 2026-09-20 Codex is launched in that window as `codex --approve-for-me` so its own reviewer answers the approval prompts a brief's queue moves and report writes raise (a plain `codex` asks on every one and the lane stalls unseen); its fixed worktree folders, `home-codex`, `stack-codex`, `.github-codex`, `catalog-codex`, `bot-codex` and `commons-codex`, are never removed by anyone (a landing session that removed `home-codex` left Codex in a deleted directory, every turn failing with "invalid cwd"); a brief that needs another repo creates `<repo>-codex` the same way and it joins that list. A Codex report that says a change is "already present" pastes the grep that proves it, before and after; on 2026-09-20 two such reports were wrong (a keyword matched a different guard in the same file), so a brief names the exact grep and its expected count and the coordinator lands nothing on the claim alone. A Codex commit made over a red gate is discarded, not fixed forward, and its brief is reissued with the exact checkout commands and the rule in its first line. At low reasoning (the owner's setting since 2026-09-20 to stretch credits) Codex takes S mechanical items only; an M item goes to the local model or a Claude session (DECISIONS.md, 2026-09-20, the lane measure).
+
+**Codex can push its own turn-complete event, so the coordinator does
+not have to wait for the 20-minute tick, or a pane read, to learn a
+brief finished (2026-09-27, not yet wired on the dev machine).** Codex
+CLI has a native `notify` hook (a `hooks.json` entry on newer
+installs) that Codex itself invokes the moment a turn completes, with
+a JSON payload describing what happened; this is a real push from
+Codex, not a guess from screen text. To turn this on, once per
+machine:
+
+1. Check the installed Codex version's own hooks docs for the exact
+   config key and payload shape (`notify` legacy field vs. a
+   `hooks.json` entry, `after_agent` vs. some other event name); they
+   have changed across releases and are not asserted here.
+2. Add it to `~/.codex/config.toml` (or the equivalent hooks config):
+   ```
+   notify = ["<path to>/plugin/skills/coordinate/scripts/codex-notify.sh"]
+   ```
+3. Restart Codex once so it picks up the config.
+4. Start watching the log with the `Monitor` tool: `tail -F
+   ~/.local/state/maipai/codex-events.log`, re-armed on its own
+   expiry.
+
+`codex-notify.sh` appends each event as one line to that log,
+verbatim, timestamped, unparsed; the coordinator reads the line's JSON
+when `Monitor` fires. Once wired and watched, a new line is a real
+event the instant Codex finishes a turn, so the coordinator can read
+the pane and land the report right away instead of up to twenty
+minutes late. Until it is wired (or if the watch has lapsed), Codex
+completion still falls back to the 20-minute tick and the pane read
+below; the tick keeps its other jobs regardless (queue refill, landing
+already-accepted reports, the local model's health, reading the pane
+for a credits or quota message).
 
 ## 2. The work order
 
