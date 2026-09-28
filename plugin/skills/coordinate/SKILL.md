@@ -289,6 +289,24 @@ Codex out of credits) is reported to Jesse by name, not left as
 silent idle time; it is never a reason to stop writing that lane's
 next brief once the block clears.
 
+**A brief the coordinator just wrote and pushed is not automatically
+visible in the lane's worktree (2026-09-28).** `home-codex`,
+`stack-codex`, and the rest are long-lived fixed worktrees the
+coordinator never `cd`s into to write from; the coordinator writes and
+commits a work-order file in its own checkout (or another worktree)
+and pushes it to `origin/main`, but the Codex worktree keeps whatever
+commit it was last on until something pulls. Pointing Codex at
+`docs/plans/<brief>.md` before that catches up gets back "no such
+file" - this is the gap, not a Codex mistake, and re-sending the same
+pointer only repeats it. Before typing the pointer line: `git -C
+<worktree> status` (clean only; anything dirty is a question, not a
+merge), then `git -C <worktree> fetch origin && git -C <worktree>
+merge --ff-only origin/main`. Doing this from the coordinator's own
+shell, before the pointer goes in, is simpler than folding it into the
+brief's own first line (a session that can't yet read the brief can't
+be told to fetch by the brief either) - the brief only needs to assume
+it's already caught up.
+
 **Codex**, in Jesse's visible window, driven by the coordinator. Codex
 has no API for a running TUI, so it runs inside a tmux session named
 `codex`, opened or re-pointed with one command,
