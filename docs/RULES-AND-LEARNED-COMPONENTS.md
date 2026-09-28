@@ -76,6 +76,6 @@ the rebuild clean and apply to every product's turn pipeline.
   built into, the new path. The coordinator stops routing such patches
   the day the design is accepted.
 - **Tone is set by the plan line, the companion's own example lines
-  and a measured steering vector per dial, not by prose.** A paragraph
-  of personality instructions is the weakest lever on a small model
-  (the prebuilt-over-hand-built rule, applied to voice).
+  and a measured style adapter per companion, not by prose.** A
+  paragraph of personality instructions is the weakest lever on a small
+  model (the prebuilt-over-hand-built rule, applied to voice).
