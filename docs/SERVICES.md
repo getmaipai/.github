@@ -55,6 +55,48 @@ restarts its engine children with backoff and raises a health item
 instead of restarting a child forever; the status app polls the
 daemon's health endpoint and shows the truth when it is gone.
 
+## One instance
+
+A daemon runs at most once per machine per OS user, whatever data directory
+or port it is given. On 2026-09-29 a second hub, started by hand with a
+different data directory and port, ran beside the real one for hours and
+answered on its port with an empty household. A lock per data directory
+would not have stopped it, so the lock is per machine.
+
+On boot, before opening any database or binding a port, the daemon takes
+an exclusive lock at `~/.maipai/<product>/<daemon>.lock`
+(`%LOCALAPPDATA%\MaiPai\<product>\<daemon>.lock` on Windows). The file is
+JSON, `{pid, startedAt, port, dataDir, cwd}`, and it is created atomically:
+write a temp file, then `link()` it into place, falling back to an
+exclusive create where hard links do not exist.
+
+- **Stale locks are reclaimed.** A lock is stale when its pid is dead, when
+  the pid now belongs to something that is not the daemon's runtime, or
+  when that process started after `startedAt`. A crashed daemon never
+  blocks the next start.
+- **Released on exit.** A clean exit, SIGINT and SIGTERM all release it. A
+  hard kill leaves a stale lock, which the next start reclaims.
+- **A second start refuses.** It exits 1 before touching any database and
+  says, in plain words, which daemon is running and how to stop it:
+  `Another <Product> <daemon> is already running on this machine (PID n,
+  port n, data directory ...). Only one runs at a time, so this one will
+  not start, and it has not touched any database. Stop the running one
+  first: kill n.`
+- **No production opt-out.** Tests that boot throwaway instances on their
+  own data directory and port set a test-only environment variable that
+  skips the lock, point the lock path at a temp file, and the daemon logs
+  a warning to stderr whenever the variable is set.
+- **Managers read the same file.** The service manager scripts and the
+  status tooling read the lock to name a daemon they did not start, with
+  its pid, port and data directory, and refuse to report success for a
+  start that was refused.
+
+A data directory outside the product's own home (the repo checkout for a
+source run, `~/.maipai/<product>/data` for an install) is refused unless
+the person set it on purpose, so a working-directory slip cannot silently
+create a second, empty household. Home's implementation is
+`backend/src/lib/instanceLock.ts` and `bootGuard.ts`.
+
 ## Health, one list
 
 The daemon owns one list of health items: `code`, `severity`
