@@ -32,10 +32,11 @@ live in Profile.
 
 ## Channels, all inside the house
 
-The shell's notification center and browser push through the hub's own
-push endpoint on the LAN; Go local notifications from the hub's event
-stream, with a TV overlay and speech through a companion if present; the
-robot speaks once at a natural moment (`immediate` interrupts) and turns
+The shell's notification center and system notifications from the open
+app; browser-maker push only as an opt-in relay. Go local notifications
+from the hub's event stream, with a TV overlay and speech through a
+companion if present; the robot speaks once at a natural moment
+(`immediate` interrupts) and turns
 actions into a spoken question; pods and Desktop use the same overlay and
 chime; email and SMS only as later integration packages; Telegram is the one
 off-LAN channel that exists today (a direct call from the machine to
