@@ -283,6 +283,25 @@ or Opus may hold it when Jesse says so.
   things: compact and continue, when the next item continues this one
   and unwritten working detail would be lost; or a fresh session with
   the handoff note, when the next item is a different task.
+- **Codex does the running; the coordinator only writes the brief
+  (owner's rule, 2026-09-29).** Anything that costs machine time or
+  tokens but no judgment goes to a Codex lane whenever a lane is free,
+  never to the coordinator's own session: gates (`check.sh`, including
+  `--docs`), test and lint runs, builds, the commit and push of a
+  finished item (docs-only ones included), landing a lane's commit,
+  restarting the local app, and screenshot or health captures. The
+  coordinator's own work is the brief, the decision, and reading the
+  diff and the report; it starts a gate itself only when no Codex lane
+  can take it (both busy, or the step needs Claude-only tools such as
+  the code-review skill or the browser), and says so in its report.
+  A brief therefore ends with the exit checks and the commit, and asks
+  Codex to report the gate's exit code and scope line, so the
+  coordinator reads a result instead of producing one. Why: on
+  2026-09-29 a coordinator session ran a docs gate itself that turned
+  into the full 4,474-test suite (344 seconds of a Claude session
+  waiting on a machine), for a change a Codex lane runs for no Claude
+  tokens. A gate's exit code is read from the command itself, never
+  from `tail` of its output, which hides it.
 - **Coordinator cost hygiene (owner's rule, 2026-09-26).** Researched
   against the Claude Code and Agent SDK docs first (there is no
   programmatic `/model` or `/clear`; both are interactive-only, so
