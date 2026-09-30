@@ -5,12 +5,12 @@ repo pins by tag and calls from its own `scripts/check.sh`. The prose half
 (what the rules say and why) lives in [`../CLAUDE.md`](../CLAUDE.md) and the
 `docs/` tree beside it; this package is what actually runs.
 
-Current version: **std-v0.3.0** (see [`VERSION`](VERSION)).
+Current version: **std-v0.3.1** (see [`VERSION`](VERSION)).
 
 ## What v0.1 shipped
 
 - `bin/check-core.sh`: the shared `check.sh` core. Runs gitleaks, the PII
-  wordlist scan, the prose lint, and the licence check, in that order, and
+  wordlist scan, the prose lint, the engine-port check, and the licence check, in that order, and
   exits non-zero on the first category that fails (each check still runs and
   reports, so one commit shows every problem at once).
 - `bin/pii-scan.sh`: word-boundary scan of tracked files and the working tree
@@ -23,6 +23,9 @@ Current version: **std-v0.3.0** (see [`VERSION`](VERSION)).
   case, not for silencing a real violation.
 - `bin/licence-check.sh`: confirms `LICENSE` is AGPL-3.0 with a copyright
   line.
+- `bin/engine-port-check.sh`: rejects committed launch scripts that start a
+  local engine on Home's fixed default ports (`8788`, `8789`, `8793`, or
+  `8794`). Its fixture test is `bin/engine-port-check.test.sh`.
 
 ## What v0.2 added
 
