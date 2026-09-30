@@ -289,7 +289,11 @@ or Opus may hold it when Jesse says so.
   never to the coordinator's own session: gates (`check.sh`, including
   `--docs`), test and lint runs, builds, the commit and push of a
   finished item (docs-only ones included), landing a lane's commit,
-  restarting the local app, and screenshot or health captures. The
+  and screenshot or health captures. Not restarting the local app: a
+  process started from a Codex command dies when that command's shell
+  is cleaned up (2026-09-29: the hub was started twice from Codex and
+  gone by the next probe, a household outage), so the coordinator's own
+  shell starts or restarts the app and confirms it answers. The
   coordinator's own work is the brief, the decision, and reading the
   diff and the report; it starts a gate itself only when no Codex lane
   can take it (both busy, or the step needs Claude-only tools such as
