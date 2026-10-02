@@ -3,7 +3,7 @@
 #
 # Pinned by every getmaipai repo's scripts/check.sh (called after the repo's
 # own build/lint/test steps). Runs the checks that are the same everywhere:
-# gitleaks, the PII wordlist scan, the prose lint, engine ports, and the licence check.
+# gitleaks, the PII wordlist scan, the prose lint, engine ports, the licence check, and the architect rulebook lint.
 # Every category runs even if an earlier one fails, so one commit shows
 # every problem at once; the exit code is non-zero if any category failed.
 #
@@ -43,6 +43,9 @@ bash "$HERE/engine-port-check.sh" "$REPO_ROOT" || STATUS=1
 
 echo "== standards: licence check"
 bash "$HERE/licence-check.sh" "$REPO_ROOT" || STATUS=1
+
+echo "== standards: architect rulebook"
+bash "$HERE/architect-check.sh" "$REPO_ROOT" || STATUS=1
 
 if [ "$STATUS" -eq 0 ]; then
   echo "== standards core passed (std-v$STD_VERSION)"

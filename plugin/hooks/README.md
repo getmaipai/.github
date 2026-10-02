@@ -178,6 +178,24 @@ to run it any better than "review before committing" did.
   would wave through a real-code commit on nothing more than the fast
   standards-core path having run).
 
+## The architect gate (ARCH-GATE-01, 2026-10-02)
+
+- **`require-architect-verdict.sh`** (PreToolUse, `Bash`): in a repo that
+  keeps `docs/design/RULES.md`, denies a `git commit` that stages
+  anything under `docs/design/`, `docs/plans/`, `docs/BACKLOG.md`, or a
+  path matching a `Governs:` glob in RULES.md, unless
+  `data-scratch/architect/<ITEM-ID>.verdict` holds `verdict: APPROVED`,
+  under 24 hours old, for an item id that appears in the commit message
+  (or whose `sha256:` equals the staged diff's). A commit that stages
+  `docs/design/RULES.md` itself needs `Owner-approved: YYYY-MM-DD` in the
+  message and then needs no verdict: only the owner changes a rule.
+  Does nothing in a repo without RULES.md, exempts `--amend`, folds in
+  unstaged tracked files under `-a`, finds the repo with `git rev-parse`
+  so a worktree works (verdicts are read from the worktree's and the
+  main checkout's `data-scratch/`). Soft gate: every denial names the
+  next step (dispatch the `architect` agent with the item id). Tested in
+  `standards/tests/ts/architectHook.test.ts`. See `docs/ARCHITECT.md`.
+
 ## Session-start context
 
 - **`session-start-context.sh`** (SessionStart, all events): if the

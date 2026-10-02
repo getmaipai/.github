@@ -53,6 +53,9 @@ fi
 echo "== standards: prose-lint.sh self-test"
 bash standards/bin/prose-lint.test.sh
 
+echo "== standards: architect-check.sh self-test"
+bash standards/bin/architect-check.test.sh
+
 echo "== plugin: bun test"
 bun test plugin/skills/status-dashboard/parse-backlog.test.ts
 

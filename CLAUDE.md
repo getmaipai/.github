@@ -355,6 +355,21 @@ or Opus may hold it when Jesse says so.
     happen every time the same condition is true, not only when Jesse
     happens to ask.
 
+## Architect gate
+
+A repo with `docs/design/RULES.md` keeps its hard design rules there; that
+file is the authority, and `docs/dev.md` and `docs/plans/` are history.
+Before a backlog item is dispatched, a design note is committed, or a commit
+touches `docs/design/`, `docs/plans/`, `docs/BACKLOG.md` or a path an area's
+`Governs:` line names, the `architect` agent rules on it: APPROVED, REJECTED
+(rule quoted), DUPLICATE (backlog id) or NEEDS-RULE-CHANGE (to Jesse). The
+verdict lands in `data-scratch/architect/<ITEM-ID>.verdict`; the commit hook
+and the `coordinate` skill require a fresh APPROVED one. Only Jesse changes a
+rule, and a commit that edits `RULES.md` carries `Owner-approved: <date>`.
+Why (2026-10-02): sessions wrote new decision records without checking
+earlier ones, and 22 contradictions had built up in Home's docs. See
+[docs/ARCHITECT.md](docs/ARCHITECT.md).
+
 ## Git workflow
 
 - **All work lands directly on `main`. Never open pull requests.** The remote is

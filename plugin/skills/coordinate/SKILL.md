@@ -126,6 +126,14 @@ scripts/lane-lock.sh release <repo> <codex|opencode> <coordinator name>
 A lock still held past that point (`scripts/lane-lock.sh status <repo>
 <lane>`) is a bug the next coordinator to find it flags and clears.
 
+**Architect gate (before any claim).** In a repo with
+`docs/design/RULES.md`, no item is dispatched without an `APPROVED`
+record at `<repo>/data-scratch/architect/<item id>.verdict`, written by
+the `architect` agent (see `docs/ARCHITECT.md`). Dispatch the agent
+first if none exists. `REJECTED` and `DUPLICATE` items are not
+dispatched (fix the proposal or drop it); `NEEDS-RULE-CHANGE` goes to
+Jesse, since only he changes a rule.
+
 **Item claims (every lane), via `scripts/claim.sh`.** Before dispatching
 *any* item, whether to an agent, Codex, or OpenCode:
 
