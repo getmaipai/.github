@@ -107,7 +107,9 @@ Every package declares `data_sources` and a `privacy_row`; the "what
 leaves the house" tables (see [`CLAUDE.md`](../CLAUDE.md) > Privacy
 architecture) are generated from these declarations, never hand-maintained.
 A new outbound host is a permission change, shown at install and on
-update. Export and forget per person cover every package's storage:
+update. The one outbound host an owner adds by key, an optional hosted
+search provider, is off by default, a write-only secret, never used for
+a child's or teen's query, and has its privacy row (PRIVACY.md). Export and forget per person cover every package's storage:
 `host.data.forget(person)` is mandatory for anything person-scoped.
 Retention is declared per data class. No analytics, ever. Enforced by
 catalog lint plus a forget fixture that proves the data is actually gone.

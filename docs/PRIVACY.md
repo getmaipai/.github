@@ -19,6 +19,17 @@ check, a model download).
   that identifies the user (their YouTube account, their location for
   weather) is opt-in, connects directly from their hub to that service with
   credentials stored locally, and never transits anything of ours.
+- **An optional hosted search provider is the owner's choice, and the
+  query text then leaves the house (owner's ruling, 2026-10-02).** The
+  owner brings the provider and its key; it is not MaiPai-operated, and
+  nothing of ours sits between the hub and it. It is off by default, its
+  key is a write-only secret, and it is never used for a child's or a
+  teen's query. The setting says in plain words that the query text
+  leaves the house, and the privacy page gains its row in the same
+  commit. It carries the owner's own search, so it is not telemetry.
+  Search works fully with no key. Why: some owners want a hosted
+  index's coverage and accept the trade, but the default must stay
+  private and a minor's words must never go.
 - **Every product keeps a user-tier privacy page** with the "what leaves the
   house" table: each outbound connection, when it happens, what it carries,
   and who receives it. Plain dad-test language. Adding or changing an

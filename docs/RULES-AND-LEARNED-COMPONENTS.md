@@ -8,7 +8,9 @@ classifier instead.
 
 From the chat architecture review (`home/docs/plans/
 chat-architecture-review-2026-09-16.md`): decisions live in code and
-the model writes, and that is right; the failure mode is a word list
+the model writes, and that is right (for whether a turn needs a search
+or a tool, the model decides outright: see the 2026-10-02 section
+below); the failure mode is a word list
 that grows forever and a rule nobody can prove ever fires.
 
 - **No rule without a counter and a row.** A deterministic rule that
@@ -58,7 +60,9 @@ the rebuild clean and apply to every product's turn pipeline.
   closed, exact things: exact commands (matched whole or not at all),
   the safety, consent and privacy floors (deterministic on purpose,
   above), and a counted closed-vocabulary property only when an
-  accepted design record names it.
+  accepted design record names it (superseded in part by the
+  2026-10-02 section below, which lists what stays deterministic for a
+  chat turn).
 - **A failed chat is a replay row and a trace, never a patch.** In
   order: the turn joins the replay set in the owner's exact words and
   fails; the trace names the layer that owns the wrong decision, with
@@ -67,15 +71,36 @@ the rebuild clean and apply to every product's turn pipeline.
   coordinator, and by the gate.
 - **Enforced by the gate, not by memory.** The rule-budget lint (U0b)
   counts regex literals and word lists per turn-path file against a
-  baseline that only goes down; a new rule outside the protected
+  baseline that only goes down, and drops with each stage of the thin
+  chat path that retires a rule; a new rule outside the protected
   modules fails the gate unless its marker names the design record that
-  accepted it. The rebuilt path (`turnNext.ts`) starts at zero.
+  accepted it. The rebuilt default path (`turnMachine/`) starts at zero.
 - **Once a design is accepted, the part it replaces is frozen the same
   day.** No patch lands in a pipeline that an accepted design is
   replacing, except a safety defect; everything else waits for, or is
   built into, the new path. The coordinator stops routing such patches
-  the day the design is accepted.
+  the day the design is accepted. The accepted design for this rule is
+  `home/docs/plans/chat-thin-path-2026-10-02.md`, so its stages may
+  change the default path (`turnMachine/`); the path it replaces is
+  `turnEngine.ts`, deleted when the new one is ported.
 - **Tone is set by the plan line, the companion's own example lines
   and a measured style adapter per companion, not by prose.** A
   paragraph of personality instructions is the weakest lever on a small
   model (the prebuilt-over-hand-built rule, applied to voice).
+
+## The model decides whether a turn needs a search or a tool (owner's rule, 2026-10-02)
+
+No learned lookup head, router or classifier decides whether a turn
+needs a search or a tool, any more than a word rule does. Tools are
+offered with `tool_choice: "auto"` and the model decides. What stays
+deterministic: the safety floor on input and output, the credential
+catch, consent words, the household-name gate on search arguments, the
+crisis, temporary-mode and grounding refusals, and exact commands,
+forget among them. The turn signal is kept for the plan line,
+memory-judge eligibility, the wire `signal` event and spoken-cue
+suppression; it no longer decides a search. The first rule above ("three
+phrasings is a classifier") does not reopen this. Why: a head trained on
+phrasings misses the ones nobody labelled, the model reads the whole
+message, and a wrong "no search" is silent. The record is
+`home/docs/plans/chat-thin-path-2026-10-02.md`; the rules are in
+`home/docs/design/RULES.md`.

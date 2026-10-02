@@ -6,6 +6,30 @@ incident or review that prompted each. The rule itself lives in
 why, so the rule can be revisited on the facts rather than re-argued
 from memory. Newest first.
 
+## 2026-10-02: the chat turn goes onto a thin path, and five standards bend to it
+
+**Decision.** The owner accepted `home/docs/design/RULES.md` and its
+record, `home/docs/plans/chat-thin-path-2026-10-02.md`. The model
+decides whether a turn needs a search or a tool; sampling and context
+come from the engine and the model's own record; adult written chat has
+no length cap; a failed tool never fails the answer; search reads result
+pages inside a stated request budget; only the Stack's own engines run
+models. The standards changed with it: SAFETY.md (the output gate's
+grain, with the teen setting), PRIVACY.md and ENGINEERING.md (an
+optional owner-keyed search provider), THIRD-PARTY-SERVICES.md (pages
+per search and keyless search as the default), RULES-AND-LEARNED-
+COMPONENTS.md and STACK.md (no learned lookup head, the freeze rule's
+accepted design, runners and supporting services, pinned sampling and
+context). A child's answers stay short: that ruling is in force, and the
+no-length-cap rule is adult-only.
+
+**Why.** The chat had grown a pipeline of word rules and learned heads
+that decided for the model, and each patch added a path the next one had
+to work around. The owner chose to measure Home against the bare model
+(CHAT-AB-01) and to keep only the deterministic floors that protect
+people. Entries superseded in part: 2026-09-16, 2026-09-21,
+2026-09-22 (temporary chat).
+
 ## 2026-09-27: the status block gets a `done` word, and `waiting` must name its wait
 
 **Decision.** `STATE:` (org `CLAUDE.md`, Writing style) opens with
@@ -284,6 +308,9 @@ Stack's, fed by the body's power and thermal budget. The robot design
 pass confirms or amends this in `bot/docs/dev.md`.
 
 ## 2026-09-16: rules, word lists and learned components
+
+*Superseded in part by 2026-10-02: no learned lookup head or router
+decides whether a turn needs a search or a tool; the model does.*
 
 **Decision.** Six standing rules in CLAUDE.md ("Rules, word lists and
 learned components"): no rule without a counter and a corpus row; three
@@ -598,6 +625,10 @@ The standing lane check (a lane producing more fix-up rounds than clean lands re
 
 ## 2026-09-21: no hand-built UI; the chat moves onto assistant-ui Elements as shipped
 
+*Superseded in part by 2026-10-02: the web chat's stream is
+`assistant-stream`; the Elements still carry reasoning, sources and
+citations.*
+
 The owner looked at Home's chat, rebuilt by hand on assistant-ui's
 runtime over the past week, and called it ugly and buggy; the library
 it sits on ships Elements, a catalog of 144 interface pieces for every
@@ -742,6 +773,10 @@ person reading the setting knows what they are getting, and a house name never s
 
 ## 2026-09-21: an answer's register follows the surface, and there is no switch
 
+*Superseded in part by 2026-10-02: adult written chat has no length cap
+and no word-count instruction. A child's short answers on every surface
+stay in force, and spoken and glance surfaces keep their own limits.*
+
 The humanistic chat program tuned every reply to the spoken register,
 a few sentences the way a person talks, and the owner, comparing a
 typed weather question with ChatGPT's answer, saw that a typed screen
@@ -833,6 +868,10 @@ better. Each is a small trade against the one thing the product is
 actually selling, and the answer to all of them is already here.
 
 ## A temporary chat leaves nothing behind, not even a row (2026-09-22)
+
+*Superseded in part by 2026-10-02: the window's token size follows the
+model's real context. The in-process, keyed, size-capped, idle-expired
+store stays, and its cap is a memory cap, not a token budget.*
 
 A temporary chat already shipped (Chat 55, `d892052a`): no turns are
 written, the thread list excludes it, minors get a 403, and the memory

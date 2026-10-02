@@ -21,17 +21,28 @@ dark for a day. These rules exist so that never repeats, on any service.
   serve the screen in front of someone. Background work (warming, expanding,
   building pools, enriching) is bounded, staggered, and stops entirely when
   the service pushes back. No fan-out that multiplies per item (related-of-
-  related, all-pages-now, every-thumbnail-now).
+  related, all-pages-now, every-thumbnail-now). A search reading its
+  own few result pages is bounded by the budget below, not fan-out.
 - **Prefer the front door.** A signed-in official session (the user's linked
   account, the platform's own feed, its official API with a token) beats
   anonymous scraping every time: it is what the user's own app would do, it is
   rate-limited generously, and it does not get the address flagged. Anonymous
-  access is the fallback, never the plan.
+  access is the fallback, never the plan. The exception is web search
+  (owner's ruling, 2026-10-02): keyless search through the household's
+  own SearXNG is the default path, not a fallback, and a hosted provider
+  is an optional key (PRIVACY.md).
 - **Back off on the first signal.** A 429, a captcha, a "confirm you're not a
   bot", a LOGIN_REQUIRED where none is expected: stop that class of traffic
   immediately (quiet mode), keep only user-initiated requests, probe on a
   schedule, and resume only when the service is answering normally. Never
   retry through a block.
+- **A search may read several result pages, inside a stated budget
+  (owner's ruling, 2026-10-02).** Chat answers from page text, not
+  snippets, so one search may fetch a few of its result pages. The
+  budget is a cap on pages per search, the per-host pace above kept for
+  every fetch, and a back-off on the first signal from any host. Why:
+  an answer grounded in the pages is the point of the search, and a
+  fixed cap keeps it a person's few tabs, never a crawl.
 - **Look like the user's client, honestly.** Real user agents, the client's
   own headers, one identity per household session. No header spoofing tricks
   beyond what the platform's own app sends, no rotating identities, no

@@ -13,7 +13,10 @@ controls, they are architecture:
   disable or weaken them, including for the household's own admin. Code
   review treats any change that makes them bypassable as a correctness bug
   of the highest severity. These protections and their design may be
-  documented publicly; they are a feature, not a liability.
+  documented publicly; they are a feature, not a liability. The one named
+  exception is the teen setting in the output-gate bullet below, which
+  picks between two modes that are both checked; the child's mode and
+  everything for a child stays absolute.
 - **Child profiles are restricted by default.** Unrestricted generation and
   chat are unlocked per-user by an adult, never inherited, never the default
   for a new profile. Safe-by-default, adult-opt-in.
@@ -48,13 +51,29 @@ Adult freedom comes with three standing pieces:
   real, a memory the child may not read), and anything sent to a client
   is visible in it. So: a minor's turn never receives reasoning, because
   the hub does not emit it (never a client-side hide); reasoning passes
-  the same output gate and the same disclosure filter as the answer
-  before any adult sees it, a recalled memory quoted in the thinking
-  included; no voice, glance or shared-screen surface shows reasoning,
+  the same output gate and the same disclosure filter as the answer, at
+  the grain the output-gate bullet gives that person (an adult's
+  reasoning streams live as its own part, checked as it arrives), a
+  recalled memory quoted in the thinking included; no voice, glance or shared-screen surface shows reasoning,
   and a shared screen with a child possibly present counts as shared;
   and the turn's record says when reasoning was withheld and why. This is
   architecture, not a setting: no admin switch, flag or mode may send a
   child a reasoning stream.
+- **The output gate's grain follows the person (owner's ruling,
+  2026-10-02).** For a child, and for every spoken turn, each sentence
+  is checked before it is released, and no setting loosens that. For an
+  adult's written chat, text streams as it is generated and the gate
+  checks it as it arrives; text already released is never retracted. For
+  a teen, an admin setting picks the child's mode or the adult's; the
+  child's mode is the default. Fetched web page text must pass the
+  deterministic safety floor before it reaches a child's or a teen's
+  turn. This replaces "passes the gate before any adult sees it" for
+  adult written chat only. Why: a minor, or a listener to a voice, cannot
+  take back what they saw or heard, while for an adult the cost
+  is that part of a sentence can show before the check on it finishes,
+  and the stream stops there if the check fails. The teen setting is the only admin choice that moves a
+  minor's gate, and it chooses between two checked modes; nothing turns
+  the gate off.
 
 Neutrality rule: MaiPai ships neutral. No jailbreak presets, no
 harm-optimized prompt packs, nothing that curates toward dangerous uses.

@@ -852,7 +852,10 @@ a visual status dashboard reads this file directly, so it has to stay real.
 
 "Nothing leaves your house" is the product, kept structurally: zero
 phone-home, no MaiPai-operated service in a user data path, a user-tier
-privacy page per product. Load [docs/PRIVACY.md](docs/PRIVACY.md) before
+privacy page per product. The one exception is an optional hosted search
+provider the owner keys themselves (off by default, never for a child or
+teen, the query then leaves the house, owner's rule 2026-10-02); it is not
+MaiPai-operated and gets its privacy row. Load [docs/PRIVACY.md](docs/PRIVACY.md) before
 adding or changing an outbound connection.
 
 ## Trademarks and platform references
@@ -868,7 +871,11 @@ that mentions or styles one.
 Child-safety protections on generation and chat are non-removable
 architecture, not a setting; child profiles are restricted by default; adult
 freedom comes with a disclaimer, a one-time acknowledgment, and crisis
-resources offered, never blocking. Load [docs/SAFETY.md](docs/SAFETY.md)
+resources offered, never blocking. The output gate's grain follows the
+person (owner's rule 2026-10-02): a child and every spoken turn are released
+sentence by sentence after the check, an adult's written chat streams under
+a check-as-it-arrives gate, and an admin setting picks one of the two for a
+teen. Load [docs/SAFETY.md](docs/SAFETY.md)
 before touching generation, chat, child profiles, or the adult-unlock flow.
 
 ## Licensing
@@ -881,7 +888,9 @@ time, or before adding a dependency whose license is in doubt.
 
 Toward YouTube, Reddit, TikTok, Plex, and every other service MaiPai talks
 to, it behaves as the user would, only automated: a person's pace, the
-front door over scraping, back off on the first signal. Load
+front door over scraping, back off on the first signal; a search may read
+several result pages inside a stated request budget, and keyless search is
+the default path (owner's rule 2026-10-02). Load
 [docs/THIRD-PARTY-SERVICES.md](docs/THIRD-PARTY-SERVICES.md) before writing
 or changing code that fetches from an external service.
 
@@ -919,7 +928,10 @@ the model's job, never a word rule's; a failed chat becomes a replay row
 and a root-cause trace, never a patch that makes one phrasing pass; the
 gate's rule-budget lint only lets the count go down; and once a design is
 accepted, the pipeline it replaces is frozen that day except for safety
-defects. Load
+defects. **The model decides whether a turn needs a search or a tool
+(owner's rule, 2026-10-02):** no word rule or learned head or router does;
+tools are offered with `tool_choice: auto`, and the thin chat path is the
+accepted design for the freeze rule. Load
 [docs/RULES-AND-LEARNED-COMPONENTS.md](docs/RULES-AND-LEARNED-COMPONENTS.md)
 before adding or editing a rule, word list, or classifier in a chat or turn
 pipeline.
