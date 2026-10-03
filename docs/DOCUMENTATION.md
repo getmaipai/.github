@@ -95,7 +95,7 @@ machine-generated tell.
 
 **No AI filler vocabulary:** delve, seamless, robust, leverage, empower, elevate, streamline, game-changer, "in today's world", "it's important to note". Say the plain thing instead. <!-- prose-lint: allow -->
 
-## Writing style: no "not just X, it's Y"
+## Writing style: no padded contrasts
 
 **No "not just X, it's Y" constructions**, no rhetorical questions as transitions, no exclamation points in technical prose. <!-- prose-lint: allow -->
 

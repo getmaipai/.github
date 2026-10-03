@@ -91,6 +91,34 @@ Every package error maps to a code from the shared catalogue
 leaves a half-working feature; it raises a Repairs item instead. The host
 wraps errors so a package cannot throw an unmapped one past the boundary.
 
+**A failure is told like a person would tell it, and admins can see why
+(owner's rule, 2026-10-03; applies to every app, package and client,
+the music app included).** The person never meets a canned or cryptic
+line, an error code or a raw message:
+- Where an AI voices the reply (chat, a companion, a spoken turn), the
+  model says in its own words, fresh each time and in the voice of that
+  person's band and surface, that something did not work. It is told
+  only the kind of failure, never the raw error, never invents a fact
+  to fill the gap, and the sentence passes the same output gate as any
+  reply. No fixed or stored sentence exists for it.
+- Where no model voices the surface (a button, a list, a settings
+  page), the message is plain human copy written once in the app's copy
+  layer, says what happened and what to try, and carries no code,
+  stack or vendor text.
+- Every person sees the same reply. An admin also sees a small,
+  quiet indicator on it that opens the raw details (the tool or
+  package, the error, the timing, the trace id). The details never
+  reach a non-admin, a child or a teen, the model, or a log shipped off
+  the machine; secrets and tokens are redacted from them.
+- The failure still raises its Repairs item, and a policy refusal
+  (consent, crisis, age gate) is not an error and keeps its own reply.
+
+Why: a fixed line ("Search isn't working right now.") reads as a
+machine, repeats until it is noise, and tells the person nothing; the
+raw error tells a parent nothing and can leak. Home's chat applies this
+as rule 6 in `home/docs/design/RULES.md`; a new app copies the pattern,
+not the wording.
+
 ## Performance budgets
 
 A prompt budget is a test on both sides. First-token and page-open budgets
