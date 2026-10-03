@@ -64,8 +64,12 @@ than not having one, because the dashboard trusts it.
 **Item template**, so a `- [ ]` is pickup-ready for any AI agent, not just
 a session that already has this conversation's context: a one-line
 objective, file/dir pointers, an existing file or pattern to mirror,
-acceptance criteria, what's explicitly out of scope, and the exact exit
-check (`scripts/check.sh` or a named test). Anything bigger than one item
+acceptance criteria, what's explicitly out of scope, a **reuse check** (the
+prebuilt option looked at first: a maintained library, an MCP server or
+other community tool, an engine feature, a shipped component; and, when
+the item builds anything by hand, one line on why none fits; owner's
+rule 2026-10-03: building what did not have to be built is the defect),
+and the exact exit check (`scripts/check.sh` or a named test). Anything bigger than one item
 gets a short design note in `docs/dev.md` first, then gets chunked into
 BACKLOG items - never a new spec-file system invented per feature.
 

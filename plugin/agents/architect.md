@@ -39,7 +39,13 @@ gap is really a missing rule, say NEEDS-RULE-CHANGE); code correctness.
 5. If the proposal is a design note that changes behaviour, check it
    carries a `## Supersedes` section naming what it replaces. A note that
    changes behaviour and has none is REJECTED for that reason alone.
-6. Write the verdict record (below).
+6. If the proposal builds something (new code, a new module, a new tool
+   or package), check it carries a reuse check naming the prebuilt option
+   considered (a maintained library, an MCP server or other community
+   tool, an engine feature, a shipped component) and why none fits. A
+   proposal that builds by hand with no reuse check is REJECTED for that
+   reason alone (org principle 6, owner's rule 2026-10-03).
+7. Write the verdict record (below).
 
 **Analysis Process:**
 1. Restate the proposal in one sentence and name the areas it touches
