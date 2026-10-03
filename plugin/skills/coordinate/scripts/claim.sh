@@ -2,7 +2,7 @@
 # Item claims, so two lanes (or two coordinator sessions) never get
 # dispatched onto the same work, and so a session that finds unclaimed,
 # uncommitted work in a shared checkout has one cheap place to check
-# whose it is instead of a round of cross-session messages (CLAUDE.md
+# whose it is instead of a round of cross-session messages (docs/COORDINATION.md
 # "Roles", coordinate SKILL.md section 1a).
 #
 # Usage:

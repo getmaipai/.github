@@ -12,7 +12,7 @@ loaded, `/hooks` to review what is active).
   flag cluster containing `-a` (so `-am`, `-avm`, and friends, not just a
   bare `-a`) unless `git status` or `git diff --stat` ran in this repo
   within the last 15 minutes. This is a soft gate, not a ban: the org rule
-  (`CLAUDE.md` > Git workflow) is to stage specific files after reviewing
+  (`docs/GIT-WORKFLOW.md`) is to stage specific files after reviewing
   what is actually there, not to never use these commands. Denying comes
   with the exact next step (run status, then retry), so it never dead-ends
   a session.
@@ -64,7 +64,7 @@ billed and user-triggered, not something a session runs on its own).
 
 Same mechanical shape as the review gate above, for `scripts/check.sh`
 instead of the `code-review` skill: "it must pass before any commit"
-(org `CLAUDE.md` > Verification) doesn't survive a session forgetting
+(`docs/VERIFICATION.md`) doesn't survive a session forgetting
 to run it any better than "review before committing" did.
 
 - **`require-gate-before-commit.sh`** (PreToolUse, `Bash`): denies a

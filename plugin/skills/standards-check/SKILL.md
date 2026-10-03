@@ -30,7 +30,7 @@ calls the core from its own `scripts/check.sh`. See
 
 ## The release skill's use of this
 
-Per [`CLAUDE.md`](../../CLAUDE.md) > Releases, "the `release` skill refuses
+Per [`docs/RELEASES-AND-DEPENDENCIES.md`](../../docs/RELEASES-AND-DEPENDENCIES.md) > Releases, "the `release` skill refuses
 a release in any repo whose `check.sh` is not on the current standards
 tag." Run this skill's checks as part of that refusal logic: if the pin is
 stale relative to a standards change that matters (not every `.github`

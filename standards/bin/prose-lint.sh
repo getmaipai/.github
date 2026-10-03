@@ -1,7 +1,7 @@
 #!/usr/bin/env bash
 # @maipai/standards: prose lint.
 #
-# Enforces the org's AI writing standards (CLAUDE.md > Writing style) against
+# Enforces the org's AI writing standards (docs/DOCUMENTATION.md > Writing style) against
 # every tracked Markdown file: no em dashes, no AI filler vocabulary, no
 # "not just X, it's Y" constructions, no exclamation points outside fenced
 # or inline code or an HTML comment. Exits non-zero on any hit.

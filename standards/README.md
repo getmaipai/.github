@@ -80,7 +80,7 @@ second copy of its rules here.
 
 ## Unreleased (next tag)
 
-- `bin/gate-lock.sh`: the machine-wide full-gate mutex (org `CLAUDE.md` >
+- `bin/gate-lock.sh`: the machine-wide full-gate mutex (org `docs/VERIFICATION.md` >
   Verification, "One full gate at a time"; `docs/DECISIONS.md`,
   2026-09-27). A repo's `check.sh` runs `gate-lock.sh acquire <label>
   [item]` before any non-docs scope, which blocks FIFO behind any other

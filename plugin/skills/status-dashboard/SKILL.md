@@ -15,7 +15,7 @@ the embedded `INITIAL` snapshot after an `active`/`next` write** (see
 refresh, which is `write_db` alone.
 
 Source of truth is each repo's `docs/BACKLOG.md` (see
-[`CLAUDE.md`](../../CLAUDE.md) > Backlog and status) - this skill is a
+[`docs/BACKLOG-FORMAT.md`](../../docs/BACKLOG-FORMAT.md) > Backlog) - this skill is a
 derived view, never a second place status gets decided.
 
 ## Process
@@ -151,7 +151,7 @@ inside `INITIAL` and redeploy, in the same step as the `write_db` call.
 
 ## When to run it
 
-Per [`CLAUDE.md`](../../CLAUDE.md) > Backlog and status: whenever a
+Per [`docs/BACKLOG-FORMAT.md`](../../docs/BACKLOG-FORMAT.md) > Backlog: whenever a
 `docs/BACKLOG.md` changes, at latest before the session ends. This is an
 instruction, not a hook - judging whether a BACKLOG.md actually changed in a
 way worth reflecting needs contextual reading, the same reason

@@ -4,7 +4,7 @@
 set -euo pipefail
 cd "$(dirname "$0")/.."
 
-# One full gate at a time on this machine (org CLAUDE.md > Verification;
+# One full gate at a time on this machine (org docs/VERIFICATION.md;
 # docs/DECISIONS.md, 2026-09-27). This gate has no docs-only scope, so it
 # always takes the machine-wide lock, blocking FIFO behind any other
 # repo's full gate, and frees it on every exit path, a failure or a kill

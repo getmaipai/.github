@@ -51,7 +51,7 @@ standard in [`CLAUDE.md`](../CLAUDE.md).
 ## Tiers
 
 - **Tier 0, declarative**: a prompt body, or a recipe interpreted natively
-  by the TypeScript and Python interpreters in `home/spec/`. No process.
+  by the TypeScript and Python interpreters in `spec/` in `commons`. No process.
   Most plugins, and every robot plugin by default.
 - **Tier 1, code**: TypeScript under Deno (see [STACK.md](../STACK.md)), for
   what a recipe cannot express. `runtime: wasm` (Extism) is reserved for

@@ -1,6 +1,6 @@
 #!/usr/bin/env bash
 # Lane lock for a Codex or OpenCode target shared across coordinator
-# sessions (CLAUDE.md "Roles", coordinate SKILL.md section 1a). Neither
+# sessions (docs/COORDINATION.md, coordinate SKILL.md section 1a). Neither
 # Codex nor OpenCode has a per-caller identity ListAgents can show, so
 # this is the registry that answers "who is driving this lane right
 # now" in one cheap read instead of a cross-session message round trip.

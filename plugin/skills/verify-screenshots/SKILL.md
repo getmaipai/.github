@@ -7,7 +7,7 @@ description: Run the two-pass AI review over a batch of generated screenshots (s
 
 Full rules: [docs/STYLE.md](../../docs/STYLE.md) > Platform screenshot
 pipeline and the general screenshot rule in
-[`CLAUDE.md`](../../CLAUDE.md) > Documentation. Two passes, both required,
+[`docs/DOCUMENTATION.md`](../../docs/DOCUMENTATION.md). Two passes, both required,
 neither is a substitute for the other.
 
 ## Pass 1: session review (do this every time, in every repo)

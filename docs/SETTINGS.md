@@ -70,5 +70,5 @@ The generic renderer is the one consumer of the registry's selector names, and i
 ## Storage
 
 Values by scope with per-field last-writer-wins on the oplog (see the link
-and sync design in `home/spec/dev.md` once it exists). Definitions come
+and sync design in `commons` `spec/dev.md` once it exists). Definitions come
 from the registry above and from package manifests.

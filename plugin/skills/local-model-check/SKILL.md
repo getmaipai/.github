@@ -135,7 +135,7 @@ done
   doc if both A and a clean reboot leave it disconnected).
 
 Route the item to Codex or a Haiku-floor Claude session while this is
-unresolved (`CLAUDE.md`, Roles).
+unresolved (`docs/COORDINATION.md`).
 
 ## 4. Anything else: read and report, don't guess
 

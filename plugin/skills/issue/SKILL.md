@@ -50,7 +50,7 @@ it would help, in a sentence a parent would say; no spec, no design.
 The title makes sense on a phone with zero context: what the person
 saw, in one sentence, no ticket prefix (GitHub's template adds its
 own). The body follows the org template's questions, in plain words
-(`CLAUDE.md`, Issues): for a bug, what happened, what was expected
+(`docs/BACKLOG-FORMAT.md`, Issues): for a bug, what happened, what was expected
 instead, steps if known, where it happened; for a request, what
 someone wants and why it would help. Technical detail (file and line,
 log lines, the exact command) goes at the bottom under a "Technical

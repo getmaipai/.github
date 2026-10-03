@@ -5,7 +5,7 @@ description: Direct one or more coder sessions to completion without coding your
 
 # Coordinate coder sessions
 
-Policy lives in the org `CLAUDE.md`, "Roles: coordinator and coder"
+Policy lives in the org `CLAUDE.md`, "Roles: coordinator and coder", and `docs/COORDINATION.md`
 (role boundary, model floor, verification, Git). This skill is the
 procedure. The coordinator architects, decides, instructs, unblocks, and
 checks evidence. It never edits source or tests, never writes scripts,
@@ -60,7 +60,7 @@ an item.
    directly or is resuming one he already has open (`claude
    --dangerously-skip-permissions`, `--continue` to resume one started
    without the flag). Pick the model from the floor table in
-   `CLAUDE.md` at the lowest tier it allows; the ready handshake
+   `docs/COORDINATION.md` at the lowest tier it allows; the ready handshake
    (section 3) confirms it.
 
 ## 1a. Dispatch: agent, not a second terminal (owner's rule, 2026-09-26)
@@ -173,7 +173,7 @@ An S item in files no session has open, or a small M item whose brief
 can name every file, rule, test and command, goes to one of two lanes
 that cost no Claude tokens; anything needing a decision, a diagnosis
 or a read of how subsystems interact stays with a Claude session (the
-model floor table in CLAUDE.md). The first try of a local model
+model floor table in docs/COORDINATION.md). The first try of a local model
 (2026-09-13, `docs/DECISIONS.md`) was retired for reading its own
 diff badly in a shared checkout; both lanes below run in their own
 worktree at the base the coordinator picks, commit only, never push,
@@ -188,7 +188,7 @@ item to it; down or unreachable sends the item to Codex or a Haiku-
 floor Claude session instead of waiting on it. The coordinator also
 tracks each lane's fix-up rate; a lane producing more fix-up rounds
 than clean lands over a week reverts to Claude-floor routing for its
-class of item until re-tried, per `CLAUDE.md`'s Roles section. Exactly
+class of item until re-tried, per `docs/COORDINATION.md`. Exactly
 one session, never recreated; between briefs the coordinator deletes
 its messages through the server API and posts the
 next brief with `prompt_async` (the `session-c-post` helper in the
@@ -575,7 +575,7 @@ is verified as a whole at a named commit.
 Before a context reset: the handoff notes are current, memory
 (`coordinator-sessions-<date>`) says which session is which, what each
 was told, what is open, and where the notes are. Every reply to Jesse
-ends with the status block in CLAUDE.md's shape (Writing style):
+ends with the status block in the shape in docs/DOCUMENTATION.md:
 
 ```
 STATE: done | active | waiting [<what>] | blocked [<owner>: <what>] · <session>: <item> (running ~<when> | holding, behind <what> | blocked) · landed <item>

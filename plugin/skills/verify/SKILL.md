@@ -11,13 +11,13 @@ gates below pass.
 ## Gate 1: checks
 
 Run `scripts/check.sh` at the repo root; it must exit clean (see
-`CLAUDE.md`'s Verification section for what it covers and the doc-only
+`docs/VERIFICATION.md` for what it covers and the doc-only
 exception). If the repo predates `check.sh`, run the closest equivalents
 by hand and flag that the script is missing.
 
 ## Gate 2: exercised for real
 
-Static success is not verification (`CLAUDE.md`: "exercised for real",
+Static success is not verification (`docs/VERIFICATION.md`: "exercised for real",
 "never hand Jesse something to check that you have not checked yourself").
 Pick what applies here:
 

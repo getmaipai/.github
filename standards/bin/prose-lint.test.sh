@@ -8,7 +8,7 @@
 #
 # Written the same day (2026-09-06) prose-lint.sh's own false positive on
 # home-backend package READMEs' `<!-- Store card ... -->` opener was found
-# live, blocking a real commit - per CLAUDE.md's testing standard, "every
+# live, blocking a real commit - per docs/VERIFICATION.md's testing standard, "every
 # real failure becomes a permanent regression test, first."
 set -uo pipefail
 cd "$(dirname "$0")/../.."

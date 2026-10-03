@@ -1,7 +1,7 @@
 #!/usr/bin/env bash
 # PreToolUse (Bash matcher): refuses a blind "stage everything" command
 # (git add -A/--all, bare git add ., git commit -a/--all) unless git status
-# was run in this repo within the last 15 minutes. The org rule (CLAUDE.md
+# was run in this repo within the last 15 minutes. The org rule (docs/GIT-WORKFLOW.md
 # > Git workflow) is to stage specific files after reviewing status, not to
 # never use git add -A; this hook enforces the "after reviewing" part, not
 # a blanket ban, so it only blocks when there is no recent status check to

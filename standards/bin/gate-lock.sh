@@ -1,7 +1,7 @@
 #!/usr/bin/env bash
 # @maipai/standards - the machine-wide full-gate mutex.
 #
-# Why this exists: org CLAUDE.md > Verification > "One full gate at a
+# Why this exists: org docs/VERIFICATION.md > "One full gate at a
 # time on a shared machine". Two full check.sh runs at once on the dev
 # machine push it into memory pressure and fail tests the change never
 # touched. The rule used to be a pgrep poll each session ran by hand,
