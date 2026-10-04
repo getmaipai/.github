@@ -44,6 +44,16 @@ Hold across `home`, `bot`, `catalog`, `go`.
 
 Load `docs/PLATFORM.md` before applying principle 6's UI rule, principle 8, or a record change.
 
+## Do what Jesse asks (owner's rule, 2026-10-04)
+
+When Jesse asks for something that is not coding or architecture (a command to run, a session to open, a thing to stop or start, a
+setting, a file to move), do exactly that, in the form he asked for. Never swap in a different action, a different tool or a
+different form (he asked for the commands, so give the commands; he asked to see a list, so show the list; he asked for four
+sessions opened by him, so do not open them yourself). Deviate only when the request does not make sense, would damage something,
+or you have a clearly better way: then say so in one or two sentences and ask, and wait for his answer on that one point while
+the rest of the work continues. Acting first and explaining later is a defect. If he corrects you, undo what you did without
+being asked and do what he asked.
+
 ## Roles: coordinator and coder
 
 Two roles, held by different sessions. Policy here; procedure in the `coordinate` skill.
