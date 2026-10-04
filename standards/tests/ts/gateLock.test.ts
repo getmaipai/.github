@@ -283,4 +283,20 @@ describe("GATE-LOCK-01: gate-lock.sh, the machine-wide full-gate mutex", () => {
       rmSync(home, { recursive: true, force: true });
     }
   });
+  test("GATE-SPEED-01: a named lock class (frontend) is free while the machine-wide lock is held, and queues only behind its own class", () => {
+    const home = makeStateHome();
+    try {
+      expect(run(home, ["acquire", "home-main", "BACKEND"]).exitCode).toBe(0);
+      const frontend = run(home, ["acquire", "home-fe", "FRONTEND"], { GATE_LOCK_NAME: "frontend" });
+      expect(frontend.exitCode).toBe(0);
+      expect(frontend.stdout).toContain("acquired");
+      expect(existsSync(join(home, "maipai", "gate-lock-frontend", "holder"))).toBe(true);
+      // The machine-wide holder is untouched, and a second frontend gate is refused its class lock.
+      expect(readFileSync(join(lockDir(home), "holder"), "utf8")).toStartWith("home-main\t");
+      const second = run(home, ["acquire", "home-fe2"], { GATE_LOCK_NAME: "frontend", GATE_LOCK_PER_POSITION_SECONDS: "1" });
+      expect(second.exitCode).toBe(1);
+    } finally {
+      rmSync(home, { recursive: true, force: true });
+    }
+  });
 });

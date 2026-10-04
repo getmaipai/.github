@@ -51,7 +51,10 @@
 # Sourcing this file defines gate_lock() and runs nothing; executing it
 # runs gate_lock "$@".
 
-GATE_LOCK_DIR="${XDG_STATE_HOME:-$HOME/.local/state}/maipai/gate-lock"
+# GATE-SPEED-01: GATE_LOCK_NAME picks a separate lock for a lighter class of
+# gate (check.sh uses "frontend" for a frontend-only diff) so it never waits
+# behind a backend or full gate; unset keeps the one machine-wide lock.
+GATE_LOCK_DIR="${XDG_STATE_HOME:-$HOME/.local/state}/maipai/gate-lock${GATE_LOCK_NAME:+-$GATE_LOCK_NAME}"
 
 _gl_now() { date -u +%Y-%m-%dT%H:%M:%SZ; }
 _gl_alive() { [ -n "$1" ] && kill -0 "$1" 2>/dev/null; }
@@ -204,6 +207,11 @@ _gl_acquire() {
         echo "gate-lock: gave up after ${elapsed}s at queue position $pos (allowance ${allowed}s); holder: $(cat "$GATE_LOCK_DIR/holder" 2>/dev/null || echo none)" >&2
       fi
       return 1
+    fi
+    # GATE-SPEED-01: a waiting gate says where it stands every minute.
+    if [ $(( elapsed / 60 )) -gt "${_gl_last_note:-0}" ]; then
+      _gl_last_note=$(( elapsed / 60 ))
+      echo "gate-lock: still waiting, position $pos of $(grep -c . "$GATE_LOCK_DIR/queue" 2>/dev/null || echo "$pos"), ${elapsed}s so far; holder: $(cut -f1,2 "$GATE_LOCK_DIR/holder" 2>/dev/null | tr '\t' ' ' || echo none)" >&2
     fi
     sleep "$poll"
   done
