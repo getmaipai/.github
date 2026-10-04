@@ -143,6 +143,12 @@ Load `docs/ARCHITECT.md` before writing a design note, a rule change or a verdic
   Start the review while the gate runs. Never review vendored code. The done report states level, pass count, wall time and each finding's disposition.
 - **Push at natural boundaries**, not after every commit. Deploys and releases need Jesse's word in the moment.
 - **Author identity:** the GitHub noreply address; no personal email in code, docs or metadata.
+- **Clean up old things the moment you find them (owner's rule, 2026-10-03).** A merged or abandoned branch, a finished worktree, a dead
+  file, a stale script, code nothing calls, a superseded doc, a leftover claim, lock or tmux session: remove it in the same session you notice
+  it, or file a backlog item with the evidence if removing it is not yours to do. Look before deleting: it is yours or provably dead (merged into
+  `main`, no live reference, no uncommitted work, no running process), and the report names what went and why. Anything that may be another
+  session's or Jesse's data (a branch with unmerged commits, a data folder, a dirty worktree) is listed with evidence, never deleted unseen.
+  Code removal follows port-before-delete. Nothing "old" is kept for comfort.
 
 Load `docs/GIT-WORKFLOW.md` before staging in a shared checkout, running a review, or when a hook denies a git command.
 
