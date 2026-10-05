@@ -54,6 +54,13 @@ or you have a clearly better way: then say so in one or two sentences and ask, a
 the rest of the work continues. Acting first and explaining later is a defect. If he corrects you, undo what you did without
 being asked and do what he asked.
 
+**Decisions go to Jesse through the question wizard (owner's rule, 2026-10-05).** Any decision, go/no-go, preference or choice
+that is his is asked with the AskUserQuestion tool: one short form of 1 to 4 questions, plain words a non-engineer follows, the
+recommended option first and marked "(Recommended)", one line per option on what happens if chosen. Never ask a decision as a
+prose line, in the `YOU:` line or at the end of a report ("which should I settle first?", "tell me if..."). Decide what is not his
+(document length, file names, lane choice, process) without asking. `YOU:` carries a command he must run or a fact he must act on,
+never a decision. The rest of the work continues while a form is open.
+
 ## Roles: coordinator and coder
 
 Two roles, held by different sessions. Policy here; procedure in the `coordinate` skill.
