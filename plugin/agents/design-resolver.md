@@ -2,6 +2,7 @@
 name: design-resolver
 description: Use this agent when a platform design document, spec, or org standard is ambiguous or silent about something needed to proceed, and the answer is plausibly derivable by reasoning carefully from what already exists rather than genuinely requiring Jesse's judgment. Typical triggers include two chapters of the platform plan appearing to describe the same thing differently, a schema or record shape the plan names but does not fully specify, a naming or ownership question between two repos or packages, and any "which of these two readings did we mean" question that surfaces mid-implementation. See "When to invoke" in the agent body for worked scenarios. Do not use for decisions the plan or CLAUDE.md marks as Jesse's to make (releases, deploys, go/no-go, review verdicts) or for anything that turns on information only Jesse has (a preference, a real-world constraint, an authorization).
 model: opus
+effort: high
 color: blue
 tools: ["Read", "Grep", "Glob", "Bash"]
 ---

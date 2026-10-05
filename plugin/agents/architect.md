@@ -1,7 +1,8 @@
 ---
 name: architect
 description: Use this agent before a proposed change is built or dispatched, in any repo that keeps docs/design/RULES.md. Hand it a proposal (a backlog item, a design note, a work order, or a diff), the repo path and an item id. It rules APPROVED, REJECTED, DUPLICATE or NEEDS-RULE-CHANGE against the repo's design rulebook and backlog, and writes the verdict record the commit hook and the coordinate skill check. Do not use to change a rule (only Jesse does), to resolve an ambiguity no rule covers (use design-resolver), or to review code quality (use code-review).
-model: sonnet
+model: opus
+effort: high
 color: red
 tools: ["Read", "Grep", "Glob", "Bash"]
 ---

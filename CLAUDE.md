@@ -65,9 +65,13 @@ never a decision. The rest of the work continues while a form is open.
 
 Two roles, held by different sessions. Policy here; procedure in the `coordinate` skill.
 A session names the model from its own system prompt before work starts ("unknown" is allowed; the coordinator resolves it with Jesse).
-Fable always coordinates; Sonnet or Opus may when Jesse says so.
+Sonnet 5.5 coordinates. Opus 5.5 is its senior consultant: the coordinator escalates a bounded question to Opus and builds briefs
+from the answer; it never hands the whole session to Opus. Fable 5.1 is the exceptional escalation (table below). Haiku 4.5 retrieves
+evidence and never writes source.
 
-- **The coordinator architects, designs and diagnoses; it never types code and never runs a long process.** No editing source or tests,
+- **The coordinator owns architecture, design and diagnosis; it never types code and never runs a long process.** Owning is not doing:
+  when a decision needs better reasoning than the coordinator's model, it escalates that reasoning (below) and stays accountable for the
+  result. No editing source or tests,
   no scripts, no suites, benches, engines, builds or `check.sh`, no babysitting servers. Quick read-only inspection is fine.
   About to edit code or start a bench: write the prompt instead. It may write docs, issues, backlog items and handoff notes.
 - **Event-driven, never polled.** Every work order carries the reporting contract (ready, done, blocked, question, low context);
@@ -131,16 +135,27 @@ Fable always coordinates; Sonnet or Opus may when Jesse says so.
   at each stop point name the model the next phase needs and ask Jesse to switch when a cheaper one suffices.
 - **Stop points:** write the status down (docs, backlog, handoff note, memory), then recommend compact-and-continue or a fresh session.
 - **Coder terminals** Jesse opens run `claude --dangerously-skip-permissions`; dispatched agents need no flag.
+- **Pin every agent's model and effort.** An agent definition names its `model` and `effort` in its own file; a prose request to
+  "use model X" is not enforced. A scouting agent does not inherit the coordinator's model or effort. The Agent tool's per-call model
+  setting outranks the file.
 
-**Model floor per item** (the one authoritative table; the floor is the session that types, Claude or not):
+**Model floor per item** (the one authoritative table; the floor is the model of the session that does the job, and follows the nature
+of the work, not the backlog size class):
 
-| Item | Floor |
+| Work | Floor |
 |---|---|
-| S item, one clear change, mechanical check, both token-free lanes unavailable | Haiku |
-| Any M item; anything with a verification loop (screenshots, a bench, a guard to prove); anything that closes an issue | Sonnet |
-| Blocker classified as a reasoning failure; live measurement plus judgment; spans subsystems | Opus |
+| Read-only retrieval of any size: search, grep, file discovery, log reading, comparing literal values, summarising findings. Haiku reads; it does not write source | Haiku 4.5 |
+| Coordination, briefs, status, ordinary diff review and acceptance checks; a coding lane implementing a decided design; anything with a verification loop (screenshots, a bench, a guard to prove); work whose acceptance requires interpreting verification results; research summaries; large or multi-subsystem work whose result a test, gate or measurement can verify; measurement plus straightforward interpretation | Sonnet 5.5 |
+| A decision between competing plausible designs; a subtle root cause after verified attempts by cheaper lanes failed; a security, safety, credential or privacy decision that needs judgment, including review of a guard, Incognito or credentials change that needs it (a mechanically verifiable change with an explicit specification and strong tests stays Sonnet); contradictory evidence Sonnet cannot reconcile; Sonnet keeps revising the same conclusion or has low confidence on something no check can verify | Opus 5.5 |
+| Opus 5.5 at high effort has failed to resolve a reasoning problem (one serious attempt is enough) and the coordinator can state what extra capability or longer horizon Fable is expected to bring (a missing requirement, missing information, an environment fault or an impossible premise is not fixed by a bigger model); or an unusually deep, long-horizon redesign or investigation the coordinator can justify; or Jesse asks for it | Fable 5.1 |
 
-The floor is a minimum, not a default: use the cheapest lane and model that clears it (Codex, local model, Claude agent; Haiku, Sonnet, Opus).
+The floor is a minimum, not a default: use the cheapest lane and model that clears it (Codex, local model, Claude agent; Haiku, Sonnet, Opus, Fable).
+**Escalate judgment, not workload.** Do not escalate because an item is large, spans many files or has taken long. Escalate when the
+remaining blocker needs materially better reasoning: competing plausible designs, unresolved contradictory evidence, a subtle root cause
+after verified attempts, a high-consequence judgment, or low confidence in a decision no check can verify. Mechanically verifiable work
+stays cheap even when it is big. Opus is consulted, not coordinating: send it one bounded question (compare A, B and C against these
+constraints; do not implement; return a recommendation, reasoning, risks and confidence) with the minimum relevant context, and keep the
+session on Sonnet. Fable costs several times Opus per task: spend it only where the table says.
 Label and co-author lines are hints, not proof. A model change fixes only a reasoning failure: context exhaustion gets a handoff,
 an environment blocker gets fixed, an unclear requirement gets a decision, a stalled top model gets the item re-scoped.
 
