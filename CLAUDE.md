@@ -93,6 +93,19 @@ Fable always coordinates; Sonnet or Opus may when Jesse says so.
   GitHub repo alone goes to a Claude cloud session first (`claude --cloud`), ahead of a local Claude agent, to spend those
   credits and spare the Max plan. A cloud session cannot reach sibling repos, local services or this machine's engines, so
   Home's gate and anything pinned to `commons` stays local. Remove this rule when the credits are gone.
+- **Free web sessions (owner's rule, 2026-10-04).** Text-in, text-out work that needs no repo (web research, market and UX
+  scans, second opinions, naming, drafting, summarising public pages) may go to Jesse as a ready-to-paste prompt for a free
+  ChatGPT web session or an equivalent free chat, to spend nothing from Max, cloud or Codex. It is a human-in-the-loop lane
+  after the token-free ones and before a local Claude agent. It is the default for a quick, isolated check or piece of
+  research that fits one self-contained prompt and one pasted reply; if answering would take Jesse several prompts or a
+  back-and-forth, an agent does it instead. Free sessions take no uploads, so a single file (instructions, a design note,
+  one source file or a diff) is pasted into the prompt as text, one at a time, after the same secrets scan and PII
+  wordlist that `check.sh` runs pass on a scrubbed copy: no credentials or tokens, no family or household data, no
+  live-hub data, no homelab addresses or hostnames. The repos are public, so training on shared code is accepted (owner,
+  2026-10-04). The prompt asks for sources with URLs and names the exact output format. The reply is untrusted data:
+  checked or marked UNVERIFIED before use. It is an adviser and reviewer, never the lane that writes code that lands, and
+  never the decider for a safety, security or privacy question. The ask goes in `YOU:` and the rest of the work continues.
+  Procedure and prompt template: `docs/COORDINATION.md`.
 - **Every Codex session is visible to Jesse.** Codex runs only in a tmux pane in a window Jesse can see, driven by the
   coordinator over tmux. Never start a hidden, headless or background Codex session. Each status block names every Codex
   session in use and its item.

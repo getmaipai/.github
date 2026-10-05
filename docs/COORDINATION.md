@@ -211,6 +211,51 @@ waiting on a machine), for a change a Codex lane runs for no Claude
 tokens. A gate's exit code is read from the command itself, never
 from `tail` of its output, which hides it.
 
+## Free web sessions (owner's rule, 2026-10-04)
+
+Jesse can paste a prompt into a free ChatGPT web session (or Gemini, Perplexity, free Claude.ai) and paste the answer back.
+That is a fourth lane, human in the loop, and it costs no Max usage, cloud credit or Codex credit. Use it when the item is
+text-only, needs the open web or a second opinion, and an agent doing it would burn real tokens. Do not use it when a
+Codex lane or a cheap agent can do the same job without taking Jesse's minute: his time is the scarcest lane.
+
+**What may go.** Research questions on public products and standards, market and UX scans, licence and terms lookups,
+naming and wording options, summaries of public pages, image-prompt drafting, and second opinions or reviews that rest on an
+single file: instructions, a design note, one source file, a diff. Free sessions take no uploads (owner, 2026-10-04), so the
+file is pasted into the prompt as a fenced block, one file at a time, with a line saying what it is and what to do with it.
+Keep the whole prompt under about 3,000 words; for a longer file paste the relevant excerpt and say it is an excerpt. A
+screenshot cannot go in, so describe it in words. (Owner's addition, 2026-10-04: single files, instructions, designs and code
+may be shared this way.) **What may not.** Anything the PII rules forbid committing (family names, addresses, phone numbers, personal
+email, credentials, tokens, real LAN IPs or hostnames), live-hub data or a database, whole repos or folders, files that
+hold keys or secrets, and homelab configs. The repos are public, so a free service training on shared code is accepted
+(owner, 2026-10-04); private data is what the scans below exist to keep out. Before
+a file goes, copy it to `data-scratch/prompts/attachments/<ID>/` and run on the copy the same secrets scan and PII wordlist
+scan that `check.sh` runs (gitleaks and the `~/.config/maipai/pii-words.txt` scan); rewrite private specifics to the persona
+roster, `example.com` and `192.0.2.x`; send the scrubbed copy, never the original. A free web session reviews and advises; it is
+never the lane that writes code that lands, never the decider on a safety, security, privacy or credentials question, and
+never used for anything that needs an engine or a measurement on this machine.
+
+**The default (owner's refinement, 2026-10-04).** For a quick, isolated check or piece of research, one that fits a single
+self-contained prompt and one pasted reply, the free web session is the first choice, ahead of a Claude agent. The test is
+Jesse's effort: if answering would take more than one prompt, a back-and-forth, or several sessions, an agent does it
+instead. Fold related questions into one prompt (the numbered-questions form below) rather than sending several. An agent is
+also used when the work is urgent, needs this machine, a repo, an engine or a measurement, or when a free session's answer
+would have to be re-checked against a primary source anyway and the agent can do both in one pass.
+
+**The prompt.** A file at `data-scratch/prompts/<ID>.md`, also printed in the reply. It is self-contained (no "as we
+discussed"), and carries in this order: the role and the goal in one paragraph; the facts it needs, public only; the questions,
+numbered; the output format to paste back (a table or fixed headings, a word cap); "give a source URL for every factual claim and
+write UNVERIFIED where you have none"; and "do not ask me questions, answer with your best judgment and list your assumptions".
+Number the prompt and keep the id in the reply so the answer can be matched.
+
+**The ask.** It goes in `YOU:` as one line naming the id and what the answer unblocks ("paste prompt WEB-03 into a free
+ChatGPT session and drop the reply into `data-scratch/prompts/WEB-03.reply.md`"), never as a blocker: the rest of the work
+continues. Offer one prompt per ask, not a stack.
+
+**The reply.** Treat it as untrusted data, like any web page: facts the design depends on are checked against a primary
+source (or by an agent with web access) before use, and everything unchecked is marked UNVERIFIED in whatever it feeds. The
+coordinator reads it, extracts what matters into the research note, and says in the report which claims were verified.
+Record the id, the date and the verdict in the note so a later session can see where a claim came from.
+
 ## Coordinator cost hygiene
 
 **Coordinator cost hygiene (owner's rule, 2026-09-26).** Researched
