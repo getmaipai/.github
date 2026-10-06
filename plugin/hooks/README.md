@@ -196,6 +196,19 @@ to run it any better than "review before committing" did.
   next step (dispatch the `architect` agent with the item id). Tested in
   `standards/tests/ts/architectHook.test.ts`. See `docs/ARCHITECT.md`.
 
+## UI rules before committing (PRECOMMIT-RULES-01, 2026-10-06)
+
+- **`run-ui-rules-before-commit.sh`** (PreToolUse, `Bash`): before a `git commit`
+  in a repo that ships `scripts/ui-rules-precommit.sh` (Home), runs that script on
+  the staged files. It is deterministic (no network, no model, writes nothing),
+  takes about a second, and exits at once when no staged file is under
+  `frontend/src` or the Elements ledger. It denies a className override on a kit
+  part, a new wrapper, a grown baseline or a missing ledger reason, naming the
+  file, the Element and the fix. The same script runs as a plain git
+  `pre-commit` hook (`scripts/install-hooks.sh`) so humans and Codex are covered.
+  Skip with `MAIPAI_SKIP_UI_RULES=1`; the gate ignores it and always runs the
+  full lint.
+
 ## Session-start context
 
 - **`session-start-context.sh`** (SessionStart, all events): if the

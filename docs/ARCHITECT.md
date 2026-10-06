@@ -76,6 +76,8 @@ or wrapper.
 
 Every verdict that leaves any custom code or Element non-adoption adds or cites a row in the repo's Elements decisions ledger (Home: `docs/design/ELEMENTS-DECISIONS.md`).
 
+A repo's UI-rule lints run early too: a pre-commit hook (`scripts/ui-rules-precommit.sh` in Home) rejects a className override, wrapper or grown baseline in about a second, and `check.sh` still runs the same script with no skip.
+
 ## Three enforcement points
 
 1. **Dispatch.** The `coordinate` skill dispatches no item without an

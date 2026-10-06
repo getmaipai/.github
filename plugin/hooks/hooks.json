@@ -27,6 +27,11 @@
           },
           {
             "type": "command",
+            "command": "bash ${CLAUDE_PLUGIN_ROOT}/hooks/scripts/run-ui-rules-before-commit.sh",
+            "timeout": 15
+          },
+          {
+            "type": "command",
             "command": "bash ${CLAUDE_PLUGIN_ROOT}/hooks/scripts/block-wholesale-shared-docs.sh",
             "timeout": 5
           }
