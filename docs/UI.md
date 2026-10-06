@@ -21,6 +21,12 @@ the rest under More, the right pane becomes a bottom sheet, breadcrumbs
 become a back button. TV is a focusable rail with no hover. An app declares
 nothing about any of this.
 
+Home overrides the phone navigation (owner-approved 2026-10-06, Home
+RULES S1): the main navigation is a 56 px icon rail from 640 px up, and a
+phone gets one slide-over drawer with the app switcher, not a bottom bar.
+The five-entry bottom bar text above and the `PhoneNav` part do not apply
+to Home.
+
 ## Pages are data
 
 An app's pages are trees of the kit's primitives (`Page`, `Section`,
@@ -195,7 +201,7 @@ type scale, icons, wording, order of content and actions, and the same
 states, so a person who knows the desktop already knows the phone.
 What changes is only what the small screen forces: one column instead
 of three, the rail collapses to the phone tab bar with the rest under
-More, a table becomes labeled rows with the same fields in the same
+More (Home excepted: its phone drawer, see above), a table becomes labeled rows with the same fields in the same
 order, a side pane becomes a sheet, hover actions become a long press,
 targets grow to 48 px and body type never drops below 16 px. Nothing
 that matters on the desktop is hidden on the phone; a field the desktop

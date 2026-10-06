@@ -6,22 +6,22 @@ Full source: platform plan section 6.6 and the settings registry
 ## Rule 1: a setting lives with the thing it configures, once
 
 Every package declares its settings; the shell renders them inside that
-package (a gear in the app header opens the right pane or a sheet with
-household and personal settings together, plus a "for everyone / just me"
-toggle). News sources live in the News app, a companion's voice on the
-companion, an integration's options on its card. Strictly declarative: no
+package (a gear in the app header opens that app's own settings page, a
+separate page per app; household settings live in Home settings, not in
+the app's gear; owner-approved 2026-10-06). News sources live in the News app, a
+companion's voice on the companion, an integration's options on its card. Strictly declarative: no
 custom settings pages. The one escape hatch is a declared `setup` flow.
 Every package's settings are also reachable from the central package list
-(Household → Store, Profile → Apps) as the same renderer pointed at that
+(Home settings → Store, Account → Apps) as the same renderer pointed at that
 package.
 
 MaiPai Stack's settings are the same `SettingsKey` declaration, restricted to keys under `stack.*` (scope device, lives in the Stack, the three levels, the four selectors) with three fields of its own: `needs_restart`, `in_effect` and `pending`. Home's generic renderer draws the Engines page's settings from that declaration exactly as it draws every other section; a secret key (`stack.engines.tts.hf_token`) is stored encrypted by the Stack and read back redacted; a change to a `needs_restart` key is stored as pending and applied when the engine restarts. No second form, no second schema.
 
 ## Rule 2: central pages hold only what is central
 
-- **Profile**: identity, appearance, my voice and volume, notifications, my
+- **Account**: identity, appearance, my voice and volume, notifications, my
   connections, my AI, privacy and data, signed-in devices.
-- **Household**: People and permissions, Devices (Pods, Robots), Store,
+- **Home settings** (owner and admin only): People and permissions, Devices (Pods, Robots), Store,
   Integrations and credentials, AI, Storage and backups, Network and
   access, Repairs, Health, System.
 
@@ -52,6 +52,14 @@ Live apply, defaults and reset, help text from the declaration, destructive
 confirms, only the kit's form primitives, at most about fifteen keys per
 screen, a master toggle at the top of a section, search results with
 breadcrumbs.
+
+## Rule 7: every settings screen is the one kit settings shell
+
+An app's settings, Account and Home settings are settings areas declared
+as data (spec `areas.json`, or a package's `contributes.settings_area`)
+and drawn by the kit's `SettingsShell`. A product writes no settings
+layout of its own, and each registry group is placed in exactly one card
+(owner-approved 2026-10-06).
 
 ## The registry
 
