@@ -74,6 +74,8 @@ checks two kit violations (org principle 6; Home RULES.md rule 9, owner's rule
 The verdict names the Element and the kit change that replaces the override
 or wrapper.
 
+Every verdict that leaves any custom code or Element non-adoption adds or cites a row in the repo's Elements decisions ledger (Home: `docs/design/ELEMENTS-DECISIONS.md`).
+
 ## Three enforcement points
 
 1. **Dispatch.** The `coordinate` skill dispatches no item without an
