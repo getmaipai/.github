@@ -81,7 +81,9 @@ evidence and never writes source.
   decided change, gates, tests, builds, commits, landings, captures. It never plans, architects, designs, diagnoses or decides.
   Codex runs GPT-6 Luna at low effort by default and high effort when the item needs it, and never a higher model (it burns
   credits); work that needs more than Luna at high goes to Claude, not to a bigger Codex model. After Codex: the local model
-  (OpenCode, only after a health check), then a Claude agent at the model floor. Items are S or small M, in their own
+  (Reika with the 9B model, only after a health check; the 35B only while Jesse says he is away, started on his word
+  "going to bed" or "away", never by the clock, and stopped when the queue is empty or he is back; every task scope-checked
+  and every diff read), then a Claude agent at the model floor. Items are S or small M, in their own
   worktree, commit only, never push; the coordinator reads every diff. A red gate means stop and report. A lane with more
   fix-ups than clean lands over a week reverts to Claude routing. A coordinator that uses a Claude agent where a Codex lane
   was free says so, and why, in its report.
@@ -124,7 +126,7 @@ evidence and never writes source.
   a lane is held by another coordinator, or it is unclear whether the work is a Codex item or a Claude one, ask Jesse which
   session takes it (in `YOU:`, naming the lanes and what each is doing) and carry on with work that does not depend on the answer.
 - **Dispatch Claude items with the Agent tool, never by asking Jesse to open a second terminal.**
-- **Lane locks and item claims:** before sending to Codex or OpenCode, read and take `data-scratch/lane-locks/<lane>.lock`.
+- **Lane locks and item claims:** before sending to Codex or the local coder, read and take `data-scratch/lane-locks/<lane>.lock`.
   Before dispatching any item, write `data-scratch/claims/<ITEM-ID>.claim`. Unclaimed uncommitted work in a shared checkout
   is reported to the coordinator, never guessed at or finished. Clear locks and claims when the item reports.
 - **Codex does the running:** gates, tests, builds, commit and push of a finished item, screenshot captures. The coordinator
