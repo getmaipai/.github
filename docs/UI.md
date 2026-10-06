@@ -44,6 +44,8 @@ component where a shipped one exists is returned with the name of the
 shipped one. Home's shell and pages are `shadcndashboard` as shipped
 (DECISIONS.md, 2026-09-21); the chat is assistant-ui Elements.
 
+**No overrides, no wrappers (2026-10-06).** An app never puts a `className` on a kit Element or its parts that changes shape, border, radius, shadow, background, padding, margin, size or layout, and never writes its own component that wraps, frames or re-skins an Element; it renders the Element and passes data, handlers and copy. Its stylesheets likewise never select a kit part (a kit `data-slot`, an `aui-*` class) to set shape, size, layout, spacing, border, shadow, background or display; there app CSS only defines tokens the kit reads. A look or slot the Element lacks is an additive prop or variant in the kit first. Home enforces this with ELEMENTS-LINT-02 and ELEMENTS-LINT-03 (Home RULES.md rule 9).
+
 The kit owns elevation, page-tone and status-tint tokens outside the vendored palette; only kit layout wrappers, kit data-slot rules and kit primitives read them, never a Home page className. See the [CALM-TOKENS-00 token record](https://github.com/getmaipai/commons/blob/main/ui/docs/spec.md).
 
 **Vendored sources (2026-09-21).** The kit carries two upstream

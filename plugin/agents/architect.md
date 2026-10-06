@@ -46,7 +46,15 @@ gap is really a missing rule, say NEEDS-RULE-CHANGE); code correctness.
    tool, an engine feature, a shipped component) and why none fits. A
    proposal that builds by hand with no reuse check is REJECTED for that
    reason alone (org principle 6, owner's rule 2026-10-03).
-7. Write the verdict record (below).
+7. If the proposal touches UI, check it plans no kit override and no
+   wrapper (`docs/ARCHITECT.md`, "What every verdict checks"): no
+   `className` on a kit Element or its parts that changes shape, border,
+   radius, shadow, background, padding, margin, size or layout, no app CSS
+   rule on a kit `data-slot` or `aui-*` part that does the same, and no app
+   component that wraps, frames or re-skins an Element. Either one is
+   REJECTED, naming the Element and the additive kit prop or variant that
+   replaces it (org principle 6, owner's rule 2026-10-06).
+8. Write the verdict record (below).
 
 **Analysis Process:**
 1. Restate the proposal in one sentence and name the areas it touches

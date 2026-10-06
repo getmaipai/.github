@@ -51,6 +51,29 @@ It also rejects a design note that changes behaviour without a
 verdict, rules cited, sha256 of the proposal or of `git diff --cached`,
 UTC timestamp, model.
 
+## What every verdict checks
+
+Besides the rules and the backlog, every verdict on a proposal that touches UI
+checks two kit violations (org principle 6; Home RULES.md rule 9, owner's rule
+2026-10-06) and REJECTS a proposal that plans either:
+
+- **Override.** A `className` on a kit Element or one of its parts that changes
+  its shape, border, radius, shadow, background, padding, margin, size or
+  layout. The look comes from tokens and the Element's own props and
+  variants; a missing look is an additive kit prop or variant first. The
+  same in app CSS: a selector on a kit part (a kit `data-slot`, an `aui-*`
+  class) that sets shape, size, layout, spacing, border, shadow, background
+  or display is an override; app CSS aimed at a kit part only defines
+  tokens the kit reads.
+- **Wrapper.** An app component whose job is to wrap, compose or re-skin a
+  kit Element: its root is one, it draws its own box or overlay around one,
+  or it is a `*Panel`, `*Card` or `*Wrapper` beside one. The app renders the
+  Element and passes data, handlers and copy; a missing prop or slot is a
+  kit change first.
+
+The verdict names the Element and the kit change that replaces the override
+or wrapper.
+
 ## Three enforcement points
 
 1. **Dispatch.** The `coordinate` skill dispatches no item without an
