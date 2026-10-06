@@ -44,6 +44,8 @@ component where a shipped one exists is returned with the name of the
 shipped one. Home's shell and pages are `shadcndashboard` as shipped
 (DECISIONS.md, 2026-09-21); the chat is assistant-ui Elements.
 
+The kit owns elevation, page-tone and status-tint tokens outside the vendored palette; only kit layout wrappers, kit data-slot rules and kit primitives read them, never a Home page className. See the [CALM-TOKENS-00 token record](https://github.com/getmaipai/commons/blob/main/ui/docs/spec.md).
+
 **Vendored sources (2026-09-21).** The kit carries two upstream
 snapshots, each used exactly as it ships and pinned by commit in
 `commons/ui/docs/dashboard-upstream.md`: `shadcndashboard` (MIT; the
