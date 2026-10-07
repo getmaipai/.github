@@ -13,6 +13,9 @@ check, a model download).
 - **No MaiPai-operated service ever sits in a user data path.** No relays,
   proxies, sync servers, or cloud accounts. Org web properties (docs sites,
   the org page) are static and carry no trackers.
+- **A person's activity stays theirs.** No user can see what another user
+  does in any app; no role grants it; a person may share their own screen or
+  hand over their own passcode.
 - **Outbound connections are user-serving and transparent.** The app talks
   to the network only to serve the user: update checks, on-demand model and
   dependency downloads, and integrations the user enabled. An integration
