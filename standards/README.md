@@ -83,10 +83,13 @@ second copy of its rules here.
 - `bin/gate-lock.sh`: the machine-wide full-gate mutex (org `docs/VERIFICATION.md` >
   Verification, "One full gate at a time"; `docs/DECISIONS.md`,
   2026-09-27). A repo's `check.sh` runs `gate-lock.sh acquire <label>
-  [item]` before any non-docs scope, which blocks FIFO behind any other
+  [item] [lane]` before any non-docs scope, which blocks FIFO behind any other
   repo's full gate, and `gate-lock.sh release <label>` from an `EXIT`
   trap. State lives in `~/.local/state/maipai/gate-lock/` (`holder`,
-  `queue`); a holder or waiter whose PID is dead is reclaimed, and a wait
+  `queue`); one additional waiter per lane may be recorded globally in
+  `~/.local/state/maipai/gate-lanes/queue`, including across gate classes.
+  A duplicate queued lane is refused with the existing label and item.
+  A holder or waiter whose PID is dead is reclaimed, and a wait
   past its allowance (6 minutes per queue position, 30 at most) exits 1
   so the gate fails and reports. `gate-lock.sh status` shows the holder
   and the queue. Until a tag carries it, consumers call it from the

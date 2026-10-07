@@ -13,7 +13,7 @@
 # releases it in an EXIT trap.
 #
 # Usage:
-#   gate-lock.sh acquire <label> [item]   blocks until held, exits 0
+#   gate-lock.sh acquire <label> [item] [lane] blocks until held, exits 0
 #                                         (exits 1 past the wait cap)
 #   gate-lock.sh release <label>          frees it if <label> holds it
 #   gate-lock.sh status                   holder or "free", plus queue
@@ -54,7 +54,9 @@
 # GATE-SPEED-01: GATE_LOCK_NAME picks a separate lock for a lighter class of
 # gate (check.sh uses "frontend" for a frontend-only diff) so it never waits
 # behind a backend or full gate; unset keeps the one machine-wide lock.
-GATE_LOCK_DIR="${XDG_STATE_HOME:-$HOME/.local/state}/maipai/gate-lock${GATE_LOCK_NAME:+-$GATE_LOCK_NAME}"
+GATE_LOCK_ROOT="${XDG_STATE_HOME:-$HOME/.local/state}/maipai"
+GATE_LOCK_DIR="$GATE_LOCK_ROOT/gate-lock${GATE_LOCK_NAME:+-$GATE_LOCK_NAME}"
+GATE_LANE_QUEUE_DIR="$GATE_LOCK_ROOT/gate-lanes"
 
 _gl_now() { date -u +%Y-%m-%dT%H:%M:%SZ; }
 _gl_alive() { [ -n "$1" ] && kill -0 "$1" 2>/dev/null; }
@@ -81,6 +83,59 @@ _gl_mutex_lock() {
   perl -MFcntl=:flock -e 'open(my $fh, ">&=", 9) or die "gate-lock: fd 9: $!\n"; flock($fh, LOCK_EX) or die "gate-lock: flock: $!\n"'
 }
 _gl_mutex_unlock() { exec 9>&-; }
+
+_gl_lane_mutex_lock() {
+  mkdir -p "$GATE_LANE_QUEUE_DIR" || return 1
+  if ! exec 8>>"$GATE_LANE_QUEUE_DIR/.mutex"; then
+    echo "gate-lock: cannot open $GATE_LANE_QUEUE_DIR/.mutex" >&2
+    return 1
+  fi
+  perl -MFcntl=:flock -e 'open(my $fh, ">&=", 8) or die "gate-lock: fd 8: $!\n"; flock($fh, LOCK_EX) or die "gate-lock: flock: $!\n"'
+}
+_gl_lane_mutex_unlock() { exec 8>&-; }
+
+_gl_lane_prune() {
+  local tmp line
+  [ -f "$GATE_LANE_QUEUE_DIR/queue" ] || return 0
+  tmp="$(mktemp "$GATE_LANE_QUEUE_DIR/.queue.XXXXXX")"
+  while IFS= read -r line; do
+    [ -z "$line" ] && continue
+    _gl_alive "$(_gl_field "$line" 5)" && printf '%s\n' "$line"
+  done < "$GATE_LANE_QUEUE_DIR/queue" > "$tmp"
+  mv -f "$tmp" "$GATE_LANE_QUEUE_DIR/queue"
+}
+
+_gl_lane_remove() {
+  local label="$1" tmp line
+  _gl_lane_mutex_lock || return 1
+  _gl_lane_prune
+  if [ -f "$GATE_LANE_QUEUE_DIR/queue" ]; then
+    tmp="$(mktemp "$GATE_LANE_QUEUE_DIR/.queue.XXXXXX")"
+    while IFS= read -r line; do
+      [ -z "$line" ] && continue
+      [ "$(_gl_field "$line" 2)" = "$label" ] || printf '%s\n' "$line"
+    done < "$GATE_LANE_QUEUE_DIR/queue" > "$tmp"
+    mv -f "$tmp" "$GATE_LANE_QUEUE_DIR/queue"
+  fi
+  _gl_lane_mutex_unlock
+}
+
+_gl_lane_enqueue() {
+  local lane="$1" label="$2" item="$3" pid="$4" line
+  [ -n "$lane" ] || return 0
+  _gl_lane_mutex_lock || return 1
+  _gl_lane_prune
+  if [ -f "$GATE_LANE_QUEUE_DIR/queue" ]; then
+    while IFS= read -r line; do
+      [ "$(_gl_field "$line" 1)" = "$lane" ] || continue
+      _gl_lane_mutex_unlock
+      echo "gate-lock: lane $lane already has queued gate $(_gl_field "$line" 2) (item $(_gl_field "$line" 3))" >&2
+      return 1
+    done < "$GATE_LANE_QUEUE_DIR/queue"
+  fi
+  printf '%s\t%s\t%s\t%s\t%s\n' "$lane" "$label" "$item" "$(_gl_now)" "$pid" >> "$GATE_LANE_QUEUE_DIR/queue"
+  _gl_lane_mutex_unlock
+}
 
 # Rewrites `queue` without the lines for <label> and without any waiter
 # whose recorded PID is dead. Caller holds the mutex.
@@ -139,7 +194,7 @@ _gl_try_create() {
 }
 
 _gl_acquire() {
-  local label="$1" item="$2" pid="$3"
+  local label="$1" item="$2" pid="$3" lane="${4:-}"
   local poll="${GATE_LOCK_POLL_SECONDS:-10}"
   local per="${GATE_LOCK_PER_POSITION_SECONDS:-360}"
   local max="${GATE_LOCK_MAX_SECONDS:-1800}"
@@ -162,13 +217,17 @@ _gl_acquire() {
       return 0
     fi
   fi
+  if ! _gl_lane_enqueue "$lane" "$label" "$item" "$pid"; then
+    _gl_mutex_unlock
+    return 1
+  fi
   printf '%s\t%s\t%s\t%s\n' "$label" "$item" "$(_gl_now)" "$pid" >> "$GATE_LOCK_DIR/queue"
   _gl_mutex_unlock
 
   # A caller interrupted while queued (Ctrl-C on check.sh reaches this
   # process too) leaves the queue rather than blocking the ones behind.
   # Executed only: a sourcing shell's own traps are never replaced.
-  [ "$_GL_SOURCED" = 1 ] || trap '_gl_mutex_lock; _gl_queue_prune "$label"; _gl_mutex_unlock; exit 130' INT TERM HUP
+  [ "$_GL_SOURCED" = 1 ] || trap '_gl_mutex_lock; _gl_queue_prune "$label"; _gl_mutex_unlock; _gl_lane_remove "$label"; exit 130' INT TERM HUP
 
   start=$(date +%s)
   echo "gate-lock: waiting for the full gate (held by $(cut -f1 "$GATE_LOCK_DIR/holder" 2>/dev/null || echo "nobody"))" >&2
@@ -186,6 +245,7 @@ _gl_acquire() {
     if [ "$pos" = 1 ] && _gl_try_create "$label" "$item" "$pid"; then
       _gl_queue_prune "$label"
       _gl_mutex_unlock
+      _gl_lane_remove "$label"
       [ "$_GL_SOURCED" = 1 ] || trap - INT TERM HUP
       echo "acquired after $(( $(date +%s) - start ))s"
       return 0
@@ -200,6 +260,7 @@ _gl_acquire() {
       _gl_mutex_lock || return 1
       _gl_queue_prune "$label"
       _gl_mutex_unlock
+      _gl_lane_remove "$label"
       [ "$_GL_SOURCED" = 1 ] || trap - INT TERM HUP
       if ! _gl_alive "$pid"; then
         echo "gate-lock: gave up, the owning process (pid $pid) exited while queued" >&2
@@ -259,9 +320,9 @@ gate_lock() {
     acquire)
       [ -n "${2:-}" ] || { echo "$usage" >&2; return 2; }
       if [ "$_GL_SOURCED" = 1 ]; then
-        _gl_acquire "$2" "${3:-}" "${GATE_LOCK_PID:-$$}"
+        _gl_acquire "$2" "${3:-}" "${GATE_LOCK_PID:-$$}" "${4:-${GATE_LOCK_LANE:-}}"
       else
-        _gl_acquire "$2" "${3:-}" "${GATE_LOCK_PID:-$PPID}"
+        _gl_acquire "$2" "${3:-}" "${GATE_LOCK_PID:-$PPID}" "${4:-${GATE_LOCK_LANE:-}}"
       fi
       ;;
     release)

@@ -147,6 +147,43 @@ describe("GATE-LOCK-01: gate-lock.sh, the machine-wide full-gate mutex", () => {
     }
   });
 
+  test("one queued gate per lane is enforced across lock classes with a named refusal", async () => {
+    const home = makeStateHome();
+    const fullDir = lockDir(home);
+    const frontendDir = join(home, "maipai", "gate-lock-frontend");
+    try {
+      mkdirSync(fullDir, { recursive: true });
+      mkdirSync(frontendDir, { recursive: true });
+      writeFileSync(join(fullDir, "holder"), `full-holder\t\t${process.pid}\t2026-09-27T00:00:00Z\n`);
+      writeFileSync(join(frontendDir, "holder"), `frontend-holder\t\t${process.pid}\t2026-09-27T00:00:00Z\n`);
+
+      const first = spawnShell(home,
+        `bash "$G" acquire first-waiter FIRST codex-a >/dev/null || exit 1; bash "$G" release first-waiter >/dev/null`,
+      );
+      await waitFor(() => logLines(join(home, "maipai", "gate-lanes", "queue")).some((l) => l.startsWith("codex-a\tfirst-waiter\tFIRST\t")));
+
+      const second = Bun.spawnSync(["bash", GATE_LOCK, "acquire", "second-waiter", "SECOND", "codex-a"], {
+        env: env(home, { GATE_LOCK_NAME: "frontend" }), stdout: "pipe", stderr: "pipe",
+      });
+      expect(second.exitCode).toBe(1);
+      expect(second.stderr.toString()).toContain("lane codex-a already has queued gate first-waiter (item FIRST)");
+
+      // A distinct lane may queue in the other lock class.
+      const third = spawnShell(home,
+        `export GATE_LOCK_NAME=frontend; bash "$G" acquire third-waiter THIRD codex-b >/dev/null || exit 1; bash "$G" release third-waiter >/dev/null`,
+      );
+      await waitFor(() => logLines(join(home, "maipai", "gate-lanes", "queue")).some((l) => l.startsWith("codex-b\tthird-waiter\tTHIRD\t")));
+      expect(run(home, ["status"]).stdout).toContain("full-holder");
+      expect(run(home, ["release", "full-holder"]).exitCode).toBe(0);
+      expect(run(home, ["release", "frontend-holder"], { GATE_LOCK_NAME: "frontend" }).exitCode).toBe(0);
+      expect(await first.exited).toBe(0);
+      expect(await third.exited).toBe(0);
+      expect(logLines(join(home, "maipai", "gate-lanes", "queue"))).toEqual([]);
+    } finally {
+      rmSync(home, { recursive: true, force: true });
+    }
+  });
+
   test("(b) four gates started at the same instant never overlap: each one's in/out pair closes before the next opens", async () => {
     const home = makeStateHome();
     const log = join(home, "mutex.log");
