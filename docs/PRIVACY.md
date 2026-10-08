@@ -13,6 +13,7 @@ check, a model download).
 - **No MaiPai-operated service ever sits in a user data path.** No relays,
   proxies, sync servers, or cloud accounts. Org web properties (docs sites,
   the org page) are static and carry no trackers.
+- **The household's own engine computer is inside the house (owner's ruling, 2026-10-07).** When Home uses an engine computer the owner paired, chat, pictures and voice travel between the two inside an encrypted, key-authenticated SSH link, over the home network. Only if an admin turns on the household setting "Reach the engine computer when away from home" does the link also use the owner's own Tailscale network, so those requests then cross the internet inside Tailscale's encrypted link; the setting is off by default. Home refuses any address that is neither on the home network nor, with that setting on, in the Tailscale ranges. The privacy page lists the link in the same commit that adds it, as two rows, the second shown only while the setting is on.
 - **A person's activity stays theirs.** No user can see what another user
   does in any app; no role grants it; a person may share their own screen or
   hand over their own passcode.
@@ -40,3 +41,5 @@ check, a model download).
   (this is the docs-with-the-change rule applied to privacy).
 
 MaiPai Stack keeps no privacy page. It publishes its outbound endpoints as rows (`/stack/v1/privacy`: the signed Catalog index checks, the pinned downloads, a provenance read before an install, a voice or its cloning weights fetched once on an explicit need), each saying when it happens, what it carries, who receives it and the setting that governs it, and Home's own page shows those rows in the same table as everything else that leaves the house. Adding or changing a Stack endpoint changes that data in the same commit, which is the docs-with-the-change rule applied to a daemon with no docs of its own.
+
+Owner-approved: 2026-10-07
