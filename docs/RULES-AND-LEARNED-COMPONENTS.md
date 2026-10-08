@@ -90,17 +90,19 @@ the rebuild clean and apply to every product's turn pipeline.
 
 ## The model decides whether a turn needs a search or a tool (owner's rule, 2026-10-02)
 
-No learned lookup head, router or classifier decides whether a turn
-needs a search or a tool, any more than a word rule does. Tools are
-offered with `tool_choice: "auto"` and the model decides. What stays
-deterministic: the safety floor on input and output, the credential
-catch, consent words, the household-name gate on search arguments, the
-crisis, temporary-mode and grounding refusals, and exact commands,
-forget among them. The turn signal is kept for the plan line,
-memory-judge eligibility, the wire `signal` event and spoken-cue
-suppression; it no longer decides a search. The first rule above ("three
-phrasings is a classifier") does not reopen this. Why: a head trained on
-phrasings misses the ones nobody labelled, the model reads the whole
-message, and a wrong "no search" is silent. The record is
+No learned lookup head, router or classifier decides on a live turn
+whether it needs a search or a tool, any more than a word rule does; one
+may run in shadow to be measured. Tools are offered with
+`tool_choice: "auto"` and the model decides, except that an explicit
+request to search (a search control, an exact command matched whole) is
+honored in code and still passes policy. What stays deterministic: the
+safety floor on input and output, the credential catch, consent words,
+the household-name gate on search arguments, the crisis, temporary-mode
+and grounding refusals, and exact commands, forget among them. The turn
+signal is kept for the plan line, memory-judge eligibility, the wire
+`signal` event and spoken-cue suppression; it no longer decides a search.
+The first rule above ("three phrasings is a classifier") does not reopen
+this. Why: a head trained on phrasings misses the ones nobody labelled,
+the model reads the whole message, and a wrong "no search" is silent. The record is
 `home/docs/plans/chat-thin-path-2026-10-02.md`; the rules are in
 `home/docs/design/RULES.md`.
