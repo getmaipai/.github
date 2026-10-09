@@ -23,6 +23,13 @@ check, a model download).
   that identifies the user (their YouTube account, their location for
   weather) is opt-in, connects directly from their hub to that service with
   credentials stored locally, and never transits anything of ours.
+- **Default-on public reads are allowed (owner's ruling, 2026-10-09).** A
+  working hub needs outside data, so it may fetch named public sources by
+  default (the RSS news shelf, reference-library updates). Each one carries
+  no identifier or household data, polls slowly and politely
+  (`THIRD-PARTY-SERVICES.md`), is listed in `/stack/v1/privacy` and the
+  settings screen, and has an off switch. Anything that identifies the
+  user stays opt-in.
 - **An optional hosted search provider is the owner's choice, and the
   query text then leaves the house (owner's ruling, 2026-10-02).** The
   owner brings the provider and its key; it is not MaiPai-operated, and
