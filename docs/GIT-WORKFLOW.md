@@ -135,6 +135,15 @@ fresh session picking the task back up.
   review on record), never a `medium` one. The done report states the review's wall time beside
   its level and pass count.
 
+## Keeping branches, worktrees and sessions tidy (owner's rule, 2026-10-09)
+
+- **Name every session "role · work"**: `coord · admin-settings`, `cloud · link-state`, `codex-a · place-hub`. Repo goes in the work part when more than one repo is live. A session without a name that says what it does is renamed or archived.
+- **At landing, the lander removes its own leftovers in the same report:** the work branch (local and remote), its worktree, its claim and lock, and archives its cloud session. The done report names each.
+- **Remote branches:** delete one only when it is merged into `origin/main` or every commit is patch-equivalent (`git cherry` shows no `+`), and its newest commit is over 2 hours old. Log `repo branch sha` to `data-scratch/cleanup/deleted-branches-<date>.txt` first so it can be recreated.
+- **Weekly sweep (coordinator):** list remote branches per repo, delete the provably dead ones by the rule above, list the unmerged rest with age and owner. Unmerged branches are reported, never deleted unseen.
+- **Cloud sessions** are named at start; when the item lands, Jesse archives the session (the coordinator cannot reach the desktop sidebar) and the report lists which ones.
+- **Worktrees** live beside the repo as `<repo>-<lane>-<item>`, never inside `data-scratch/` (a nested checkout breaks relative imports). Remove after landing.
+
 ## Push at natural boundaries
 
 **Push at natural boundaries** (a verified item merged to `main`, the end
