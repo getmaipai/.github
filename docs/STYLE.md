@@ -125,6 +125,21 @@ Hard limits (the calm budget):
 - If a section runs longer than its docs page would, move it to docs and
   leave one sentence.
 
+## Error messages (owner's rule, 2026-10-09)
+
+Every error a person can see names the problem and the fix. Two parts, in this order:
+
+1. **What happened**, in what the person sees or did, not the internal cause.
+2. **What to do next**, as a concrete step: the address to open, the setting to change (with its path, such as Settings > Engines), the exact command, or who to ask.
+
+Bad: `Pairing requires a secure Home connection`. Good: `Pairing only works when Home is opened at an address that starts with https://. You opened it at http://. Open Home at its https:// address and try again.`
+
+- Grade-6 words, no jargon, no stack traces, no error codes as the only content. Admins may get the raw cause as a second line.
+- One shared constant per message; the server's text is shown as written, never replaced by a generic "Something went wrong".
+- If there is no fix the person can make, say so and say what will happen next (it retries, or who to tell).
+- Tests assert the fix part (the address, setting or command appears), not only the status code.
+- Review checks any new or changed error string against this rule; a bare constraint statement is a finding.
+
 ## AI writing standards
 
 The full list lives in [CLAUDE.md](../CLAUDE.md) and applies to every tier: no em dashes, no AI filler vocabulary (delve, seamless, robust, leverage, and friends), no "not just X, it's Y" constructions, bullets only for real lists, concrete beats abstract. If a sentence sounds like a press release, rewrite it like you'd say it to a neighbor. <!-- prose-lint: allow -->

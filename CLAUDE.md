@@ -171,6 +171,7 @@ Reads like a sharp human wrote it. Applies to docs, UI copy, comments, commit me
 - Bullets are for lists of things; flowing sentences are a paragraph.
 - Concrete beats abstract: numbers, names and file paths over adjectives.
 - User-facing copy passes the dad test: a busy parent with basic tech knowledge understands it on first read.
+- **Every error message says what went wrong and what to do about it (owner's rule, 2026-10-09).** Two parts, plain words: the problem in terms the person sees, then the next step (the address to open, the setting to change, the command to run). A bare statement of a constraint is a defect. Applies to UI, API `error` strings, CLI output and logs a person is told to read. Detail: `docs/STYLE.md`, "Error messages".
 
 **End every reply to Jesse with the status block:** three lines, uppercase labels, this order, nothing after it.
 
