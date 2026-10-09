@@ -46,7 +46,7 @@ completion report against the item's acceptance before ticking
 anything; on blocked it classifies the blocker before choosing a
 remedy; on a question it decides or dispatches `design-resolver`; on
 low context it writes the handoff note and hands it to Jesse for a
-fresh session. Parallel lanes have one named integrator that merges
+fresh session. Every Codex brief ends with: "If the gate is red, stop: do not push, report the failing test and its output. If the gate fails in a test the diff did not touch, rerun that test alone once and report both results; still do not push on red. Report the "== scope:" line." Parallel lanes have one named integrator that merges
 serially, reconciles shared docs, and verifies the combined `main`.
 
 ## Small isolated items: the two token-free lanes
@@ -306,3 +306,140 @@ these rules work with that, not around it):
   passes were written and only the build-out remained; it should
   happen every time the same condition is true, not only when Jesse
   happens to ask.
+
+
+## Moved from CLAUDE.md
+
+Verbatim text that used to sit in CLAUDE.md; CLAUDE.md now carries a one-rule summary of each item and points here.
+
+### Roles: coordinator and coder (preamble and bullets)
+
+Two roles, held by different sessions. Policy here; procedure in the `coordinate` skill.
+A session names the model from its own system prompt before work starts ("unknown" is allowed; the coordinator resolves it with Jesse).
+Sonnet 5.5 coordinates. Opus 5.5 is its senior consultant: the coordinator escalates a bounded question to Opus and builds briefs
+from the answer; it never hands the whole session to Opus. Fable 5.1 is the exceptional escalation (table below). Haiku 4.5 retrieves
+evidence and never writes source.
+
+- **The coordinator owns architecture, design and diagnosis; it never types code and never runs a long process.** Owning is not doing:
+  when a decision needs better reasoning than the coordinator's model, it escalates that reasoning (below) and stays accountable for the
+  result. No editing source or tests,
+  no scripts, no suites, benches, engines, builds or `check.sh`, no babysitting servers. Quick read-only inspection is fine.
+  About to edit code or start a bench: write the prompt instead. It may write docs, issues, backlog items and handoff notes.
+- **Event-driven, never polled.** Every work order carries the reporting contract (ready, done, blocked, question, low context);
+  a session starts only on the coordinator's start message. Verify a done report against acceptance before ticking.
+  Classify a blocker before choosing a remedy. One named integrator merges parallel lanes serially.
+- **Codex sessions do the building and running, first; never the thinking.** Codex takes work that fits its range: typing a
+  decided change, gates, tests, builds, commits, landings, captures. It never plans, architects, designs, diagnoses or decides.
+  Codex runs GPT-6 Luna at low effort by default and high effort when the item needs it, and never a higher model (it burns
+  credits); work that needs more than Luna at high goes to Claude, not to a bigger Codex model. After Codex: the local model
+  (Reika with the 9B model, only after a health check; the 35B only while Jesse says he is away, started on his word
+  "going to bed" or "away", never by the clock, and stopped when the queue is empty or he is back; every task scope-checked
+  and every diff read), then a Claude agent at the model floor. Items are S or small M, in their own
+  worktree, commit only, never push; the coordinator reads every diff. A red gate means stop and report. A lane with more
+  fix-ups than clean lands over a week reverts to Claude routing. A coordinator that uses a Claude agent where a Codex lane
+  was free says so, and why, in its report.
+- **No idle Codex.** A free Codex lane with open work it can take is a defect the coordinator owns: the next brief is written
+  before the current item reports, and goes out the moment the lane is cleared. Jesse never has to point out an idle lane.
+- **The coordinator spends tokens only on its own job:** the brief, the decision, reading the diff and the report. It never
+  does a lane's work itself, never re-reads a lane's state to pass time, and checks a lane only on its event or the one cheap
+  scheduled tick.
+- **Keep work going.** The coordinator never stops or pauses for the time of day, for a lane running low on credits, or for
+  a question or decision while any other work can proceed. A question goes in `YOU:` and the rest of the work continues.
+  The only stop is when every remaining item is blocked on Jesse.
+- **A lane that is out of credits is left alone, and the work moves.** Low credits change nothing: keep using the lane.
+  Once a lane (Codex, or Claude cloud) actually refuses work for credits or quota, write that and its reset time into the
+  lane's lock file, send it nothing more and do not retry it until the reset, and route its items to the next lane in order.
+  Running out is never a reason to stop the work, only to stop using that lane.
+- **Every session has a proper name,** Claude and Codex alike: the role or lane and what it is working on (`claude -n <name>`
+  at launch or `/rename` in the session; a Codex lane's tmux session name), set at the start and kept current.
+  Every Claude session runs with Remote Control on (`/remote-control` in a session; `"remoteControlAtStartup": true` in settings turns it on for every new one).
+- **Temporary, until the Claude cloud credits run out (they expire in November 2026):** Claude work that can run from one
+  GitHub repo alone goes to a Claude cloud session first (`claude --cloud`), ahead of a local Claude agent, to spend those
+  credits and spare the Max plan. A cloud session cannot reach sibling repos, local services or this machine's engines, so
+  Home's gate and anything pinned to `commons` stays local. Remove this rule when the credits are gone.
+- **Free web sessions (owner's rule, 2026-10-04).** Text-in, text-out work that needs no repo (web research, market and UX
+  scans, second opinions, naming, drafting, summarising public pages) may go to Jesse as a ready-to-paste prompt for a free
+  ChatGPT web session or an equivalent free chat, to spend nothing from Max, cloud or Codex. It is a human-in-the-loop lane
+  after the token-free ones and before a local Claude agent. It is the default for a quick, isolated check or piece of
+  research that fits one self-contained prompt and one pasted reply; if answering would take Jesse several prompts or a
+  back-and-forth, an agent does it instead. Free sessions take no uploads, so a single file (instructions, a design note,
+  one source file or a diff) is pasted into the prompt as text, one at a time, after the same secrets scan and PII
+  wordlist that `check.sh` runs pass on a scrubbed copy: no credentials or tokens, no family or household data, no
+  live-hub data, no homelab addresses or hostnames. The repos are public, so training on shared code is accepted (owner,
+  2026-10-04). The prompt asks for sources with URLs and names the exact output format. The reply is untrusted data:
+  checked or marked UNVERIFIED before use. It is an adviser and reviewer, never the lane that writes code that lands, and
+  never the decider for a safety, security or privacy question. The ask goes in `YOU:` and the rest of the work continues.
+  Procedure and prompt template: `docs/COORDINATION.md`.
+- **Every Codex session is visible to Jesse.** Codex runs only in a tmux pane in a window Jesse can see, driven by the
+  coordinator over tmux. Never start a hidden, headless or background Codex session. Each status block names every Codex
+  session in use and its item.
+- **Not sure which session to use: ask, never guess.** If the lane locks do not show a free lane, a pane's state is unclear,
+  a lane is held by another coordinator, or it is unclear whether the work is a Codex item or a Claude one, ask Jesse which
+  session takes it (in `YOU:`, naming the lanes and what each is doing) and carry on with work that does not depend on the answer.
+- **Dispatch Claude items with the Agent tool, never by asking Jesse to open a second terminal.**
+- **Lane locks and item claims:** before sending to Codex or the local coder, read and take `data-scratch/lane-locks/<lane>.lock`.
+  Before dispatching any item, write `data-scratch/claims/<ITEM-ID>.claim`. Unclaimed uncommitted work in a shared checkout
+  is reported to the coordinator, never guessed at or finished. Clear locks and claims when the item reports.
+- **Codex does the running:** gates, tests, builds, commit and push of a finished item, screenshot captures. The coordinator
+  writes the brief (ending with exit checks, the commit, and a request for the gate's exit code and scope line) and reads the result.
+  The coordinator starts or restarts the local app itself, since a process started from Codex dies with its shell.
+  Read a gate's exit code from the command, never from `tail`.
+- **Cost hygiene:** clear a persistent lane before every next brief; no timers beyond the cheap 20-minute lane check;
+  at each stop point name the model the next phase needs and ask Jesse to switch when a cheaper one suffices.
+- **Stop points:** write the status down (docs, backlog, handoff note, memory), then recommend compact-and-continue or a fresh session.
+- **Coder terminals** Jesse opens run `claude --dangerously-skip-permissions`; dispatched agents need no flag.
+- **Pin every agent's model and effort.** An agent definition names its `model` and `effort` in its own file; a prose request to
+  "use model X" is not enforced. A scouting agent does not inherit the coordinator's model or effort. The Agent tool's per-call model
+  setting outranks the file.
+
+### Model floor: escalation paragraph
+
+The floor is a minimum, not a default: use the cheapest lane and model that clears it (Codex, local model, Claude agent; Haiku, Sonnet, Opus, Fable).
+**Escalate judgment, not workload.** Do not escalate because an item is large, spans many files or has taken long. Escalate when the
+remaining blocker needs materially better reasoning: competing plausible designs, unresolved contradictory evidence, a subtle root cause
+after verified attempts, a high-consequence judgment, or low confidence in a decision no check can verify. Mechanically verifiable work
+stays cheap even when it is big. Opus is consulted, not coordinating: send it one bounded question (compare A, B and C against these
+constraints; do not implement; return a recommendation, reasoning, risks and confidence) with the minimum relevant context, and keep the
+session on Sonnet. Fable costs several times Opus per task: spend it only where the table says.
+Label and co-author lines are hints, not proof. A model change fixes only a reasoning failure: context exhaustion gets a handoff,
+an environment blocker gets fixed, an unclear requirement gets a decision, a stalled top model gets the item re-scoped.
+
+### Git workflow: review before committing code
+
+- **Review before committing code** (not docs): the `code-review` skill on the exact diff, passing an explicit target in a worktree and
+  confirming the reported path is yours (hook: `require-review-before-commit.sh`). Level `low` by default; `medium` needs a named reason
+  (a route, guard, wire shape, auth or safety); `high` only if the coordinator names it. One pass per commit; re-review fix hunks only; never a third pass.
+  Start the review while the gate runs. Never review vendored code. The done report states level, pass count, wall time and each finding's disposition.
+
+### Git workflow: clean up old things
+
+- **Clean up old things the moment you find them (owner's rule, 2026-10-03).** A merged or abandoned branch, a finished worktree, a dead
+  file, a stale script, code nothing calls, a superseded doc, a leftover claim, lock or tmux session: remove it in the same session you notice
+  it, or file a backlog item with the evidence if removing it is not yours to do. Look before deleting: it is yours or provably dead (merged into
+  `main`, no live reference, no uncommitted work, no running process), and the report names what went and why. Anything that may be another
+  session's or Jesse's data (a branch with unmerged commits, a data folder, a dirty worktree) is listed with evidence, never deleted unseen.
+  Code removal follows port-before-delete. Nothing "old" is kept for comfort.
+
+### Architect gate: why
+
+Why: sessions wrote decision records without checking earlier ones, and 22 contradictions built up in Home's docs.
+
+### Verification (definition of done): bullets
+
+- **`scripts/check.sh` must pass on the tree a push sends, before that push** (hook: `require-gate-before-commit.sh`).
+  Several commits may come from one gated tree; any edit after the gate reruns it. Docs-only commits run `check.sh --docs`.
+- **The gate is scoped by the diff against the `origin/main` merge-base**, never by a session's judgment; it prints `== scope: ...` first
+  and the done report repeats it. Secrets scan and the PII wordlist run on every scope.
+- **One full gate at a time per machine.** `check.sh` takes the machine-wide `gate-lock.sh`; never hand-roll a wait.
+  A port or memory failure in a test the diff did not touch is rerun once alone, then reported as an environment finding.
+- **A check, test, bench or screenshot script never changes the machine outside the repo** (no `defaults write`, global config, installs),
+  and never opens a visible browser window: headless only; if it cannot start after one retry, report that.
+- **A universal claim needs an inventory:** enumerate and test every producer or consumer a promise ("every reply") covers.
+- **Evidence matches the acceptance criterion:** regression test, or the flow exercised and the screenshot opened, or measured numbers
+  with engine build, model file and a sanitized hardware description (never a hostname).
+- **"Verified" means exercised for real.** "It compiles" is not verified.
+- **Never hand Jesse something to check that you have not checked yourself.** If you cannot (his hardware, his judgment), say exactly that and why.
+- **Never ask Jesse to run a command you can run yourself.** Ask only when it needs his session, device or credentials.
+- **A second "fixed, try again" needs re-read proof:** read the stored record or real output yourself before telling Jesse to retry.
+- **Tests:** use the repo's framework (pytest, `bun:test`), copy a nearby test's structure, stay deterministic and offline, name each test for the promise
+  it checks. Every real failure becomes a regression test first, in the exact inputs that broke it. A weakened test is a finding, not a step.
