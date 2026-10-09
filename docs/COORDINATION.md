@@ -370,9 +370,7 @@ evidence and never writes source.
   checked or marked UNVERIFIED before use. It is an adviser and reviewer, never the lane that writes code that lands, and
   never the decider for a safety, security or privacy question. The ask goes in `YOU:` and the rest of the work continues.
   Procedure and prompt template: `docs/COORDINATION.md`.
-- **Every Codex session is visible to Jesse.** Codex runs only in a tmux pane in a window Jesse can see, driven by the
-  coordinator over tmux. Never start a hidden, headless or background Codex session. Each status block names every Codex
-  session in use and its item.
+- **Codex lanes run in named tmux sessions the coordinator starts and restarts (owner's rule, 2026-10-08, replaces "every Codex session is visible").** No terminal window has to be open; tmux keeps the lane alive. Never a hidden process outside tmux. The Lanes panel shows each lane's state; Jesse can attach to any lane at any time. After a reboot the coordinator rebuilds the lanes.
 - **Not sure which session to use: ask, never guess.** If the lane locks do not show a free lane, a pane's state is unclear,
   a lane is held by another coordinator, or it is unclear whether the work is a Codex item or a Claude one, ask Jesse which
   session takes it (in `YOU:`, naming the lanes and what each is doing) and carry on with work that does not depend on the answer.
