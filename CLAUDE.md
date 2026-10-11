@@ -41,7 +41,7 @@ Hold across `home`, `bot`, `catalog`, `go`.
 
 - Shared record changes go through the spec first (`spec/` in `commons`), then hub, then robot. A one-sided patch is a bug.
 - Design ambiguity is a research task: dispatch `design-resolver` before asking Jesse. Escalate only low-confidence results or his own calls (releases, deploys, go/no-go, review verdicts, real-world facts).
-- **Rules never hide the right design (owner's rule, 2026-10-11).** Find the best design on merit first, then check it against the rules. If the best design conflicts with a rule, do not drop it or quietly pick the second best: measure it where a measurement is safe (a bench that ships nothing), report it with the rule named and the numbers beside the best in-rules option, and let Jesse decide whether the rule should change. Only Jesse changes a rule. "Breaks a rule" is a finding to report, never the reason an option was not examined.
+- **Rules never hide the right design (owner's rule, 2026-10-11).** Find the best design on merit first, then check it against the rules. If the best design conflicts with a rule, do not drop it or quietly pick the second best: measure it where a measurement is safe (a bench that ships nothing), report it with the rule named and the numbers beside the best in-rules option, and let Jesse decide whether the rule should change. Only Jesse changes a rule. "Breaks a rule" is a finding to report, never the reason an option was not examined. When several independent sources (other products, open-source code, our own history, outside advisers) point the same way, that design is measured first, not last.
 
 Load `docs/PLATFORM.md` before applying principle 6's UI rule, principle 8, or a record change.
 
