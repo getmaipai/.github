@@ -317,8 +317,8 @@ Verbatim text that used to sit in CLAUDE.md; CLAUDE.md now carries a one-rule su
 Two roles, held by different sessions. Policy here; procedure in the `coordinate` skill.
 A session names the model from its own system prompt before work starts ("unknown" is allowed; the coordinator resolves it with Jesse).
 Sonnet 5.5 coordinates. Opus 5.5 is its senior consultant: the coordinator escalates a bounded question to Opus and builds briefs
-from the answer; it never hands the whole session to Opus. Fable 5.1 is the exceptional escalation (table below). Haiku 4.5 retrieves
-evidence and never writes source.
+from the answer; it never hands the whole session to Opus. Fable 5.1 is the exceptional escalation (table below). Haiku 4.5 gathers evidence for Sonnet
+and may do small verified work (CLAUDE.md, Haiku row; owner's rule, 2026-10-11).
 
 - **The coordinator owns architecture, design and diagnosis; it never types code and never runs a long process.** Owning is not doing:
   when a decision needs better reasoning than the coordinator's model, it escalates that reasoning (below) and stays accountable for the
