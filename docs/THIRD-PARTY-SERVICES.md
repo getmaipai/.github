@@ -30,7 +30,10 @@ dark for a day. These rules exist so that never repeats, on any service.
   access is the fallback, never the plan. The exception is web search
   (owner's ruling, 2026-10-02): keyless search through the household's
   own SearXNG is the default path, not a fallback, and a hosted provider
-  is an optional key (PRIVACY.md).
+  is an optional key (PRIVACY.md). An optional ddgs sidecar is a second
+  keyless source (owner's ruling, 2026-10-11): off by default, adults only,
+  one fixed browser identity, no rotation, no proxies, through the limiter
+  with back-off.
 - **Back off on the first signal.** A 429, a captcha, a "confirm you're not a
   bot", a LOGIN_REQUIRED where none is expected: stop that class of traffic
   immediately (quiet mode), keep only user-initiated requests, probe on a
