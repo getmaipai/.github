@@ -75,9 +75,10 @@ Adult freedom comes with three standing pieces:
   minor's gate, and it chooses between two checked modes; nothing turns
   the gate off.
 
-- **Web search for child and teen controls runs through SafeSearch at the
-  band floor, safe engines only, a pinned adult-site host list and the
-  page-text floor (owner's ruling, 2026-10-11).** A child sees no outbound
+- **Web search for child and teen controls runs through SafeSearch, safe
+  engines only, a pinned adult-site host list and the page-text cleaning
+  (owner's ruling, 2026-10-11; SafeSearch level, sources and cleaning
+  became user defaults an admin may override, 2026-10-12).** A child sees no outbound
   links and has no web search in a temporary chat, and the band's content
   ceiling is part of every minor turn's instructions. No parent approval
   is asked per search; the household switch for that mode decides.
@@ -89,13 +90,16 @@ Adult freedom comes with three standing pieces:
   feelings and self-harm; drugs, alcohol, gambling and risky stunts;
   violence, weapons, crime and frightening news; other people and staying
   safe; and beliefs and big questions. A parent picks each child's level for
-  bodies, health, risk and violence within the band's bounds; teen levels for
-  bodies and risk are household-wide. Feelings and self-harm (care, a trusted
+  bodies, health, risk and violence; teen levels for bodies and risk are
+  global defaults. The band sets the starting level, and an admin may move a
+  child's or a teen's topic levels past the band's bounds for one person
+  through a user override (for example, one teen with the scary-subjects level
+  unblocked); the child or teen can never change it. Feelings and self-harm (care, a trusted
   adult, 988), staying safe with other people, even-handed beliefs, the hard
   lines (no sexual content or romance role-play, no steps for weapons, drugs,
   crime or dangerous stunts, no extremist praise or recruitment, no
   weight-loss coaching) and the crisis overlay are the same for every minor
-  and no setting reaches them; a safety emergency is always answered with
+  and no setting or override reaches them; a safety emergency is always answered with
   "get an adult or call for help" at any level. For a child, family stories
   (Santa Claus, the Tooth Fairy, the Easter Bunny and any a parent adds) are
   never confirmed or denied unless a parent turns that off. No word list or
