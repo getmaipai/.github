@@ -95,7 +95,15 @@ whether it needs a search or a tool, any more than a word rule does; one
 may run in shadow to be measured. Tools are offered with
 `tool_choice: "auto"` and the model decides, except that an explicit
 request to search (a search control, an exact command matched whole) is
-honored in code and still passes policy. What stays deterministic: the
+honored in code and still passes policy. One exception: on a written turn
+where the person may search, when the model returns text with no tool call
+and an embedding score is above the recorded threshold, the engine's query
+writer writes the query and the call passes the same policy checks as a
+model call. It never cancels a model call. For a child or a teen it applies
+only when web search is on for their controls, takes that person's own
+search path and protections, and a refused rescued call is dropped without a
+reply. It never applies to a spoken turn or the safety, consent, privacy or
+credentials paths, and an admin setting can switch it off. What stays deterministic: the
 safety floor on input and output, the credential catch, consent words,
 the household-name gate on search arguments, the crisis, temporary-mode
 and grounding refusals, and exact commands, forget among them. The turn

@@ -75,6 +75,13 @@ Adult freedom comes with three standing pieces:
   minor's gate, and it chooses between two checked modes; nothing turns
   the gate off.
 
+- **Web search for child and teen controls runs through SafeSearch at the
+  band floor, safe engines only, a pinned adult-site host list and the
+  page-text floor (owner's ruling, 2026-10-11).** A child sees no outbound
+  links and has no web search in a temporary chat, and the band's content
+  ceiling is part of every minor turn's instructions. No parent approval
+  is asked per search; the household switch for that mode decides.
+
 Neutrality rule: MaiPai ships neutral. No jailbreak presets, no
 harm-optimized prompt packs, nothing that curates toward dangerous uses.
 Users bring their own models and their own intentions.

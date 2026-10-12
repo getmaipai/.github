@@ -41,6 +41,10 @@ check, a model download).
   Search works fully with no key. Why: some owners want a hosted
   index's coverage and accept the trade, but the default must stay
   private and a minor's words must never go.
+- **The household's own SearXNG passes a query's text to public search
+  engines (owner's ruling, 2026-10-11).** It carries no identity or
+  household data, and a child's or teen's query is checked first for the
+  home address, phone numbers, email addresses and household names.
 - **Every product keeps a user-tier privacy page** with the "what leaves the
   house" table: each outbound connection, when it happens, what it carries,
   and who receives it. Plain dad-test language. Adding or changing an
