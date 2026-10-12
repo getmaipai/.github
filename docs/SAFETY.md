@@ -82,6 +82,25 @@ Adult freedom comes with three standing pieces:
   ceiling is part of every minor turn's instructions. No parent approval
   is asked per search; the household switch for that mode decides.
 
+- **Sensitive subjects follow the person's controls (owner's ruling,
+  2026-10-12).** Every model call that answers a child or a teen carries the
+  band's topic block, rendered from one spec record, that says how to answer
+  seven families: bodies, sex and relationships; illness, death and health;
+  feelings and self-harm; drugs, alcohol, gambling and risky stunts;
+  violence, weapons, crime and frightening news; other people and staying
+  safe; and beliefs and big questions. A parent picks each child's level for
+  bodies, health, risk and violence within the band's bounds; teen levels for
+  bodies and risk are household-wide. Feelings and self-harm (care, a trusted
+  adult, 988), staying safe with other people, even-handed beliefs, the hard
+  lines (no sexual content or romance role-play, no steps for weapons, drugs,
+  crime or dangerous stunts, no extremist praise or recruitment, no
+  weight-loss coaching) and the crisis overlay are the same for every minor
+  and no setting reaches them; a safety emergency is always answered with
+  "get an adult or call for help" at any level. For a child, family stories
+  (Santa Claus, the Tooth Fairy, the Easter Bunny and any a parent adds) are
+  never confirmed or denied unless a parent turns that off. No word list or
+  learned classifier decides a subject; the deterministic floor is unchanged.
+
 Neutrality rule: MaiPai ships neutral. No jailbreak presets, no
 harm-optimized prompt packs, nothing that curates toward dangerous uses.
 Users bring their own models and their own intentions.
