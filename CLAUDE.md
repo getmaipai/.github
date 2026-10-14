@@ -175,22 +175,15 @@ Reads like a sharp human wrote it. Applies to docs, UI copy, comments, commit me
 - User-facing copy passes the dad test: a busy parent with basic tech knowledge understands it on first read.
 - **Every error message says what went wrong and what to do about it (owner's rule, 2026-10-09).** Two parts, plain words: the problem in terms the person sees, then the next step (the address to open, the setting to change, the command to run). A bare statement of a constraint is a defect. Applies to UI, API `error` strings, CLI output and logs a person is told to read. Detail: `docs/STYLE.md`, "Error messages".
 
-**End every reply to Jesse with the status block:** three lines, uppercase labels, this order, nothing after it.
+**Status footer (owner's rule, 2026-10-13, replaces the three-line block).** Full state lives on the plan page (link in
+`home/data-scratch/plan-page.url`), not in every reply. End a reply with ONE line only when something started, finished, was
+decided, or needs Jesse; otherwise end with nothing:
 
 ```
-STATE: <word> · <session>: <item> (running ~<when> | holding, behind <what> | blocked) · landed <item>
-PROGRESS: <milestone>  ▰▰▰▱▱▱  3/6  ·  now <item>  ·  next <items in order>
-YOU: nothing | <ask> (whenever) | <ask> (blocking: <what it holds>)
+STATE: <active | waiting [what] | blocked [owner: what] | done> · <what> · YOU: <command or fact he must act on> | nothing
 ```
 
-`STATE:` opens with exactly one word:
-- `done`: everything asked for has landed, nothing is running, nothing is owed by anyone.
-- `active`: work is running now (session, agent, gate, bench) and will report on its own.
-- `waiting [<what>]`: stopped until a named thing happens that is not Jesse's to do. The bracket is mandatory; a bare `waiting` is a defect.
-- `blocked [<owner>: <what>]`: stopped, and cannot restart until the owner does the named thing. Never for a fact that stops nothing.
-
-`YOU:` is the only place an ask appears, written for a reader who saw no earlier message (the exact command or decision, never "still yours").
-`STATE: done` and `YOU: nothing` go together.
+A decision is never in `YOU:` (use the question wizard). Plan state changes go through `plan-set` and the republished page.
 
 Load `docs/DOCUMENTATION.md` (Writing style, full text) before writing a long report or a status block with several sessions.
 
