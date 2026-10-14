@@ -451,3 +451,12 @@ Why: sessions wrote decision records without checking earlier ones, and 22 contr
 - **A second "fixed, try again" needs re-read proof:** read the stored record or real output yourself before telling Jesse to retry.
 - **Tests:** use the repo's framework (pytest, `bun:test`), copy a nearby test's structure, stay deterministic and offline, name each test for the promise
   it checks. Every real failure becomes a regression test first, in the exact inputs that broke it. A weakened test is a finding, not a step.
+
+## The cockpit mod's source (2026-10-14)
+
+The mod's source of truth is the GitHub repo `JesseWebDotCom/claude-cockpit`, cloned at
+`~/Developer/github.com/JesseWebDotCom/claude-cockpit` (branch `main`, committed and pushed like any repo).
+`home/data-scratch/mods/maipai-local-marketplace/plugins/cockpit` is an installed copy in git-ignored scratch: never
+code there, never `git init` there. A cockpit brief names the clone's absolute path as its working directory, and the
+copy is refreshed from the clone with `tools/sync-marketplace.sh`. A Codex lane given the scratch path cannot commit
+(COCKPIT-SUBAGENTS-01 and COCKPIT-FIXES-02 both ended that way).
