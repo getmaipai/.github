@@ -25,8 +25,7 @@ MaiPai-operated service, per the org's zero-phone-home rule in
 
 AES-256-GCM before leaving the machine, keyed from the keystore, never
 inside the archive. An **emergency kit** is generated at setup (the backup
-key and hub identity as a printable page and a file, shown once, with a
-"print this" step). Credentials inside a backup keep their own encryption.
+key and hub identity as a printable page and a file, shown at setup with a print step, and again on request to an admin). Credentials inside a backup keep their own encryption.
 Archives are signed and a tampered one is refused. The agent's own
 credentials live in the credentials center.
 
