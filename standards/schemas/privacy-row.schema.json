@@ -31,6 +31,18 @@
     "retention": {
       "type": "string",
       "description": "How long the destination keeps it, in plain language, or 'unknown, see the service's own policy' when the household does not control it."
+    },
+    "attribution": {
+      "type": "string",
+      "minLength": 1,
+      "description": "The exact credit line to show with data from this source, when the service asks for one."
+    },
+    "hosts": {
+      "type": "array",
+      "items": { "type": "string", "minLength": 1 },
+      "minItems": 1,
+      "uniqueItems": true,
+      "description": "Bare lower-case hosts covered by this row; each must already appear as a net: permission in the same manifest."
     }
   }
 }

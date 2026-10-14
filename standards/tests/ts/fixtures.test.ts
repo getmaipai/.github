@@ -33,6 +33,20 @@ describe("standards fixtures validate against their generated Zod models", () =>
   test("privacy-row.example.json", () => {
     expect(() => PrivacyRow.parse(loadFixture("privacy-row.example.json"))).not.toThrow();
   });
+  test("a data_sources row with neither still validates", () => {
+    expect(() => PrivacyRow.parse(loadFixture("privacy-row.example.json"))).not.toThrow();
+  });
+  test("a data_sources row with an attribution and hosts validates", () => {
+    const row = loadFixture("privacy-row.example.json") as Record<string, unknown>;
+    row.attribution = "Weather data by Open-Meteo.com (CC BY 4.0)";
+    row.hosts = ["api.open-meteo.com"];
+    expect(() => PrivacyRow.parse(row)).not.toThrow();
+  });
+  test("a data_sources row with an unknown extra field is rejected", () => {
+    const row = loadFixture("privacy-row.example.json") as Record<string, unknown>;
+    row.unknown = true;
+    expect(() => PrivacyRow.parse(row)).toThrow();
+  });
 });
 
 describe("a bad record is rejected, not silently accepted", () => {
