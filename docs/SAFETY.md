@@ -113,3 +113,11 @@ Licensing note: no acceptable-use restrictions get added to our license
 (added restrictions are incompatible with AGPL-3.0). The README disclaimer
 and the models' own licenses carry use responsibility, which rests with the
 user.
+
+AI companions: companions are on for every profile by default, children and
+teens included; this is the owner's ruling of 2026-10-14. An admin decides who
+may use them: the setup wizard asks during first setup, and the person editor
+(Settings, People) carries a per-person companions switch for every profile.
+Turning a person's switch off hides every companion from that person and
+keeps the data. The output gate and the child and teen protections above apply
+to companion chat exactly as to any other chat; the switch never loosens them.
