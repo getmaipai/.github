@@ -291,6 +291,16 @@ these rules work with that, not around it):
   jobs regardless (queue refill, landing reports, the local model's
   health). OpenCode has no equivalent hook, so it stays on the tick
   alone either way.
+  **Lane health script and idle watcher (2026-10-13).** A launchd job
+  runs `data-scratch/lane-health/lane-health` every minute at no model
+  cost and writes `data-scratch/health.json` (finished, idle, unread
+  report, unsent message, ready-but-unowned). A file nobody reads does
+  not help: on 2026-10-13 four lanes finished in 5 to 7 minutes and sat
+  idle because the findings only reached `health.json`. So the
+  coordinator arms a `Monitor` on `health.json` at session start that
+  prints a line when a lane finishes or sits idle; that line is the
+  wake-up, and the coordinator reads the report and sends the next
+  brief in the same turn. The 20-minute tick stays as the fallback.
 - **The coordinator runs the model the current phase needs, not the
   strongest one still open.** At every stop point, it asks itself
   whether what's ahead is a design or architecture judgment call
