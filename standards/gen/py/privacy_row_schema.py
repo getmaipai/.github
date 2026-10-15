@@ -38,3 +38,12 @@ class PrivacyRow(BaseModel):
         ...,
         description="How long the destination keeps it, in plain language, or 'unknown, see the service's own policy' when the household does not control it.",
     )
+    attribution: constr(min_length=1) | None = Field(
+        None,
+        description='The exact credit line to show with data from this source, when the service asks for one.',
+    )
+    hosts: list[constr(min_length=1)] | None = Field(
+        None,
+        description='Bare lower-case hosts covered by this row; each must already appear as a net: permission in the same manifest.',
+        min_length=1,
+    )
