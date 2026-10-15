@@ -6,6 +6,12 @@ incident or review that prompted each. The rule itself lives in
 why, so the rule can be revisited on the facts rather than re-argued
 from memory. Newest first.
 
+## 2026-10-15: tiered workflow, a worktree per session (owner's ruling)
+
+Context load, lane locks and per-commit gates were slowing delivery and blocking concurrent sessions. Decided: one session, one worktree (`scripts/wt.sh`), checks by tier (T0 docs, T1 `check.sh --pre` plus tests beside the change, T2 risky surfaces get the full gate, a medium review and an architect verdict when the design changes), a gate stamp that `land` and the commit hook both check, a `main-gate` job that re-runs the full gate on origin/main and reverts a single red commit, the architect gate narrowed to design notes, plans, rules and new backlog rows, the review gate narrowed to T2, the blind-staging and shared-checkout hooks retired, and the `dispatch` skill (Codex first, one item, one worktree) replacing `coordinate`, lane locks and claims. The org CLAUDE.md shrank by about 65%. Design record: the `workflow-redesign` notes in Jesse's private scratch.
+
+Owner-approved: 2026-10-15
+
 ## 2026-10-07: the engine computer (owner's ruling)
 
 The Stack may run on a second computer in the same home. It still listens on loopback only; the paired Home reaches it through one SSH port forward whose key can open that one port and nothing else, and the SSH key plus the pinned host key are the only authentication. "No LAN exposure" from 2026-09-20 stays true. The owner also allowed, as an admin setting that is off by default, reaching the engine computer from a Home computer away from home over the owner's own Tailscale network; Tailscale carries the packets and is never trusted to say who is calling. When the engine computer is off, chat pauses; nothing falls back to a smaller model on Home's computer. Detail: Home `docs/dev.md`, REMOTE-STACK-01.

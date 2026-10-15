@@ -2,6 +2,8 @@
 
 Dev tier. Policy for the coordinator and coder roles. The procedure (work orders, handshake, lane scripts) lives in `plugin/skills/coordinate/SKILL.md`; this file keeps only policy and the dated reasons. The model floor table also appears in the always-loaded core, which is the authoritative copy; the text below is the full rule. Load before directing sessions, dispatching a lane, or taking the coordinator role.
 
+> **Status (2026-10-15):** the `dispatch` skill replaces lanes, lane locks, claims and the coordinator handshake. One decided item goes to Codex in its own worktree (`scripts/wt.sh start`, `codex exec`, `scripts/wt.sh land`). The text below is history and the role-boundary policy; the lane and lock procedures no longer run.
+
 ## Roles (hard rule, 2026-09-12)
 
 Two roles, held by different sessions. This section is the policy; the

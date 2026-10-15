@@ -2,6 +2,8 @@
 
 Dev tier. Full definition of done and the testing standards, with the dated reasons. Hooks that enforce parts of it: `require-gate-before-commit.sh`, `mark-gate-checked.sh` (see `plugin/hooks/README.md`); `gate-lock.sh` and `check-core.sh` in `standards/bin/`. Load before gating, benching, writing tests, or claiming something is done.
 
+> **Tiers (2026-10-15):** the gate is chosen by what changed. T0 docs: `check.sh --docs`. T1 ordinary code: `check.sh --pre` plus the tests beside the change. T2 risky surface: the full `check.sh` under the machine lock, a medium `code-review`, and an architect verdict when the design changes. `scripts/wt.sh check` picks the tier and writes the stamp that `wt.sh land` and the commit hook require; the `main-gate` job re-runs the full gate on origin/main. The text below still defines what "verified" means.
+
 ## The gate: check.sh per push, not per commit (owner's rule, 2026-09-23)
 
 Every repo exposes **`scripts/check.sh`**: lint + format check + tests +
