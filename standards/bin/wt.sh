@@ -135,6 +135,7 @@ changed_files() {
   local base="$1"
   git -C "$WT_ROOT" diff --name-only "$base"...HEAD
   git -C "$WT_ROOT" diff --name-only
+  git -C "$WT_ROOT" diff --cached --name-only
   git -C "$WT_ROOT" ls-files --others --exclude-standard
 }
 

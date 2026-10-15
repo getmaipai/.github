@@ -90,6 +90,18 @@ describe("wt.sh worktree lifecycle", () => {
     run(["done"], { MAIPAI_WT_SESSION: name });
   });
 
+  test("a file that is already staged still lands in the stamp manifest", () => {
+    const started = run(["start", "staged"]);
+    const path = started.stdout.trim();
+    const name = path.split("/").at(-1)!.replace(/^demo-/, "");
+    writeFileSync(join(path, "NOTE.md"), "note\n");
+    spawnSync("git", ["-C", path, "add", "NOTE.md"]);
+    const checked = spawnSync("bash", [script, "check"], { cwd: path, encoding: "utf8", env: { ...process.env, ...repoEnv, MAIPAI_WT_DATA: data, MAIPAI_WT_SESSION: name } });
+    expect(checked.status).toBe(0);
+    expect(Object.keys(JSON.parse(readFileSync(join(data, "gate-stamps", `${name}.json`), "utf8")).manifest)).toContain("NOTE.md");
+    run(["done"], { MAIPAI_WT_SESSION: name });
+  });
+
   test("without MAIPAI_WT_DATA the stamp lands inside the worktree, where the commit hook reads it", () => {
     const started = run(["start", "stampdir"]);
     const path = started.stdout.trim();
