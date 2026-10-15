@@ -54,8 +54,9 @@ measured and reported with the rule named, never dropped (full text and the dele
 
 - **Do the work end to end in your own worktree.** One session, one worktree on a short-lived branch, landed fast-forward onto `main`,
   then removed. Never edit another session's worktree, and never `git rebase`, `reset` or `checkout` in a checkout you do not own.
-  Rollout: `scripts/wt.sh` (start, check, land, done, reap) replaces hand-run `git worktree` commands once it lands; until then
-  `git worktree add ../wt/<repo>-<name>` and clean up yourself.
+  Use `scripts/wt.sh` (start, run, wait, check, land, done, reap), never hand-run `git worktree` commands. If `scripts/wt.sh` is
+  missing the checkout is stale: `git fetch`, fast-forward `main`, then `wt.sh start` / `wt.sh run`. Never run `codex exec` directly
+  (a user-level hook and deny rule block it).
 - **tmux sessions are disposable and owned.** Create one with a unique plain name (`<repo>-<worktree-name>-<purpose>`), touch only your
   own, tear it down when done.
 - **No pull requests** (only `catalog` takes community PRs). Land directly on `main`; push at natural boundaries; deploys and releases
