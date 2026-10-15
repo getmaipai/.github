@@ -36,11 +36,17 @@ Jesse's own message asks for one, matching the description's trigger.
 - Update `CHANGELOG.md` (Keep a Changelog format: Added / Changed / Fixed /
   Removed) from the commits since the last tag, written for humans, not
   restated commit subjects.
-- **Docs drift check**: diff the code changes since the last tag against the
-  docs changed in the same window. Anything user-visible with no matching
-  user-doc change gets the doc written now (org rule: Claude writes it).
-- Regenerate screenshots if the repo has a screenshot script and anything
-  user-visible changed.
+- **Docs drift check (changed-only, release time only)**: if the repo has a
+  `docs-covers.json` (Home: `docs/site-fumadocs/docs-covers.json`), run its
+  drift script (Home: `bun scripts/docsDrift.ts`). It lists only the guide
+  pages and screenshots whose declared code changed since the last `v*` tag.
+  Run the `update-docs` skill on that list, nothing else. Nothing runs on push.
+  Otherwise diff the code changes since the last tag against the docs changed
+  in the same window and write the doc for anything user-visible with no match.
+- Retake only the listed screenshots (Home: the `DOCS_SHOTS_ONLY=...` line the
+  script prints; pictures it marks "general run" need the full screenshot run).
+  Full regeneration only when the script lists everything or the picture
+  script itself changed.
 
 ## 4. Ship
 

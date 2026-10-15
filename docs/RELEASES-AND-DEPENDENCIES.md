@@ -22,7 +22,9 @@ Everything stays `0.x` until the product passes its battle-tested checklist
 
 The `release` skill in the maipai plugin runs the whole ceremony: checks,
 clean-clone build, changelog from commits since the last tag, screenshot
-regeneration, docs drift check, tag, GitHub release.
+regeneration, docs drift check, tag, GitHub release. Docs update at release
+time only, and only for pages and pictures whose code changed (the repo's
+`docs-covers.json` plus its drift script); nothing runs on push.
 
 ## Releases: notes are the changelog
 

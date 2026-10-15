@@ -61,6 +61,13 @@ as part of touching it.
 seeded demo household (see Privacy). If a screenshot is stale, fix the
 script, not the image.
 
+## Docs update at release, changed-only
+
+A repo with a docs site keeps one map, `docs-covers.json`, from each page and
+picture to the code it describes, and a drift script that lists what changed
+since the last release. The `update-docs` skill touches only that list. A new
+page or picture adds its map entry in the same commit; the repo test enforces it.
+
 ## Every screenshot is looked at before use
 
 **Every screenshot gets looked at before it is used, anywhere.** Open the
