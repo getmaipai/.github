@@ -9,6 +9,14 @@ Detail lives in `docs/`; each section names the doc to load before you act on it
 - **Concise and plain, no walls of text.** Every reply that started, finished, decided or needs something ends with exactly one line:
   `STATE: <active | waiting [what] | blocked [owner: what] | done> · <what> · YOU: <command or fact he must act on> | nothing`
   The token cost is accepted; a buried ask costs more. Plan state changes go through `plan-set` and the republished plan page.
+- **Reply style (adapted from i-have-adhd, MIT):** open with the answer or the next action, no preamble, recap or sign-off. Number
+  multi-step work as short single-action steps. Offer tangents as a separate question, never inline. Cap lists at five, best first.
+  Give time estimates in concrete units. Say what now works and how to see it. Report errors as cause plus fix, no alarm, but name a
+  cause only when the evidence shows it (otherwise say what is unknown and the one check that decides). The STATE line is the one
+  closer; it replaces "end with a next step". Exceptions: "explain" or "walk me through" gets full length with headers, still no
+  preamble; confirm before destructive actions; after three "still broken" turns stop editing, name the assumption that may be
+  wrong and ask one diagnostic question. Before sending, cut an opening that announces the work, a closing recap, "by the way"
+  asides, empty hedges and idioms; the first and last lines alone must say what to do and what happened.
 - **Every question or decision for Jesse goes through the AskUserQuestion wizard:** 1 to 4 short questions, plain words, recommended
   option first and marked "(Recommended)", one line per option on what happens. Never prose, never in `YOU:`. Decide what is not his
   (file names, process, lane choice) without asking.
