@@ -27,7 +27,7 @@ function makeRepo(withRules = true): string {
   git(dir, "config", "user.email", "architect-hook-test@example.com");
   put(dir, "src/app.ts", "v1\n");
   put(dir, "backend/chat/turn.ts", "v1\n");
-  put(dir, "docs/BACKLOG.md", "- [ ] one\n");
+  put(dir, "docs/BACKLOG.md", "- [ ] **A-1** one\n");
   if (withRules) {
     put(dir, "docs/design/RULES.md", "# Rules\n\n## Chat turn\n\nRecord: [x](../plans/x.md)\nGoverns: backend/chat/**, docs/chat/*.md\n\n1. A rule.\n");
     put(dir, "docs/plans/x.md", "# X\n\n## Supersedes\n\nNothing.\n");
@@ -66,7 +66,7 @@ describe("ARCH-GATE-01: require-architect-verdict.sh", () => {
 
   test("denies a design-surface commit with no verdict, naming the architect", () =>
     withRepo((dir) => {
-      put(dir, "docs/BACKLOG.md", "- [ ] two\n");
+      put(dir, "docs/BACKLOG.md", "- [ ] **A-2** two\n");
       git(dir, "add", "docs/BACKLOG.md");
       const r = run(dir, 'git commit -m "ITEM-1: add"');
       expect(r.exitCode).toBe(2);
@@ -74,24 +74,43 @@ describe("ARCH-GATE-01: require-architect-verdict.sh", () => {
       expect(r.stderr).toContain("item id");
     }));
 
-  test("denies a commit that touches a Governs glob path with no verdict", () =>
+  test("a Governs path alone needs no verdict (narrowed 2026-10-15)", () =>
     withRepo((dir) => {
       put(dir, "backend/chat/turn.ts", "v2\n");
       git(dir, "add", "backend/chat/turn.ts");
-      expect(run(dir, 'git commit -m "ITEM-2: change"').exitCode).toBe(2);
+      expect(run(dir, 'git commit -m "ITEM-2: change"').exitCode).toBe(0);
+    }));
+
+  test("a backlog checkbox flip or status edit needs no verdict, a new plan does", () =>
+    withRepo((dir) => {
+      put(dir, "docs/BACKLOG.md", "- [x] **A-1** one\n");
+      git(dir, "add", "docs/BACKLOG.md");
+      expect(run(dir, 'git commit -m "flip"').exitCode).toBe(0);
+      git(dir, "commit", "-q", "-m", "flip");
+      put(dir, "docs/BACKLOG.md", "- [ ] **A-1** one (in progress)\n");
+      git(dir, "add", "docs/BACKLOG.md");
+      expect(run(dir, 'git commit -m "status"').exitCode).toBe(0);
+      git(dir, "reset", "-q", "--hard", "HEAD");
+      put(dir, "docs/plans/new.md", "# New\n");
+      git(dir, "add", "docs/plans/new.md");
+      expect(run(dir, 'git commit -m "plan"').exitCode).toBe(2);
+      git(dir, "commit", "-q", "-m", "plan");
+      put(dir, "docs/plans/new.md", "# New, edited\n");
+      git(dir, "add", "docs/plans/new.md");
+      expect(run(dir, 'git commit -m "edit plan"').exitCode).toBe(0);
     }));
 
   test("allows a governed commit on a fresh APPROVED verdict named in the message", () =>
     withRepo((dir) => {
-      put(dir, "backend/chat/turn.ts", "v2\n");
-      git(dir, "add", "backend/chat/turn.ts");
+      put(dir, "docs/plans/n.md", "# N\n");
+      git(dir, "add", "docs/plans/n.md");
       verdict(dir, "ITEM-3", "APPROVED");
       expect(run(dir, 'git commit -m "ITEM-3: change"').exitCode).toBe(0);
     }));
 
   test("allows a governed commit whose staged diff hash matches an APPROVED verdict", () =>
     withRepo((dir) => {
-      put(dir, "docs/BACKLOG.md", "- [ ] three\n");
+      put(dir, "docs/BACKLOG.md", "- [ ] **A-3** three\n");
       git(dir, "add", "docs/BACKLOG.md");
       const sha = Bun.spawnSync(["bash", "-c", "git diff --cached | shasum -a 256 | cut -d' ' -f1"], { cwd: dir }).stdout.toString().trim();
       verdict(dir, "ITEM-4", "APPROVED", { sha });
@@ -100,8 +119,8 @@ describe("ARCH-GATE-01: require-architect-verdict.sh", () => {
 
   test("denies a stale APPROVED verdict", () =>
     withRepo((dir) => {
-      put(dir, "backend/chat/turn.ts", "v2\n");
-      git(dir, "add", "backend/chat/turn.ts");
+      put(dir, "docs/plans/n.md", "# N\n");
+      git(dir, "add", "docs/plans/n.md");
       verdict(dir, "ITEM-5", "APPROVED", { ageHours: 30 });
       const r = run(dir, 'git commit -m "ITEM-5: change"');
       expect(r.exitCode).toBe(2);
@@ -110,8 +129,8 @@ describe("ARCH-GATE-01: require-architect-verdict.sh", () => {
 
   test("denies a REJECTED verdict", () =>
     withRepo((dir) => {
-      put(dir, "backend/chat/turn.ts", "v2\n");
-      git(dir, "add", "backend/chat/turn.ts");
+      put(dir, "docs/plans/n.md", "# N\n");
+      git(dir, "add", "docs/plans/n.md");
       verdict(dir, "ITEM-6", "REJECTED");
       const r = run(dir, 'git commit -m "ITEM-6: change"');
       expect(r.exitCode).toBe(2);
@@ -131,14 +150,14 @@ describe("ARCH-GATE-01: require-architect-verdict.sh", () => {
 
   test("no-ops in a repo without docs/design/RULES.md", () =>
     withRepo((dir) => {
-      put(dir, "docs/BACKLOG.md", "- [ ] two\n");
+      put(dir, "docs/BACKLOG.md", "- [ ] **A-2** two\n");
       git(dir, "add", "docs/BACKLOG.md");
       expect(run(dir, 'git commit -m "anything"').exitCode).toBe(0);
     }, false));
 
   test("ignores commands that are not commits, and a message that only mentions one", () =>
     withRepo((dir) => {
-      put(dir, "docs/BACKLOG.md", "- [ ] two\n");
+      put(dir, "docs/BACKLOG.md", "- [ ] **A-2** two\n");
       git(dir, "add", "docs/BACKLOG.md");
       expect(run(dir, "git status").exitCode).toBe(0);
       expect(run(dir, 'echo "git commit later"').exitCode).toBe(0);
@@ -146,7 +165,7 @@ describe("ARCH-GATE-01: require-architect-verdict.sh", () => {
 
   test("a body line that mentions --amend does not bypass the gate", () =>
     withRepo((dir) => {
-      put(dir, "docs/BACKLOG.md", "- [ ] two\n");
+      put(dir, "docs/BACKLOG.md", "- [ ] **A-2** two\n");
       git(dir, "add", "docs/BACKLOG.md");
       expect(run(dir, 'git commit -m "tweak\n--amend body"').exitCode).toBe(2);
       expect(run(dir, "git commit -F - <<'EOF'\ntweak\n--amend body\nEOF").exitCode).toBe(2);
@@ -154,7 +173,7 @@ describe("ARCH-GATE-01: require-architect-verdict.sh", () => {
 
   test("git -C <dir> and cd <dir> && target the repo they name", () =>
     withRepo((dir) => {
-      put(dir, "docs/BACKLOG.md", "- [ ] two\n");
+      put(dir, "docs/BACKLOG.md", "- [ ] **A-2** two\n");
       git(dir, "add", "docs/BACKLOG.md");
       const other = mkdtempSync(join(tmpdir(), "architect-hook-other-"));
       try {
@@ -172,26 +191,16 @@ describe("ARCH-GATE-01: require-architect-verdict.sh", () => {
 
   test("an item id inside a longer id or word does not satisfy a verdict", () =>
     withRepo((dir) => {
-      put(dir, "docs/BACKLOG.md", "- [ ] two\n");
+      put(dir, "docs/BACKLOG.md", "- [ ] **A-2** two\n");
       git(dir, "add", "docs/BACKLOG.md");
       verdict(dir, "ARCH-1", "APPROVED");
       expect(run(dir, 'git commit -m "ARCH-12: other work"').exitCode).toBe(2);
       expect(run(dir, 'git commit -m "ARCH-1: this work"').exitCode).toBe(0);
     }));
 
-  test("a ** glob also covers files directly under its prefix", () =>
-    withRepo((dir) => {
-      put(dir, "docs/design/RULES.md", "# Rules\n\n## Chat turn\n\nRecord: [x](../plans/x.md)\nGoverns: backend/**/*.ts\n");
-      git(dir, "add", "docs/design/RULES.md");
-      git(dir, "commit", "-q", "-m", "rules");
-      put(dir, "backend/x.ts", "v2\n");
-      git(dir, "add", "backend/x.ts");
-      expect(run(dir, 'git commit -m "x"').exitCode).toBe(2);
-    }));
-
   test("a here-string does not hide the commit, and cd with $HOME or ~ still finds the repo", () =>
     withRepo((dir) => {
-      put(dir, "docs/BACKLOG.md", "- [ ] two\n");
+      put(dir, "docs/BACKLOG.md", "- [ ] **A-2** two\n");
       git(dir, "add", "docs/BACKLOG.md");
       expect(run(dir, 'read x <<< foo\ngit commit -m "a"').exitCode).toBe(2);
       const home = mkdtempSync(join(tmpdir(), "architect-hook-home-"));

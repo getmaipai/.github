@@ -1,17 +1,16 @@
 #!/usr/bin/env bash
-# PreToolUse (Bash matcher): refuses a `git commit` that touches code
-# (not just docs) unless the `code-review` skill has run in this repo
+# PreToolUse (Bash matcher): refuses a `git commit` that touches a T2 path
+# (in a repo without scripts/wt.sh: code, not just docs) unless the `code-review` skill has run in this repo
 # within the last 30 minutes. Jesse's rule (2026-09-04): relying on a
 # session "remembering" to review its own work doesn't survive a fresh
-# session, so this is enforced the same mechanical way as
-# block-blind-staging.sh, not left to memory. Soft gate: run /code-review,
+# session, so this is enforced a mechanical gate, not left to memory. Soft gate: run /code-review,
 # address what it finds, and the same commit goes through.
 #
 # This proves the review was *invoked* recently (see
 # mark-review-checked.sh), not that its findings were read and addressed
 # — there is no tool call to hook that fires only once a multi-agent
 # review's findings have all landed. Same honesty level as
-# block-blind-staging.sh's own guarantee.
+# a status-stamp hook's guarantee.
 set -euo pipefail
 
 input=$(cat)
@@ -40,7 +39,7 @@ git_dir=$(git -C "$cwd" rev-parse --git-dir 2>/dev/null) || exit 0
 # hook checked only `--cached` and a `git commit -am` with nothing
 # pre-staged sailed through with an empty diff every time (caught by a
 # code review of this very hook). Match the same flag-cluster regex
-# block-blind-staging.sh uses, and fold in unstaged tracked changes when
+# the old blind-staging hook used, and fold in unstaged tracked changes when
 # it's present.
 files=$(git -C "$cwd" diff --cached --name-only 2>/dev/null || true)
 if echo "$command" | grep -qE 'git\s+commit\s+(-[a-zA-Z]*a[a-zA-Z]*\b|--all\b)'; then
@@ -56,6 +55,18 @@ if ! echo "$files" | grep -qvE '\.md$|^LICENSE$|^NOTICE$'; then
   exit 0
 fi
 
+# Narrowed 2026-10-15: only T2 paths (the risky-surface list in the org
+# CLAUDE.md "Checks before landing" table) need a review. When the repo has
+# scripts/wt.sh, it classifies: `bash scripts/wt.sh tier <files>` prints
+# T0, T1 or T2, and only T2 needs a review stamp. A repo without wt.sh keeps
+# the older rule above (any non-doc file needs one).
+top=$(git -C "$cwd" rev-parse --show-toplevel 2>/dev/null || true)
+if [ -n "$top" ] && [ -f "$top/scripts/wt.sh" ]; then
+  # shellcheck disable=SC2086
+  tier=$(cd "$top" && bash scripts/wt.sh tier $files 2>/dev/null | tail -1 || true)
+  [ "$tier" = T2 ] || exit 0
+fi
+
 flag_file="$git_dir/maipai-review-checked"
 
 if [ -f "$flag_file" ]; then
@@ -65,6 +76,6 @@ if [ -f "$flag_file" ]; then
   fi
 fi
 
-reason="This commit touches code and no code-review run is on record for this repo in the last 30 minutes. Run the code-review skill (at least medium effort) against the diff, address what it finds, then retry this commit. This is a soft gate: once code-review runs, the same commit goes through."
+reason="This commit touches a T2 path (or, in a repo without scripts/wt.sh, code) and no code-review run is on record for this repo in the last 30 minutes. Run the code-review skill (at least medium effort) against the diff, address what it finds, then retry this commit. This is a soft gate: once code-review runs, the same commit goes through."
 jq -n --arg reason "$reason" '{decision: "deny", reason: $reason}' >&2
 exit 2

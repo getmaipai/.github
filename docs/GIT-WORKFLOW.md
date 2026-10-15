@@ -30,33 +30,17 @@ per logical change. No checkpoint commits, no WIP commits: if work is
 unfinished at session end, the honest state is a dirty tree plus a status
 note, not a commit.
 
-## Never stage or commit blindly
+## History: shared-checkout guards (retired 2026-10-15)
 
-**Never stage or commit blindly.** Run `git status` (and `git diff` for
-what actually changed) first, then stage specific files by name. Never
-`git add -A`, `git add .`, or `git commit -a` without having just looked
-at what that would sweep in: a parallel session's in-progress work in a
-shared checkout, a stray file, or something that should stay uncommitted.
-The `maipai` plugin's `block-blind-staging.sh` hook enforces this
-mechanically (`plugin/hooks/README.md`); it denies the blind form when no
-recent `git status` exists to point to, not the command itself.
-
-## In a shared checkout the commit is atomic with the staging
-
-  **In a shared checkout the commit is atomic with the staging.**
-  Stage exactly what is yours (`git add <file>` for a file only you
-  changed, `git add -p` for a shared doc), read `git diff --cached
-  --stat` and confirm it lists only yours, then commit immediately
-  with a bare `git commit`; never leave anything staged for later,
-  and never commit while another session's hunks sit in the index.
-  Do not use `git commit -- <files>` on a shared file: a pathspec
-  commit takes the file from the working tree, not the index, so it
-  sweeps the other session's uncommitted hunks in and defeats the
-  `git add -p` you just did (2026-09-13: it happened both ways in one
-  evening, a bare commit that took Session A's staged code under a
-  docs title, then a pathspec commit that took A's unstaged backlog
-  hunks). After every commit, `git show --stat HEAD` is read before
-  the done report.
+Until 2026-10-15 several sessions shared one checkout, and three rules
+guarded it: read `git status` before staging, commit atomically with the
+staging, and never `git add` the shared `docs/dev.md` or `docs/BACKLOG.md`
+wholesale. Parallel sessions overwrote each other's staged hunks on
+2026-09-13 and 2026-09-27, which is why the rules existed. Each session now
+works in its own worktree, so the hooks that enforced them
+(`block-blind-staging.sh`, `block-wholesale-shared-docs.sh`,
+`mark-git-status-checked.sh`) are deleted. Stage specific files by name,
+never `git add -A` or `.`, and read `git show --stat HEAD` after a commit.
 
 ## No rebase, reset or checkout in a shared checkout without checking
 
@@ -76,7 +60,9 @@ recent `git status` exists to point to, not the command itself.
 
 ## Code review before committing code
 
-**Run a code review before committing code** (not a doc-only change): the
+**Run a code review before committing T2 code** (the risky-surface list in the
+org CLAUDE.md "Checks before landing" table; narrowed 2026-10-15, a T0 or T1
+commit needs no review stamp): the
 `code-review` skill, at least medium effort, on the diff about to be
 committed. In a worktree, pass the review an explicit target (the
 worktree path or the branch) and read the path and branch the review
@@ -87,7 +73,7 @@ uncommitted work that way. A review whose reported path is not yours
 is discarded and re-run with the target; its findings go to that
 file's owner, never acted on by you. This is not a "remember to do it" rule: the `maipai` plugin's
 `require-review-before-commit.sh` hook enforces it mechanically
-(`plugin/hooks/README.md`), the same shape as the blind-staging gate,
+(`plugin/hooks/README.md`),
 because a session remembering to review its own work does not survive a
 fresh session picking the task back up.
 

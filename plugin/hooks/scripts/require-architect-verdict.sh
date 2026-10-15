@@ -1,9 +1,10 @@
 #!/usr/bin/env bash
 # PreToolUse (Bash matcher): the architect gate (ARCH-GATE-01, 2026-10-02).
 # In a repo that keeps docs/design/RULES.md, refuses a `git commit` that
-# touches the design surface (docs/design/**, docs/plans/**,
-# docs/BACKLOG.md, or any path an area's `Governs:` glob in RULES.md names)
-# unless the architect agent has ruled APPROVED on it within 24 hours:
+# adds to the design record (a new or changed file under docs/design/, a
+# NEW file under docs/plans/, or a NEW row in docs/BACKLOG.md: an added line
+# starting `- [ ] **` whose id is not on a removed line; a checkbox flip or
+# status edit needs no verdict; narrowed 2026-10-15) unless the architect agent has ruled APPROVED on it within 24 hours:
 # a record in <repo>/data-scratch/architect/<ITEM-ID>.verdict whose item id
 # appears in the commit message, or whose sha256 matches the staged diff.
 # A commit that edits RULES.md itself needs `Owner-approved: <date>` in its
@@ -59,11 +60,6 @@ deny() {
   exit 2
 }
 
-# A `Governs:` glob to an anchored regex: ** crosses directories, * does not.
-glob_to_regex() {
-  printf '%s' "$1" | sed -E 's/[.+^$(){}|]/\\&/g; s/\*\*\//@DSD@/g; s/\*\*/@DS@/g; s/\*/[^\/]*/g; s/@DSD@/(.*\/)?/g; s/@DS@/.*/g; s/^/^/; s/$/$/'
-}
-
 # Rule edits: only the owner changes a rule.
 if echo "$files" | grep -qx 'docs/design/RULES.md'; then
   if echo "$command" | grep -qE 'Owner-approved:[[:space:]]*[0-9]{4}-[0-9]{2}-[0-9]{2}'; then
@@ -72,17 +68,30 @@ if echo "$files" | grep -qx 'docs/design/RULES.md'; then
   deny "This commit edits docs/design/RULES.md, and only the owner changes a rule. If Jesse approved this change, add a line 'Owner-approved: YYYY-MM-DD' to the commit message and retry. If not, unstage RULES.md (git restore --staged docs/design/RULES.md) and file the change as a NEEDS-RULE-CHANGE request to the owner. This is a soft gate: the owner line makes the same commit go through."
 fi
 
+# Narrowed 2026-10-15: only the design record needs a verdict. That is any
+# new or changed file under docs/design/, a NEW file under docs/plans/, and a
+# NEW backlog row in docs/BACKLOG.md (an added line starting `- [ ] **` whose
+# bold id is not on a removed line). A checkbox flip or status edit passes.
+added_files=$(git -C "$cwd" diff --cached --diff-filter=A --name-only 2>/dev/null || true)
 governed=""
-globs=$(sed -nE 's/^Governs:[[:space:]]*(.*)$/\1/p' "$rules" | tr ',' '\n' | sed -E 's/^[[:space:]`]+//; s/[[:space:]`]+$//' | grep -v '^$' || true)
 while IFS= read -r f; do
   case "$f" in
-    docs/design/*|docs/plans/*|docs/BACKLOG.md) governed="$f"; break ;;
+    docs/design/*) governed="$f"; break ;;
+    docs/plans/*) if echo "$added_files" | grep -qxF "$f"; then governed="$f"; break; fi ;;
   esac
-  while IFS= read -r g; do
-    [ -n "$g" ] || continue
-    if echo "$f" | grep -qE "$(glob_to_regex "$g")"; then governed="$f"; break 2; fi
-  done <<< "$globs"
 done <<< "$files"
+if [ -z "$governed" ] && echo "$files" | grep -qx 'docs/BACKLOG.md'; then
+  bdiff=$(git -C "$cwd" diff --cached -U0 -- docs/BACKLOG.md 2>/dev/null || true)
+  if echo "$bare" | grep -qE 'commit([[:space:]]+[^;&|]*)?[[:space:]](-[a-zA-Z]*a[a-zA-Z]*|--all)([[:space:]]|$)'; then
+    bdiff="$bdiff
+$(git -C "$cwd" diff -U0 -- docs/BACKLOG.md 2>/dev/null || true)"
+  fi
+  removed_ids=$(echo "$bdiff" | grep -E '^-- \[[ xX]\] \*\*' | sed -E 's/^-- \[[ xX]\] \*\*([^*]*)\*\*.*/\1/' | sort -u || true)
+  new_ids=$(echo "$bdiff" | grep -E '^\+- \[ \] \*\*' | sed -E 's/^\+- \[ \] \*\*([^*]*)\*\*.*/\1/' | sort -u || true)
+  if [ -n "$removed_ids" ]; then new_ids=$(echo "$new_ids" | grep -vxF -f <(echo "$removed_ids") || true); fi
+  new_ids=$(echo "$new_ids" | grep -v '^$' || true)
+  [ -n "$new_ids" ] && governed="docs/BACKLOG.md (new row $(echo "$new_ids" | head -1))"
+fi
 [ -n "$governed" ] || exit 0
 
 # Look for a verdict: in this worktree's scratch, and the main checkout's.

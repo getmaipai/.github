@@ -1,15 +1,10 @@
 {
-  "description": "Git hygiene: a soft gate on blind staging, a status-checked stamp, a hard gate on wholesale staging of the two shared doc files, a soft gate requiring a code review before a code commit, a soft gate requiring a passing (and scope-covering) check.sh run before any commit, a soft gate requiring an architect verdict before a design-surface commit, and session-start repo context.",
+  "description": "Git hygiene: a soft gate requiring a code review before a commit that touches a T2 path, a soft gate requiring a passing (and scope-covering) check run before any commit, a soft gate requiring an architect verdict before a design-record commit, and session-start repo context.",
   "hooks": {
     "PreToolUse": [
       {
         "matcher": "Bash",
         "hooks": [
-          {
-            "type": "command",
-            "command": "bash ${CLAUDE_PLUGIN_ROOT}/hooks/scripts/block-blind-staging.sh",
-            "timeout": 5
-          },
           {
             "type": "command",
             "command": "bash ${CLAUDE_PLUGIN_ROOT}/hooks/scripts/require-review-before-commit.sh",
@@ -29,11 +24,6 @@
             "type": "command",
             "command": "bash ${CLAUDE_PLUGIN_ROOT}/hooks/scripts/run-ui-rules-before-commit.sh",
             "timeout": 15
-          },
-          {
-            "type": "command",
-            "command": "bash ${CLAUDE_PLUGIN_ROOT}/hooks/scripts/block-wholesale-shared-docs.sh",
-            "timeout": 5
           }
         ]
       }
@@ -42,11 +32,6 @@
       {
         "matcher": "Bash",
         "hooks": [
-          {
-            "type": "command",
-            "command": "bash ${CLAUDE_PLUGIN_ROOT}/hooks/scripts/mark-git-status-checked.sh",
-            "timeout": 5
-          },
           {
             "type": "command",
             "command": "bash ${CLAUDE_PLUGIN_ROOT}/hooks/scripts/mark-gate-checked.sh",

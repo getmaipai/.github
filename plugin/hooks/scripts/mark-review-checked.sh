@@ -16,7 +16,7 @@
 # "findings were read and addressed" — there is no tool call available to
 # hook that fires only once a multi-agent review's parallel findings have
 # all landed (those arrive as task-notifications, not tool calls). This is
-# the same honesty level as mark-git-status-checked.sh: proof the check
+# the same honesty level as a status stamp: proof the check
 # ran recently, not proof its output was acted on. Never blocks.
 set -euo pipefail
 

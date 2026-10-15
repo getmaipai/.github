@@ -5,33 +5,24 @@ nicely for before. Hooks load at session start; editing these requires a
 Claude Code restart to take effect (`claude --debug` to confirm they
 loaded, `/hooks` to review what is active).
 
-## Git hygiene
+## Git hygiene (retired 2026-10-15)
 
-- **`block-blind-staging.sh`** (PreToolUse, `Bash`): denies `git add -A`,
-  `git add --all`, a bare `git add .`, and any `git commit` with a short
-  flag cluster containing `-a` (so `-am`, `-avm`, and friends, not just a
-  bare `-a`) unless `git status` or `git diff --stat` ran in this repo
-  within the last 15 minutes. This is a soft gate, not a ban: the org rule
-  (`docs/GIT-WORKFLOW.md`) is to stage specific files after reviewing
-  what is actually there, not to never use these commands. Denying comes
-  with the exact next step (run status, then retry), so it never dead-ends
-  a session.
-- **`mark-git-status-checked.sh`** (PostToolUse, `Bash`): the other half.
-  Stamps a flag file at `<git-dir>/maipai-status-checked` (inside `.git/`,
-  never committed) whenever `git status` or `git diff --stat` runs, so the
-  PreToolUse hook has something to check the freshness of. Never blocks.
-
-Both use `git rev-parse --git-dir` from the command's own `cwd`, so they
-work correctly from a worktree, not just the main checkout.
+`block-blind-staging.sh`, `mark-git-status-checked.sh` and
+`block-wholesale-shared-docs.sh` guarded shared checkouts. Sessions now work
+one per worktree, so the three hooks and their scripts are deleted.
 
 ## Review before committing code
 
 Jesse's rule (2026-09-04): "I have to remember to tell you that" was the
 tell that self-discipline within one session doesn't survive a fresh one.
-This is the same mechanical pattern as git hygiene above, applied to code
-review instead of staging.
+This is the same mechanical pattern as the gate below, applied to code
+review.
 
-- **`require-review-before-commit.sh`** (PreToolUse, `Bash`): denies a
+- **`require-review-before-commit.sh`** (PreToolUse, `Bash`): since
+  2026-10-15 it applies to T2 paths only (the risky-surface list in the org
+  CLAUDE.md "Checks before landing" table). In a repo with `scripts/wt.sh`
+  it runs `bash scripts/wt.sh tier <files>` and requires a review only when
+  that prints T2. A repo without `wt.sh` keeps the older rule: it denies a
   `git commit` whose committed files include anything beyond `*.md`,
   `LICENSE`, or `NOTICE` unless the `code-review` skill has run in this
   repo within the last 30 minutes. Checks `--cached` plus, when the
@@ -40,8 +31,7 @@ review instead of staging.
   bare `git commit -am` with nothing pre-staged sailed through with an
   empty diff every time, caught by a code review of this hook itself
   (2026-09-04) before it ever shipped. `--amend` is exempt (it repeats
-  history rather than adding unreviewed work). Soft gate, same shape as
-  `block-blind-staging.sh`: the denial names the exact next step.
+  history rather than adding unreviewed work). Soft gate: the denial names the exact next step.
 - **`mark-review-checked.sh`** (PostToolUse, `Skill`): stamps
   `<git-dir>/maipai-review-checked` whenever the `code-review` skill is
   invoked (`tool_input.skill == "code-review"`). Originally matched
@@ -53,8 +43,7 @@ review instead of staging.
   invocation, not at "findings read and addressed", is a real limit: there
   is no tool call available to hook that fires only once a multi-agent
   review's parallel findings have all landed (those arrive as
-  task-notifications, not tool calls). Same honesty level as
-  `mark-git-status-checked.sh`. Never blocks.
+  task-notifications, not tool calls). Never blocks.
 
 This does not cover `catalog`'s community-PR path (that CI, not this
 hook, is the review gate there) or the cloud `ultra` review (separately
@@ -181,10 +170,14 @@ to run it any better than "review before committing" did.
 ## The architect gate (ARCH-GATE-01, 2026-10-02)
 
 - **`require-architect-verdict.sh`** (PreToolUse, `Bash`): in a repo that
-  keeps `docs/design/RULES.md`, denies a `git commit` that stages
-  anything under `docs/design/`, `docs/plans/`, `docs/BACKLOG.md`, or a
-  path matching a `Governs:` glob in RULES.md, unless
-  `data-scratch/architect/<ITEM-ID>.verdict` holds `verdict: APPROVED`,
+  keeps `docs/design/RULES.md`, denies a `git commit` unless a verdict is on
+  record when it stages a new or changed file under `docs/design/`, a NEW
+  file under `docs/plans/`, or a NEW backlog row in `docs/BACKLOG.md` (an
+  added line starting `- [ ] **` whose id is not on a removed line). A
+  checkbox flip or status edit in BACKLOG.md, an edit to an existing plan
+  and a code path in a `Governs:` glob need no verdict (narrowed
+  2026-10-15). The verdict is
+  `data-scratch/architect/<ITEM-ID>.verdict` with `verdict: APPROVED`,
   under 24 hours old, for an item id that appears in the commit message
   (or whose `sha256:` equals the staged diff's). A commit that stages
   `docs/design/RULES.md` itself needs `Owner-approved: YYYY-MM-DD` in the
@@ -193,8 +186,8 @@ to run it any better than "review before committing" did.
   unstaged tracked files under `-a`, finds the repo with `git rev-parse`
   so a worktree works (verdicts are read from the worktree's and the
   main checkout's `data-scratch/`). Soft gate: every denial names the
-  next step (dispatch the `architect` agent with the item id). Tested in
-  `standards/tests/ts/architectHook.test.ts`. See `docs/ARCHITECT.md`.
+  next step. Tested in `plugin/hooks/tests/require-architect-verdict.test.sh`.
+  See `docs/ARCHITECT.md`.
 
 ## UI rules before committing (PRECOMMIT-RULES-01, 2026-10-06)
 
@@ -226,14 +219,3 @@ command match a pattern, is a timestamp recent, is a checkbox unchecked),
 exactly the case where a fixed script is faster and more predictable than
 an LLM judgment call. Reach for a prompt-based hook only for something that
 genuinely needs contextual reasoning to answer.
-
-## block-wholesale-shared-docs.sh (PreToolUse, Bash)
-
-Refuses a plain `git add` of `docs/dev.md` or `docs/BACKLOG.md`, the
-two files every session in a shared checkout appends to. A wholesale
-add sweeps the other session's unstaged hunks into your commit; it
-happened three times on 2026-09-13 even with the rule written down.
-Patch, edit and interactive modes (`-p`, `--patch`, `-e`, `-i`) pass,
-since they stage hunks. Every other path is untouched. This is a hard
-gate, not a soft one: there is no legitimate wholesale add of a shared
-file while another session is active.

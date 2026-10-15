@@ -28,8 +28,9 @@ Governs: backend/chat/**, docs/design/chat*.md
 `Record:` names the design record that argues for the area's rules (links
 resolve relative to `docs/design/`). `Governs:` is optional: a
 comma-separated list of path globs for the code and docs the area's rules
-cover (`**` crosses directories, `*` does not). A commit touching a governed
-path needs a verdict. Every record carries a `## Supersedes` section naming
+cover (`**` crosses directories, `*` does not). The globs tell the architect
+and reviewers what an area covers; the commit hook no longer demands a verdict
+for a code path they name. Every record carries a `## Supersedes` section naming
 what it replaces, or "Nothing."
 
 ## The four verdicts
@@ -83,11 +84,15 @@ A repo's UI-rule lints run early too: a pre-commit hook (`scripts/ui-rules-preco
 1. **Dispatch.** The `coordinate` skill dispatches no item without an
    `APPROVED` record for its id.
 2. **Commit.** `plugin/hooks/scripts/require-architect-verdict.sh` denies a
-   commit that stages `docs/design/**`, `docs/plans/**`, `docs/BACKLOG.md`
-   or a `Governs:` path unless a fresh (24 hours) `APPROVED` record matches
-   the item id in the commit message or the staged diff hash. A commit that
-   stages RULES.md itself needs `Owner-approved: YYYY-MM-DD` in its message.
-   Every denial names the remedy.
+   commit unless a fresh (24 hours) `APPROVED` record matches the item id in
+   the commit message or the staged diff hash, when the commit stages:
+   a new or changed file under `docs/design/`, a new file under
+   `docs/plans/`, or a new backlog row in `docs/BACKLOG.md` (an added line
+   starting `- [ ] **` whose id is not on a removed line). A checkbox flip or
+   status edit in the backlog, an edit to an existing plan and a code path
+   named by a `Governs:` glob need no verdict (narrowed 2026-10-15). A
+   commit that stages RULES.md itself needs `Owner-approved: YYYY-MM-DD` in
+   its message. Every denial names the remedy.
 3. **Gate.** `standards/bin/architect-check.sh`, run by `check-core.sh`:
    every area names an existing record, every named record has a
    `## Supersedes` heading, and every `> **Superseded` marker in `docs/`
