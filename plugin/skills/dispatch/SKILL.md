@@ -29,16 +29,20 @@ Run it from a checkout that has `scripts/wt.sh` (origin/main, not a stale clone,
 worktree path, branch and session name. Export `MAIPAI_COMMONS_DIR`, `MAIPAI_STANDARDS_DIR` and `MAIPAI_WT_SESSION=<name>` for runs
 inside the worktree.
 
-## 4. Run Codex in an owned tmux session
+## 4. Run Codex with the launcher (never by hand)
 
 ```
-tmux new -d -s <repo>-<worktree>-codex -c <worktree> "codex exec 'Read <brief> and do it exactly' > <log> 2>&1; echo EXIT=\$? >> <log>"
+bash scripts/wt.sh run codex data-scratch/briefs/<slug>.md      # run THIS as a background command
 ```
 
-- Use `codex exec` (no `--full-auto`, no approval prompts). Add `--add-dir <dir>` for each outside directory it must write.
-- Never type into a running tmux pane: the Enter key is swallowed. Wait on the log instead:
-  `until grep -q '^EXIT=' <log>; do sleep 20; done` as a background command, so you are notified.
-- Codex can die on "prompt flagged" (EXIT=1). Check the worktree for partial work before re-dispatching.
+- One command launches and reports. It starts the owned tmux session, runs `codex exec` on the brief (no `--full-auto`, no
+  approvals), logs to `data-scratch/runs/<session>.log` (always ends `EXIT=<code>`), blocks until the run ends, then prints
+  DONE, FAILED, DIED (tmux gone, no `EXIT=`) or TIMEOUT (default 3600 s), the log tail and the newest report's gate lines.
+  Started in the background, the harness wakes you the moment it ends, so a finish cannot go unseen.
+- It records the owning Claude session and `runState` in `data-scratch/sessions/<name>.json` for status panes.
+- `--detach` returns at once; then you must run `bash scripts/wt.sh wait <session>` in the background yourself.
+- Never type into a running pane (the Enter is swallowed); a correction is a new `run`. Add `MAIPAI_CODEX_BIN` only in tests.
+- Codex can die on "prompt flagged" (FAILED, exit 1). Check the worktree for partial work before re-dispatching.
 
 ## 5. Verify, then land
 

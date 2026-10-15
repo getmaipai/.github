@@ -63,7 +63,7 @@ measured and reported with the rule named, never dropped (full text and the dele
   `git add -A` or `.`. Author identity is the GitHub noreply address.
 - **Parallel work:** Codex does decided, verifiable work first (GPT-6 Luna, low effort, high when needed); Claude does what needs
   judgment. Sonnet is the default, Opus gets one bounded question, Haiku gathers evidence, Fable only when Jesse says.
-  Directing other sessions or a lane: load `docs/COORDINATION.md` (legacy until the `dispatch` skill replaces it).
+  Dispatching Codex: use the `dispatch` skill (`scripts/wt.sh run` then `wait`); `docs/COORDINATION.md` is history plus role policy.
 - **Clean up on sight:** a merged or abandoned branch, finished worktree, dead file, leftover claim, lock or tmux session you own or
   can prove dead is removed this session; anything that may be another session's or Jesse's data is listed with evidence.
 - Load `docs/GIT-WORKFLOW.md` when a hook denies a git command or before a review.

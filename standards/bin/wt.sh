@@ -43,7 +43,7 @@ write_session() {
   mkdir -p "$WT_SESSION_DIR"
   node - "$name" "$branch" "$path" "$tmux" "${MAIPAI_WT_PID:-$PPID}" <<'NODE' > "$(session_file "$name")"
 const [name, branch, path, tmux, pid] = process.argv.slice(2);
-const owner = process.env.CLAUDE_SESSION_ID || process.env.CODEX_SESSION_ID || "codex";
+const owner = process.env.CLAUDE_CODE_SESSION_ID || process.env.CLAUDE_SESSION_ID || process.env.CODEX_SESSION_ID || "codex";
 console.log(JSON.stringify({owner, pid: Number(pid), tmux: tmux || null, created: new Date().toISOString(), branch, path}, null, 2));
 NODE
 }
@@ -110,6 +110,69 @@ cmd_tmux() {
   tmux_cmd new-session -d -s "$actual" -c "$path" || err "could not create tmux session '$actual'; check tmux and retry."
   write_session "$name" "$branch" "$path" "$actual"
   printf '%s\n' "$actual"
+}
+
+# Standard Codex launch (replaces hand-typed tmux and watcher steps): one owned tmux session
+# runs `codex exec` on the brief and the log always ends in an EXIT= line, so `wt.sh wait`
+# can report the finish. Run `wait` as a background command and the harness wakes you.
+# set_run_state <session-name> <state>: lets a status pane show running/DONE/FAILED/DIED/TIMEOUT per run.
+set_run_state() {
+  local f; f="$(session_file "$1")"; [[ -f "$f" ]] || return 0
+  node - "$f" "$2" <<'NODE'
+const fs = require("fs"); const [f, state] = process.argv.slice(2);
+const j = JSON.parse(fs.readFileSync(f, "utf8")); j.runState = state; j.runStateAt = new Date().toISOString();
+fs.writeFileSync(f, JSON.stringify(j, null, 2) + "\n");
+NODE
+}
+run_log() { printf '%s/runs/%s.log' "$WT_DATA" "$1"; }
+cmd_run() {
+  local detach=0; if [[ "${1:-}" == --detach ]]; then detach=1; shift; fi
+  [[ $# == 2 ]] || err "run needs a purpose and a brief file; use: wt.sh run [--detach] <purpose> <brief-file>." 2
+  local purpose="$1" brief="$2" name f path actual log bin
+  valid_name "$purpose" || err "purpose '$purpose' has unsupported characters; use letters, digits, and hyphens."
+  [[ -f "$brief" ]] || err "brief '$brief' not found; write the complete brief first (see the dispatch skill)."
+  brief="$(cd "$(dirname "$brief")" && pwd)/$(basename "$brief")"
+  name="${MAIPAI_WT_SESSION:-$(current_session_name)}"; f="$(session_file "$name")"
+  [[ -f "$f" ]] || err "no session file for '$name'; run wt.sh start <slug> first and export MAIPAI_WT_SESSION."
+  need_cmd tmux
+  path="$(read_json "$f" path)"
+  actual="$WT_REPO-${name}-$purpose"
+  tmux_cmd has-session -t "$actual" >/dev/null 2>&1 && err "tmux session '$actual' already exists; wait for it or pick another purpose name."
+  mkdir -p "$WT_DATA/runs"; log="$(run_log "$actual")"; : > "$log"
+  bin="${MAIPAI_CODEX_BIN:-codex}"
+  tmux_cmd new-session -d -s "$actual" -c "$path" "$bin exec -C '$path' - < '$brief' > '$log' 2>&1; echo EXIT=\$? >> '$log'" \
+    || err "could not create tmux session '$actual'; check tmux and retry."
+  write_session "$name" "$(read_json "$f" branch)" "$path" "$actual"
+  set_run_state "$name" running
+  printf 'session %s\nlog %s\n' "$actual" "$log"
+  # Default: block until the run ends and print the verdict, so one background command both launches
+  # and reports (nothing to forget). --detach returns at once; then run `wt.sh wait <session>` yourself.
+  if (( detach )); then printf 'next: bash scripts/wt.sh wait %s   (run as a background command)\n' "$actual"; else cmd_wait "$actual" "${MAIPAI_WT_RUN_TIMEOUT:-3600}"; fi
+}
+
+# wait <tmux-session> [timeout-seconds, default 3600]: blocks, then prints one verdict line
+# (DONE, FAILED, DIED or TIMEOUT), the log tail and the report's gate lines.
+cmd_wait() {
+  [[ $# -ge 1 && $# -le 2 ]] || err "wait needs a session name and an optional timeout; use: wt.sh wait <tmux-session> [seconds]." 2
+  local actual="$1" limit="${2:-3600}" log waited=0 verdict code
+  log="$(run_log "$actual")"; [[ -f "$log" ]] || err "no run log for '$actual'; start it with wt.sh run."
+  while :; do
+    if grep -q '^EXIT=' "$log"; then code="$(grep '^EXIT=' "$log" | tail -1 | cut -d= -f2)"
+      [[ "$code" == 0 ]] && verdict="DONE" || verdict="FAILED (exit $code)"; break; fi
+    if ! tmux_cmd has-session -t "$actual" >/dev/null 2>&1; then verdict="DIED (tmux session gone, no EXIT line)"; break; fi
+    if (( waited >= limit )); then verdict="TIMEOUT after ${limit}s (still running; attach or kill it)"; break; fi
+    sleep "${MAIPAI_WT_POLL:-5}"; waited=$((waited + ${MAIPAI_WT_POLL:-5}))
+  done
+  local sf; for sf in "$WT_SESSION_DIR"/*.json; do
+    [[ -f "$sf" && "$(read_json "$sf" tmux)" == "$actual" ]] && set_run_state "$(basename "$sf" .json)" "${verdict%% *}"
+  done
+  echo "codex run $actual: $verdict"
+  echo "-- last log lines"; tail -n 8 "$log"
+  if ls "$WT_MAIN"/data-scratch/reports/*.md >/dev/null 2>&1; then
+    echo "-- newest report gate lines"
+    grep -i -h -E 'gate|pass|fail' "$(ls -t "$WT_MAIN"/data-scratch/reports/*.md | head -1)" | head -8 || true
+  fi
+  [[ "$verdict" == DONE ]]
 }
 
 cmd_port() {
@@ -360,11 +423,13 @@ cmd_land() {
 case "${1:-}" in
   start) shift; cmd_start "$@";;
   tmux) shift; cmd_tmux "$@";;
+  run) shift; cmd_run "$@";;
+  wait) shift; cmd_wait "$@";;
   port) shift; [[ $# == 0 ]] || err "port takes no arguments; use: wt.sh port." 2; cmd_port;;
   check) shift; cmd_check "$@";;
   tier) shift; cmd_tier "$@";;
   land) shift; cmd_land "$@";;
   done) shift; cmd_done "$@";;
   reap) shift; [[ $# == 0 ]] || err "reap takes no arguments; use: wt.sh reap." 2; cmd_reap;;
-  *) err "unknown or missing command '${1:-}'; use start, tmux, port, check, land, done, or reap." 2;;
+  *) err "unknown or missing command '${1:-}'; use start, tmux, run, wait, port, check, land, done, or reap." 2;;
 esac

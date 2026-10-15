@@ -15,7 +15,7 @@ const socket = `wt-test-${process.pid}-${Date.now()}`;
 const run = (args: string[], env: Record<string, string> = {}) => spawnSync("bash", [script, ...args], {
   cwd: fixture,
   encoding: "utf8",
-  env: { ...process.env, ...repoEnv, MAIPAI_WT_DATA: data, MAIPAI_WT_TMUX_SOCKET: socket, ...env },
+  env: { ...process.env, ...repoEnv, MAIPAI_WT_DATA: data, MAIPAI_WT_TMUX_SOCKET: socket, MAIPAI_WT_SESSION: "", ...env },
 });
 
 beforeAll(() => {
@@ -107,7 +107,7 @@ describe("wt.sh worktree lifecycle", () => {
     const path = started.stdout.trim();
     const name = path.split("/").at(-1)!.replace(/^demo-/, "");
     writeFileSync(join(path, "NOTE.md"), "note\n");
-    const env = { ...process.env, ...repoEnv, MAIPAI_WT_DATA: "" } as Record<string, string>;
+    const env = { ...process.env, ...repoEnv, MAIPAI_WT_SESSION: "", MAIPAI_WT_DATA: "" } as Record<string, string>;
     delete env.MAIPAI_WT_DATA;
     const checked = spawnSync("bash", [script, "check"], { cwd: path, encoding: "utf8", env });
     expect(checked.status).toBe(0);
@@ -247,3 +247,54 @@ describe("wt.sh land gate stamp", () => {
   }, 30000);
 });
 
+
+describe("wt.sh run and wait", () => {
+  const fakeCodex = (body: string) => {
+    const bin = join(scratch, `fake-codex-${Math.random().toString(36).slice(2)}`);
+    writeFileSync(bin, `#!/usr/bin/env bash\n${body}\n`, { mode: 0o755 });
+    return bin;
+  };
+
+  test("a finished run writes EXIT=0 and wait reports DONE", () => {
+    const started = run(["start", "runok"]);
+    const path = started.stdout.trim();
+    const name = path.split("/").at(-1)!.replace(/^demo-/, "");
+    const brief = join(scratch, "brief-ok.md");
+    writeFileSync(brief, "do the thing\n");
+    const launched = run(["run", "codex", brief], { MAIPAI_WT_SESSION: name, MAIPAI_WT_POLL: "1", MAIPAI_CODEX_BIN: fakeCodex("cat >/dev/null; echo built") });
+    expect(launched.status).toBe(0);
+    expect(launched.stdout).toContain(`demo-${name}-codex`);
+    expect(launched.stdout).toContain("DONE");
+    expect(launched.stdout).toContain("built");
+    const record = JSON.parse(readFileSync(join(data, "sessions", `${name}.json`), "utf8"));
+    expect(record.runState).toBe("DONE");
+    expect(record.tmux).toBe(`demo-${name}-codex`);
+    expect(typeof record.owner).toBe("string");
+    const detached = run(["run", "--detach", "again", brief], { MAIPAI_WT_SESSION: name, MAIPAI_CODEX_BIN: fakeCodex("cat >/dev/null; echo two") });
+    expect(detached.stdout).toContain("next: bash scripts/wt.sh wait");
+    expect(run(["wait", `demo-${name}-again`, "30"], { MAIPAI_WT_POLL: "1" }).stdout).toContain("DONE");
+    run(["done"], { MAIPAI_WT_SESSION: name });
+  });
+
+  test("a failing run reports FAILED and a killed session reports DIED", () => {
+    const started = run(["start", "runbad"]);
+    const path = started.stdout.trim();
+    const name = path.split("/").at(-1)!.replace(/^demo-/, "");
+    const brief = join(scratch, "brief-bad.md");
+    writeFileSync(brief, "fail\n");
+    run(["run", "--detach", "codex", brief], { MAIPAI_WT_SESSION: name, MAIPAI_CODEX_BIN: fakeCodex("cat >/dev/null; exit 3") });
+    const failed = run(["wait", `demo-${name}-codex`, "30"], { MAIPAI_WT_POLL: "1" });
+    expect(failed.status).not.toBe(0);
+    expect(failed.stdout).toContain("FAILED (exit 3)");
+    run(["run", "--detach", "slow", brief], { MAIPAI_WT_SESSION: name, MAIPAI_CODEX_BIN: fakeCodex("cat >/dev/null; sleep 60") });
+    spawnSync("tmux", ["-L", socket, "kill-session", "-t", `demo-${name}-slow`]);
+    const died = run(["wait", `demo-${name}-slow`, "30"], { MAIPAI_WT_POLL: "1" });
+    expect(died.stdout).toContain("DIED");
+    const timedOut = (() => {
+      run(["run", "--detach", "hang", brief], { MAIPAI_WT_SESSION: name, MAIPAI_CODEX_BIN: fakeCodex("cat >/dev/null; sleep 60") });
+      return run(["wait", `demo-${name}-hang`, "2"], { MAIPAI_WT_POLL: "1" });
+    })();
+    expect(timedOut.stdout).toContain("TIMEOUT");
+    run(["done"], { MAIPAI_WT_SESSION: name });
+  });
+});
