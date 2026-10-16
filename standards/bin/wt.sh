@@ -318,12 +318,23 @@ cmd_done() {
   find "$WT_PORT_DIR" -type f -name '*.lease' -exec grep -lF "$name" {} \; -delete 2>/dev/null || true
 }
 
+# Directory holding the helper scripts. The repo wrappers run this file from a temp copy, so look
+# beside it first and otherwise in the sibling .github checkout (the wrapper's own lookup).
+std_bin() {
+  local here; here="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
+  if [[ -n "${WT_STD_BIN:-}" ]]; then echo "$WT_STD_BIN"; return; fi
+  if [[ -f "$here/origin-guard.sh" ]]; then echo "$here"; return; fi
+  local common; common="$(git rev-parse --git-common-dir)"
+  case "$common" in /*) ;; *) common="$(cd "$common" && pwd)" ;; esac
+  echo "$(cd "$common/.." && pwd)/../.github/standards/bin"
+}
+
 # Installs a pre-push hook that runs origin-guard.sh, so a push from a checkout whose origin names
 # another repo is refused even outside wt.sh. Shared by every worktree of the repo; a pre-push hook
 # that is not ours is left alone.
 install_origin_guard_hook() {
   local hooks="$WT_COMMON/hooks" hook guard
-  hook="$hooks/pre-push"; guard="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)/origin-guard.sh"
+  hook="$hooks/pre-push"; guard="$(std_bin)/origin-guard.sh"
   mkdir -p "$hooks"
   if [[ -e "$hook" ]] && ! grep -q 'maipai-origin-guard' "$hook"; then
     echo "wt: $hook exists and is not the origin guard, so it was left as it is; add: bash $guard \"\$(git rev-parse --show-toplevel)\"" >&2
@@ -458,7 +469,7 @@ Commit them by file name (git add -f for a tracked file under an ignored folder)
 }
 
 case "${1:-}" in
-  start|land|check|done) "$(dirname "${BASH_SOURCE[0]}")/origin-guard.sh" "$WT_ROOT" || exit 1;; esac
+  start|land|check|done) "$(std_bin)/origin-guard.sh" "$WT_ROOT" || exit 1;; esac
 
 case "${1:-}" in
   start) shift; cmd_start "$@";;
