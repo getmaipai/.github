@@ -75,7 +75,7 @@ measured and reported with the rule named, never dropped (full text and the dele
   Dispatching Codex: use the `dispatch` skill (`scripts/wt.sh run` then `wait`); `docs/COORDINATION.md` is history plus role policy.
 - **Clean up on sight:** a merged or abandoned branch, finished worktree, dead file, leftover claim, lock or tmux session you own or
   can prove dead is removed this session; anything that may be another session's or Jesse's data is listed with evidence.
-- Load `docs/GIT-WORKFLOW.md` when a hook denies a git command or before a review.
+- Load `docs/GIT-WORKFLOW.md` when a hook denies a git command or before a review. Before reporting a force-push or missing history, run `git remote -v` and `git reflog show origin/main`: a wrong `origin` URL looks like a rewrite (`standards/bin/origin-guard.sh`).
 
 ## Checks before landing (definition of done)
 

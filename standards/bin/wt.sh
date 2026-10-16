@@ -421,6 +421,9 @@ cmd_land() {
 }
 
 case "${1:-}" in
+  start|land|check|done) "$(dirname "${BASH_SOURCE[0]}")/origin-guard.sh" "$WT_ROOT" || exit 1;; esac
+
+case "${1:-}" in
   start) shift; cmd_start "$@";;
   tmux) shift; cmd_tmux "$@";;
   run) shift; cmd_run "$@";;

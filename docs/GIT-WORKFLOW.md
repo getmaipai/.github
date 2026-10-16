@@ -148,3 +148,11 @@ the hub requires Jesse's word in the moment.
 **Author identity:** Jesse's name is public and fine. His email is not:
 commits use the GitHub noreply address, and no personal email ever appears
 in code, docs, or package metadata.
+
+## Origin guard
+
+`standards/bin/origin-guard.sh` fails when a checkout's `origin` URL names a different repo than the checkout (on 2026-10-15
+`home`'s origin pointed at `commons.git`, so fetches showed commons history and looked like a force-push). `wt.sh` runs it before
+`start`, `check`, `land` and `done`. Install it as a pre-push hook with
+`ln -sf <path to .github>/standards/bin/origin-guard.sh <repo>/.git/hooks/pre-push`. Before reporting a force-push or missing
+history, run `git remote -v` and `git reflog show origin/main`.
