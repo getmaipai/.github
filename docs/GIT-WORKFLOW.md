@@ -17,11 +17,18 @@ own work directly on `main`, same as every other repo.
 
 ## Branches and worktrees
 
-**Never create a branch or worktree** unless Jesse explicitly asks, or a
-second session is actively editing the same repo in parallel. If one was
-needed, merge it and delete it before the session ends. A branch that
-outlives its session is a bug. If you notice a stray branch or worktree,
-flag it for cleanup.
+**One session, one worktree on a short-lived `wt/*` branch, created by `scripts/wt.sh start`.** Land it with `wt.sh land`, then
+`wt.sh done`; never hand-run `git worktree`. A branch or worktree that outlives its session is a bug: `wt.sh reap` removes
+the ones it made and lists clean older ones (branch already on `origin/main`) that a person can remove.
+
+## The main checkout belongs to wt.sh
+
+A repo's main checkout (the folder with the real `.git`) is read-only for sessions. Only `wt.sh` fetches, fast-forwards and adds
+worktrees there. The plugin hook `guard-main-checkout.sh` denies `rebase`, `reset`, `checkout`, `switch`, `merge`, `pull`,
+`worktree add`, `remote set-url` and force pushes in a main checkout; when Jesse approves one such change, put
+`MAIPAI_ALLOW_MAIN_CHECKOUT=1` in the command. A main checkout that drifts (2026-10-16: `home` ahead 12 and behind 146, `commons`
+left on another session's lane) is parked, never discarded: commit the dirty tree to `wip/<repo>-main-<date>`, branch any
+unpushed commits to `wip/...`, then reset to `origin/main`.
 
 ## Commit only completed, verified work
 
@@ -41,22 +48,6 @@ works in its own worktree, so the hooks that enforced them
 (`block-blind-staging.sh`, `block-wholesale-shared-docs.sh`,
 `mark-git-status-checked.sh`) are deleted. Stage specific files by name,
 never `git add -A` or `.`, and read `git show --stat HEAD` after a commit.
-
-## No rebase, reset or checkout in a shared checkout without checking
-
-  **Never run `git rebase`, `git reset`, or `git checkout` in a shared
-  checkout without checking `git status`/`git diff --cached` for
-  another session's staged or uncommitted work first** (2026-09-27,
-  `home`: a session's own staged `docs/BACKLOG.md` correction was
-  silently wiped when another session ran a plain `git rebase` on the
-  same shared checkout mid-edit - recovered only because the staged
-  blob was still reachable via `git fsck --dangling`; the first version
-  of this exact loss earlier the same day was not recoverable the same
-  way and had to be redone by hand). A rebase/reset/checkout operates
-  on the whole working tree and index at once, the same blast radius a
-  blind `git add -A` has, so it gets the same check first: read the
-  status, and if anything is staged or modified that isn't yours, stop
-  and let that session land or clear it before touching the tree.
 
 ## Code review before committing code
 
@@ -153,6 +144,6 @@ in code, docs, or package metadata.
 
 `standards/bin/origin-guard.sh` fails when a checkout's `origin` URL names a different repo than the checkout (on 2026-10-15
 `home`'s origin pointed at `commons.git`, so fetches showed commons history and looked like a force-push). `wt.sh` runs it before
-`start`, `check`, `land` and `done`. Install it as a pre-push hook with
-`ln -sf <path to .github>/standards/bin/origin-guard.sh <repo>/.git/hooks/pre-push`. Before reporting a force-push or missing
-history, run `git remote -v` and `git reflog show origin/main`.
+`start`, `check`, `land` and `done`, and `wt.sh start` installs it as the repo's `pre-push` hook (a pre-push hook that is not
+ours is left alone and reported). Before reporting a force-push or missing history, run `git remote -v` and
+`git reflog show origin/main`.

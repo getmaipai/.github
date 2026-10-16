@@ -60,6 +60,7 @@ cmd_start() {
   local slug="$1"; valid_name "$slug" || err "slug '$slug' has unsupported characters; use letters, digits, and hyphens."
   cmd_reap
   need_cmd git
+  install_origin_guard_hook
   git -C "$WT_ROOT" fetch origin || err "could not fetch origin; check network access and retry."
   local name branch path
   name="$(make_name "$slug")"; branch="wt/${name%-$slug}-$slug"; path="$WT_PARENT/wt/$WT_REPO-$name"
@@ -317,6 +318,21 @@ cmd_done() {
   find "$WT_PORT_DIR" -type f -name '*.lease' -exec grep -lF "$name" {} \; -delete 2>/dev/null || true
 }
 
+# Installs a pre-push hook that runs origin-guard.sh, so a push from a checkout whose origin names
+# another repo is refused even outside wt.sh. Shared by every worktree of the repo; a pre-push hook
+# that is not ours is left alone.
+install_origin_guard_hook() {
+  local hooks="$WT_COMMON/hooks" hook guard
+  hook="$hooks/pre-push"; guard="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)/origin-guard.sh"
+  mkdir -p "$hooks"
+  if [[ -e "$hook" ]] && ! grep -q 'maipai-origin-guard' "$hook"; then
+    echo "wt: $hook exists and is not the origin guard, so it was left as it is; add: bash $guard \"\$(git rev-parse --show-toplevel)\"" >&2
+    return 0
+  fi
+  printf '#!/usr/bin/env bash\n# maipai-origin-guard (installed by wt.sh start)\nexec bash %q "$(git rev-parse --show-toplevel)"\n' "$guard" > "$hook"
+  chmod +x "$hook"
+}
+
 cmd_reap() {
   mkdir -p "$WT_SESSION_DIR" "$WT_PORT_DIR"
   local f name pid tmuxname path branch alive dirty created age
@@ -349,6 +365,22 @@ cmd_reap() {
     pid="$(awk 'NR==1 {print $1}' "$f" 2>/dev/null || true)"
     [[ -n "$pid" ]] && kill -0 "$pid" 2>/dev/null || rm -f "$f"
   done
+  git -C "$WT_MAIN" worktree prune >/dev/null 2>&1 || true
+  # Worktrees this script did not create (older lane worktrees) are listed, never removed:
+  # clean ones whose branch is already on origin/main are safe for a person to remove.
+  local wpath wbranch
+  while IFS= read -r line; do
+    case "$line" in
+      "worktree "*) wpath="${line#worktree }"; wbranch="";;
+      "branch "*) wbranch="${line#branch refs/heads/}";;
+      "")
+        [[ -n "${wpath:-}" && "$wpath" != "$WT_MAIN" && "$wbranch" != wt/* && -n "$wbranch" ]] || { wpath=""; continue; }
+        if [[ -z "$(git -C "$wpath" status --porcelain 2>/dev/null)" ]] && git -C "$WT_MAIN" merge-base --is-ancestor "$wbranch" origin/main 2>/dev/null; then
+          echo "wt: removable worktree (clean, branch $wbranch already on origin/main): git -C $WT_MAIN worktree remove $wpath" >&2
+        fi
+        wpath="";;
+    esac
+  done < <(git -C "$WT_MAIN" worktree list --porcelain; echo)
 }
 
 # Refuse to push unless this session's gate stamp is green, at least as strong as the
@@ -393,6 +425,11 @@ NODE
 cmd_land() {
   [[ $# == 0 ]] || err "land takes no arguments; run it from the active worktree." 2
   need_cmd git
+  local dirty_files
+  dirty_files="$(git -C "$WT_ROOT" status --porcelain --untracked-files=no)"
+  [[ -z "$dirty_files" ]] || err "the worktree has uncommitted changes, so the rebase cannot run:
+$dirty_files
+Commit them by file name (git add -f for a tracked file under an ignored folder), or discard them, then rerun wt.sh land."
   git -C "$WT_ROOT" fetch origin || err "could not fetch origin; check network access and retry landing."
   local before after attempt changed_pin changed_pkg name d
   before="$(git -C "$WT_ROOT" rev-parse HEAD)"

@@ -2,7 +2,7 @@
 
 Dev tier. Policy for the coordinator and coder roles. The procedure (work orders, handshake, lane scripts) lives in `plugin/skills/coordinate/SKILL.md`; this file keeps only policy and the dated reasons. The model floor table also appears in the always-loaded core, which is the authoritative copy; the text below is the full rule. Load before directing sessions, dispatching a lane, or taking the coordinator role.
 
-> **Status (2026-10-15):** the `dispatch` skill replaces lanes, lane locks, claims and the coordinator handshake. One decided item goes to Codex in its own worktree (`scripts/wt.sh start`, `scripts/wt.sh run` then `wait` as a background command, `scripts/wt.sh land`). The text below is history and the role-boundary policy; the lane and lock procedures no longer run.
+> **Status (2026-10-15):** the `dispatch` skill replaces lanes, lane locks, claims and the coordinator handshake. One decided item goes to Codex in its own worktree (`scripts/wt.sh start`, `scripts/wt.sh run` then `wait` as a background command, `scripts/wt.sh land`). The text below is history and the role-boundary policy; the lane and lock procedures no longer run (lane locks and item claims moved to `docs/archive/COORDINATION-lane-locks-and-claims.md` on 2026-10-16).
 
 ## Roles (hard rule, 2026-09-12)
 
@@ -129,42 +129,6 @@ fallback when neither lane fits. A terminal session Jesse opens
 himself, because he wants to watch it directly or because a handoff
 resumes one with `--continue`, still follows the same reporting
 contract; only the coordinator's own default mechanism changes.
-
-## Lane locks
-
-**Lane locks, so only one coordinator drives a given Codex or
-OpenCode target (owner's rule, 2026-09-26).** Codex and OpenCode have
-no per-caller identity the way `ListAgents` gives Claude sessions, so
-two coordinators (a handoff mid-flight, a second session started by
-mistake) can type into the same pane or server session and corrupt
-each other's turn. Each lane target keeps a lock file at
-`<repo>/data-scratch/lane-locks/<codex|opencode>.lock` (coordinator
-name, item id, acquired-at). Before sending anything to that lane,
-the coordinator reads the lock: empty or already its own name, it
-writes itself in and proceeds; held by another name, it does not
-touch the lane and messages that coordinator instead. The lock is
-held for the lane's current item and cleared when that item reports
-done, blocked, or is handed off; it is never left stale past that.
-
-## Item claims
-
-**Item claims, so two lanes never collide on the same work or the
-same files (owner's rule, 2026-09-26).** Before dispatching any item
-(agent, Codex, or OpenCode), the coordinator writes a claim at
-`<repo>/data-scratch/claims/<ITEM-ID>.claim` (owner name, lane,
-worktree path, started-at), after checking that none already exists
-for that id anywhere the item touches. A claim answers "who has
-this" the way `ListAgents` answers "who is running" for Claude
-sessions, but Codex, OpenCode, and a shared checkout have no registry
-of their own. A session or agent that finds unclaimed, uncommitted
-work sitting in a shared checkout does not guess whose it is and does
-not finish it: it reads `data-scratch/claims/` for a match, and if
-none exists, reports the diff to the coordinator rather than touching
-it (this is exactly what cost a night's worth of cross-session
-messages on 2026-09-26, when three sessions independently tried to
-identify one uncommitted diff none of them had claimed). The claim is
-removed when the item lands, or when its owner reports the item done,
-blocked, or handed off elsewhere.
 
 ## Launching coder sessions
 

@@ -1,10 +1,15 @@
 {
-  "description": "Git hygiene: a soft gate requiring a code review before a commit that touches a T2 path, a soft gate requiring a passing (and scope-covering) check run before any commit, a soft gate requiring an architect verdict before a design-record commit, and session-start repo context.",
+  "description": "Git hygiene: a deny on history-moving git commands in a main checkout, a soft gate requiring a code review before a commit that touches a T2 path, a soft gate requiring a passing (and scope-covering) check run before any commit, a soft gate requiring an architect verdict before a design-record commit, and session-start repo context.",
   "hooks": {
     "PreToolUse": [
       {
         "matcher": "Bash",
         "hooks": [
+          {
+            "type": "command",
+            "command": "bash ${CLAUDE_PLUGIN_ROOT}/hooks/scripts/guard-main-checkout.sh",
+            "timeout": 5
+          },
           {
             "type": "command",
             "command": "bash ${CLAUDE_PLUGIN_ROOT}/hooks/scripts/require-review-before-commit.sh",

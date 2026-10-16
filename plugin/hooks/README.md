@@ -11,6 +11,13 @@ loaded, `/hooks` to review what is active).
 `block-wholesale-shared-docs.sh` guarded shared checkouts. Sessions now work
 one per worktree, so the three hooks and their scripts are deleted.
 
+## Main checkout guard
+
+**`guard-main-checkout.sh`** (PreToolUse, `Bash`): MAIN-CHECKOUT-01. Denies `git rebase|reset|checkout|switch|merge|pull`,
+`worktree add`, `remote set-url` and force pushes when the target (`git -C <dir>` or the cwd) is a repo's main checkout, so only
+`scripts/wt.sh` changes it. Escape for an owner-approved change: `MAIPAI_ALLOW_MAIN_CHECKOUT=1` in the command. Test:
+`bash plugin/hooks/tests/guard-main-checkout.test.sh`.
+
 ## Review before committing code
 
 Jesse's rule (2026-09-04): "I have to remember to tell you that" was the
