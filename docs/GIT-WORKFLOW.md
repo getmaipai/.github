@@ -31,6 +31,12 @@ the tree is clean with no untracked or ignored files (`.env`, `data-scratch`, bu
 `data-scratch/reaped.md` as `time | name | path | kept: <evidence>` and left alone, so a worktree with uncommitted changes is never
 touched at any age. Worktrees `wt.sh` did not create are listed on stderr when removable, never removed.
 
+**T1 test selection (`wt.sh check`).** For a changed TS/JS module, T1 runs its sibling test plus every test in `WT_TEST_WORKSPACES`
+that imports it (import, require, `mock.module`, `vi.mock`; relative specifiers resolved against the test's folder, path-like
+ones such as `lib/apps` matched by suffix). A test that merely contains the module's name in a string is not selected. Other changed
+files fall back to a bare-name grep. The command prints each selected test and why; past 60 tests (`MAIPAI_WT_T1_CAP`) it runs the
+first 60, says how many it skipped and points to `wt.sh check T2`.
+
 **Codex runs write inside their own worktree only (owner's ruling, 2026-10-17).** `wt.sh run` launches
 `codex exec -s workspace-write -C <worktree>`. Plain `codex exec` defaults to a read-only sandbox, so every run ended "Blocked by
 this session's enforced read-only filesystem policy". `MAIPAI_CODEX_BIN` swaps only the binary (tests; a program name or path, any space, argument or shell character is refused, use a wrapper script); the sandbox flag stays, and

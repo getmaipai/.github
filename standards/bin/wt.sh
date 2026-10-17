@@ -267,26 +267,83 @@ cmd_tier() { printf '%s\n' "$(classify_tier "$@")"; }
 
 # T1 tests: the test files that sit beside, or mention the name of, a changed file.
 # Each workspace has its own bunfig preload, so its tests run from inside it.
+# select_tests <workspace-dir> <changed-file>: prints "<test path relative to the workspace>\t<reason>" lines.
+# A changed TS/JS module selects its own sibling test plus every test that IMPORTS it (import, require,
+# mock.module, vi.mock or dynamic import), resolving relative specifiers against the test's directory and
+# matching path-like specifiers ('lib/apps', '@/lib/apps') by suffix. A bare name in a string or comment
+# selects nothing. Other changed files (JSON, docs, config) fall back to a bare-name grep.
+select_tests() {
+  WT_SEL_ROOT="$WT_ROOT" node - "$1" "$2" <<'NODE'
+const fs = require("fs"), path = require("path");
+const [ws, changed] = process.argv.slice(2);
+const root = process.env.WT_SEL_ROOT;
+const wsAbs = path.join(root, ws), file = path.join(root, changed);
+const isTest = (n) => /\.test\.(ts|tsx)$/.test(n);
+const tests = [];
+(function walk(d) {
+  let ents; try { ents = fs.readdirSync(d, { withFileTypes: true }); } catch { return; }
+  for (const e of ents) {
+    if (e.name === "node_modules" || e.name === ".git") continue;
+    const full = path.join(d, e.name);
+    if (e.isDirectory()) walk(full); else if (isTest(e.name)) tests.push(full);
+  }
+})(wsAbs);
+const rel = (t) => path.relative(wsAbs, t);
+const out = new Map();
+const add = (t, why) => { if (!out.has(t)) out.set(t, why); };
+const ext = path.extname(file), stem = file.slice(0, file.length - ext.length), name = path.basename(stem);
+if (isTest(file)) add(file, "the changed file is itself a test");
+if (/^\.(ts|tsx|js|jsx|mts|cts|mjs)$/.test(ext)) {
+  for (const x of [".test.ts", ".test.tsx"]) { const sib = stem + x; if (fs.existsSync(sib)) add(sib, "sibling test of " + path.basename(file)); }
+  const targets = [stem]; if (name === "index") targets.push(path.dirname(file));
+  const re = /(?:\bfrom\s*|\bimport\s*\(?\s*|\brequire\s*\(\s*|\bmock\.module\s*\(\s*|\bvi\.(?:mock|doMock)\s*\(\s*|\bjest\.mock\s*\(\s*)(['"])([^'"\n]+)\1/g;
+  for (const t of tests) {
+    if (out.has(t)) continue;
+    const src = fs.readFileSync(t, "utf8"); let m; re.lastIndex = 0;
+    while ((m = re.exec(src))) {
+      let spec = m[2].replace(/\.(js|jsx|ts|tsx|mjs|mts)$/, "");
+      let hit = false;
+      if (spec.startsWith(".")) { const abs = path.resolve(path.dirname(t), spec); hit = targets.some((x) => abs === x); }
+      else if (spec.includes("/")) {
+        const s2 = spec.replace(/^(@|~|#)\//, "");
+        hit = targets.some((x) => x.endsWith("/" + s2));
+      }
+      if (hit) { add(t, "imports " + m[2]); break; }
+    }
+  }
+} else {
+  const dir = path.dirname(file);
+  for (const t of tests) if (path.dirname(t) === dir) add(t, "beside the changed file");
+  for (const t of tests) if (!out.has(t) && fs.readFileSync(t, "utf8").includes(name)) add(t, "mentions '" + name + "' (non-TS change)");
+}
+for (const [t, why] of out) console.log(rel(t) + "\t" + why);
+NODE
+}
+
 run_beside_tests() {
-  local tests=() f dir testfile base_name ws group line rc=0 uniq
-  for f in "$@"; do
-    dir="$(dirname "$f")"
-    base_name="$(basename "$f")"; base_name="${base_name%.*}"
-    for testfile in "$WT_ROOT/$dir"/*.test.ts "$WT_ROOT/$dir"/*.test.tsx; do [[ -f "$testfile" ]] && tests+=("${testfile#"$WT_ROOT"/}"); done
-    for ws in $WT_TEST_WORKSPACES; do
-      [[ -d "$WT_ROOT/$ws" ]] || continue
-      while IFS= read -r testfile; do [[ -n "$testfile" ]] && tests+=("$ws/${testfile#./}"); done < <(cd "$WT_ROOT/$ws" && grep -rlF --include='*.test.ts' --include='*.test.tsx' --exclude-dir=node_modules -e "$base_name" . 2>/dev/null || true)
-    done
-  done
+  local ws f line rc=0 cap="${MAIPAI_WT_T1_CAP:-60}" n i group t why
+  local -a rows picked
   for ws in $WT_TEST_WORKSPACES; do
-    group=()
-    for testfile in ${tests[@]+"${tests[@]}"}; do
-      if [[ "$ws" == . ]]; then group+=("./$testfile"); elif [[ "$testfile" == "$ws/"* ]]; then group+=("./${testfile#"$ws"/}"); fi
+    [[ -d "$WT_ROOT/$ws" ]] || continue
+    rows=()
+    for f in "$@"; do
+      [[ "$f" == "$ws/"* || "$ws" == . ]] || continue
+      local relf="$f"; [[ "$ws" == . ]] || relf="$f"
+      while IFS= read -r line; do [[ -n "$line" ]] && rows+=("$line"); done < <(select_tests "$ws" "$relf")
     done
-    (( ${#group[@]} )) || continue
-    uniq=()
-    while IFS= read -r line; do uniq+=("$line"); done < <(printf '%s\n' "${group[@]}" | sort -u)
-    (cd "$WT_ROOT/$ws" && bun test "${uniq[@]}") || rc=$?
+    (( ${#rows[@]} )) || continue
+    picked=(); group=()
+    while IFS= read -r line; do picked+=("$line"); done < <(printf '%s\n' "${rows[@]}" | awk -F'\t' '!seen[$1]++')
+    n=${#picked[@]}
+    echo "== T1 tests in $ws: $n selected"
+    i=0
+    for line in "${picked[@]}"; do
+      t="${line%%$'\t'*}"; why="${line#*$'\t'}"
+      if (( i < cap )); then echo "   $t  ($why)"; group+=("./$t"); fi
+      i=$((i + 1))
+    done
+    (( n > cap )) && echo "   $((n - cap)) more tests also match and are NOT run here (cap $cap, MAIPAI_WT_T1_CAP); run 'bash scripts/wt.sh check T2' for the full suite."
+    (cd "$WT_ROOT/$ws" && bun test "${group[@]}") || rc=$?
   done
   return "$rc"
 }

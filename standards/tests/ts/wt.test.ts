@@ -90,6 +90,39 @@ describe("wt.sh worktree lifecycle", () => {
     run(["done"], { MAIPAI_WT_SESSION: name });
   });
 
+  test("T1 selects tests that import the changed module, not tests that only say its name", () => {
+    const started = run(["start", "sel"]);
+    const path = started.stdout.trim();
+    const name = path.split("/").at(-1)!.replace(/^demo-/, "");
+    const put = (rel: string, body: string) => { mkdirSync(join(path, rel, ".."), { recursive: true }); writeFileSync(join(path, rel), body); };
+    const spec = (imp: string) => `import { test } from "bun:test";\n${imp}\ntest("t", () => {});\n`;
+    put("backend/src/lib/apps.test.ts", spec(""));
+    put("backend/tests/relative.test.ts", spec('import { apps } from "../src/lib/apps";'));
+    put("backend/tests/alias.test.ts", spec('import { apps } from "lib/apps.js";'));
+    put("backend/tests/mocked.test.ts", spec('import { mock } from "bun:test";\nmock.module("../src/lib/apps.ts", () => ({}));'));
+    put("backend/tests/words.test.ts", spec('const label = "apps";'));
+    put("backend/tests/other.test.ts", spec('import { x } from "../src/lib/appsettings";'));
+    spawnSync("git", ["-C", path, "add", "backend"]);
+    spawnSync("git", ["-C", path, "commit", "-qm", "apps tests"]);
+    // The tests are already on origin/main; only apps.ts changes in this branch.
+    spawnSync("git", ["-C", path, "push", "-q", "origin", "HEAD:main"]);
+    spawnSync("git", ["-C", path, "fetch", "-q", "origin"]);
+    put("backend/src/lib/apps.ts", "export const apps = 1;\n");
+    spawnSync("git", ["-C", path, "add", "backend"]);
+    spawnSync("git", ["-C", path, "commit", "-qm", "apps module"]);
+    const env = { ...process.env, ...repoEnv, WT_TEST_HOOK: "", WT_TEST_WORKSPACES: "backend", MAIPAI_WT_DATA: data, MAIPAI_WT_SESSION: name };
+    const checked = spawnSync("bash", [script, "check"], { cwd: path, encoding: "utf8", env });
+    const out = checked.stdout;
+    expect(out).toContain("4 selected");
+    for (const t of ["src/lib/apps.test.ts", "tests/relative.test.ts", "tests/alias.test.ts", "tests/mocked.test.ts"]) expect(out).toContain(t);
+    expect(out).toContain("imports ../src/lib/apps");
+    expect(out).not.toContain("words.test.ts");
+    expect(out).not.toContain("other.test.ts");
+    const capped = spawnSync("bash", [script, "check"], { cwd: path, encoding: "utf8", env: { ...env, MAIPAI_WT_T1_CAP: "2" } });
+    expect(capped.stdout).toContain("2 more tests also match and are NOT run");
+    run(["done"], { MAIPAI_WT_SESSION: name });
+  });
+
   test("a file that is already staged still lands in the stamp manifest", () => {
     const started = run(["start", "staged"]);
     const path = started.stdout.trim();
