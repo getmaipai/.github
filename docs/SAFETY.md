@@ -21,7 +21,15 @@ controls, they are architecture:
   chat are unlocked per-user by an adult, never inherited, never the default
   for a new profile. Safe-by-default, adult-opt-in.
 - No feature is built whose purpose is generating imagery of identifiable
-  real people.
+  real people, with one exception (owner's ruling, 2026-10-17): an adult
+  may make a picture, video or saved style that looks like an adult in
+  their own household who agreed to it. The agreement is that person's own
+  setting, off by default, with a separate switch for adult content; a
+  child or teen is never the subject; a photo of a real person is never
+  turned into adult content; the person is told each time and sees a log;
+  taking the agreement back stops everything waiting and removes saved
+  styles of them. Public figures and anyone outside the household stay
+  refused. Home's `docs/design/likeness-consent-2026-10-17.md` is the design.
 
 Marketing and copy rule (all tiers, all repos): never pitch generation
 features as "uncensored", "unfiltered", "no restrictions", or any
