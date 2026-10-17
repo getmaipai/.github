@@ -21,6 +21,12 @@ own work directly on `main`, same as every other repo.
 `wt.sh done`; never hand-run `git worktree`. A branch or worktree that outlives its session is a bug: `wt.sh reap` removes
 the ones it made and lists clean older ones (branch already on `origin/main`) that a person can remove.
 
+**Codex runs write inside their own worktree only (owner's ruling, 2026-10-17).** `wt.sh run` launches
+`codex exec -s workspace-write -C <worktree>`. Plain `codex exec` defaults to a read-only sandbox, so every run ended "Blocked by
+this session's enforced read-only filesystem policy". `MAIPAI_CODEX_BIN` swaps only the binary (tests); the sandbox flag stays, and
+no danger, full-access or bypass flag is ever passed (`standards/tests/ts/wt.test.ts` pins both). This supersedes the
+`danger-full-access` note in `docs/COORDINATION.md` for runs started by `wt.sh`.
+
 ## The main checkout belongs to wt.sh
 
 A repo's main checkout (the folder with the real `.git`) is read-only for sessions. Only `wt.sh` fetches, fast-forwards and adds

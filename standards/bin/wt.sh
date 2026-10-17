@@ -31,7 +31,14 @@ WT_ADJECTIVES=(amber brisk calm clever eager fair gentle happy keen lucky mild n
 WT_ANIMALS=(badger falcon heron otter panda robin tiger yak)
 
 err() { echo "wt: $1" >&2; exit "${2:-1}"; }
-need_cmd() { command -v "$1" >/dev/null 2>&1 || err "$1 is required; install it and retry."; }
+need_cmd() {
+  command -v "$1" >/dev/null 2>&1 && return 0
+  # Homebrew on Apple silicon lives outside the PATH a non-login shell sees; say so, never edit PATH silently.
+  if [[ -x "/opt/homebrew/bin/$1" ]]; then
+    err "$1 is not on PATH but exists at /opt/homebrew/bin/$1; run: export PATH=\"/opt/homebrew/bin:\$PATH\" and retry."
+  fi
+  err "$1 is required; install it and retry."
+}
 valid_name() { [[ "$1" =~ ^[a-zA-Z0-9][a-zA-Z0-9-]*$ ]]; }
 rand_index() { od -An -N4 -tu4 /dev/urandom | awk -v n="$1" 'NR == 1 {print $1 % n; exit}'; }
 make_name() { echo "${WT_ADJECTIVES[$(rand_index "${#WT_ADJECTIVES[@]}")]}-${WT_ANIMALS[$(rand_index "${#WT_ANIMALS[@]}")]}-$1"; }
@@ -135,13 +142,16 @@ cmd_run() {
   brief="$(cd "$(dirname "$brief")" && pwd)/$(basename "$brief")"
   name="${MAIPAI_WT_SESSION:-$(current_session_name)}"; f="$(session_file "$name")"
   [[ -f "$f" ]] || err "no session file for '$name'; run wt.sh start <slug> first and export MAIPAI_WT_SESSION."
-  need_cmd tmux
+  need_cmd tmux; need_cmd node
   path="$(read_json "$f" path)"
   actual="$WT_REPO-${name}-$purpose"
   tmux_cmd has-session -t "$actual" >/dev/null 2>&1 && err "tmux session '$actual' already exists; wait for it or pick another purpose name."
   mkdir -p "$WT_DATA/runs"; log="$(run_log "$actual")"; : > "$log"
+  # `codex exec` defaults to a read-only sandbox, which blocks every edit. Writes inside the worktree only
+  # (owner's ruling, 2026-10-17): always workspace-write, never a full-access or bypass flag.
+  # MAIPAI_CODEX_BIN replaces only the binary; the sandbox flag stays on the command line.
   bin="${MAIPAI_CODEX_BIN:-codex}"
-  tmux_cmd new-session -d -s "$actual" -c "$path" "$bin exec -C '$path' - < '$brief' > '$log' 2>&1; echo EXIT=\$? >> '$log'" \
+  tmux_cmd new-session -d -s "$actual" -c "$path" "$bin exec -s workspace-write -C '$path' - < '$brief' > '$log' 2>&1; echo EXIT=\$? >> '$log'" \
     || err "could not create tmux session '$actual'; check tmux and retry."
   write_session "$name" "$(read_json "$f" branch)" "$path" "$actual"
   set_run_state "$name" running

@@ -35,8 +35,9 @@ inside the worktree.
 bash scripts/wt.sh run codex data-scratch/briefs/<slug>.md      # run THIS as a background command
 ```
 
-- One command launches and reports. It starts the owned tmux session, runs `codex exec` on the brief (no `--full-auto`, no
-  approvals), logs to `data-scratch/runs/<session>.log` (always ends `EXIT=<code>`), blocks until the run ends, then prints
+- One command launches and reports. It starts the owned tmux session, runs `codex exec -s workspace-write` on the brief (no `--full-auto`, no
+  approvals, no full-access or bypass flag; `codex exec` alone is read-only, so every edit would be blocked, and Codex may write
+  only inside its own worktree), logs to `data-scratch/runs/<session>.log` (always ends `EXIT=<code>`), blocks until the run ends, then prints
   DONE, FAILED, DIED (tmux gone, no `EXIT=`) or TIMEOUT (default 3600 s), the log tail and the newest report's gate lines.
   Started in the background, the harness wakes you the moment it ends, so a finish cannot go unseen.
 - It records the owning Claude session and `runState` in `data-scratch/sessions/<name>.json` for status panes.

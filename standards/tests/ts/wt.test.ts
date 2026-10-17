@@ -280,6 +280,42 @@ describe("wt.sh run and wait", () => {
     run(["done"], { MAIPAI_WT_SESSION: name });
   });
 
+  test("run passes -s workspace-write by default, respects a binary override, and never grants full access", () => {
+    const started = run(["start", "runsbx"]);
+    const name = started.stdout.trim().split("/").at(-1)!.replace(/^demo-/, "");
+    const brief = join(scratch, "brief-sbx.md");
+    writeFileSync(brief, "argv\n");
+    const argvFile = join(scratch, `argv-${name}.txt`);
+    const recorder = fakeCodex(`cat >/dev/null; printf '%s\\n' "$@" > '${argvFile}'`);
+    const defaulted = run(["run", "codex", brief], { MAIPAI_WT_SESSION: name, MAIPAI_WT_POLL: "1", MAIPAI_CODEX_BIN: recorder });
+    expect(defaulted.stdout).toContain("DONE");
+    const argv = readFileSync(argvFile, "utf8").split("\n");
+    expect(argv[0]).toBe("exec");
+    expect(argv.slice(argv.indexOf("-s"), argv.indexOf("-s") + 2)).toEqual(["-s", "workspace-write"]);
+    expect(argv.join(" ")).not.toMatch(/danger|full-access|bypass|yolo|full-auto/);
+    const script_ = readFileSync(script, "utf8");
+    expect(script_).toContain("exec -s workspace-write");
+    expect(script_).not.toMatch(/danger-full-access|dangerously|--yolo|bypass-approvals/);
+    run(["done"], { MAIPAI_WT_SESSION: name });
+  });
+
+  test("a missing tmux or node names /opt/homebrew/bin when it is there", () => {
+    const started = run(["start", "runpath"]);
+    const name = started.stdout.trim().split("/").at(-1)!.replace(/^demo-/, "");
+    const brief = join(scratch, "brief-path.md");
+    writeFileSync(brief, "x\n");
+    const bare_ = join(scratch, "pathless");
+    mkdirSync(bare_, { recursive: true });
+    for (const tool of ["git", "bash", "env", "dirname", "basename", "cat", "mkdir", "od", "awk", "grep", "tail", "cut", "sleep", "ls", "head", "tr"]) {
+      const found = spawnSync("bash", ["-c", `command -v ${tool}`], { encoding: "utf8" }).stdout.trim();
+      if (found) spawnSync("ln", ["-sf", found, join(bare_, tool)]);
+    }
+    const out = run(["run", "codex", brief], { MAIPAI_WT_SESSION: name, PATH: bare_ });
+    expect(out.status).not.toBe(0);
+    expect(out.stderr).toMatch(/tmux is (not on PATH but exists at \/opt\/homebrew\/bin\/tmux|required)/);
+    run(["done"], { MAIPAI_WT_SESSION: name });
+  });
+
   test("a failing run reports FAILED and a killed session reports DIED", () => {
     const started = run(["start", "runbad"]);
     const path = started.stdout.trim();
