@@ -48,9 +48,12 @@ make_name() { echo "${WT_ADJECTIVES[$(rand_index "${#WT_ADJECTIVES[@]}")]}-${WT_
 
 session_file() { printf '%s/%s.json' "$WT_SESSION_DIR" "$1"; }
 read_json() { node -e 'const fs=require("fs");let j=JSON.parse(fs.readFileSync(process.argv[1],"utf8"));process.stdout.write(String(j[process.argv[2]]??""))' "$1" "$2"; }
+# Heartbeat: a file touched by start, run, wait, check and land. The reaper reads it as proof of life;
+# the recorded pid (the short-lived shell that ran `start`) is never proof of anything.
+beat() { [[ -n "${1:-}" ]] || return 0; mkdir -p "$WT_SESSION_DIR" 2>/dev/null && touch "$WT_SESSION_DIR/$1.beat" 2>/dev/null || true; }
 write_session() {
   local name="$1" branch="$2" path="$3" tmux="${4:-}"
-  mkdir -p "$WT_SESSION_DIR"
+  mkdir -p "$WT_SESSION_DIR"; beat "$name"
   node - "$name" "$branch" "$path" "$tmux" "${MAIPAI_WT_PID:-$PPID}" <<'NODE' > "$(session_file "$name")"
 const [name, branch, path, tmux, pid] = process.argv.slice(2);
 const owner = process.env.CLAUDE_CODE_SESSION_ID || process.env.CLAUDE_SESSION_ID || process.env.CODEX_SESSION_ID || "codex";
@@ -129,11 +132,17 @@ cmd_tmux() {
 # set_run_state <session-name> <state>: lets a status pane show running/DONE/FAILED/DIED/TIMEOUT per run.
 set_run_state() {
   local f; f="$(session_file "$1")"; [[ -f "$f" ]] || return 0
+  beat "$1"
   node - "$f" "$2" <<'NODE'
 const fs = require("fs"); const [f, state] = process.argv.slice(2);
 const j = JSON.parse(fs.readFileSync(f, "utf8")); j.runState = state; j.runStateAt = new Date().toISOString();
 fs.writeFileSync(f, JSON.stringify(j, null, 2) + "\n");
 NODE
+}
+beat_for_tmux() {
+  local sf; for sf in "$WT_SESSION_DIR"/*.json; do
+    [[ -f "$sf" && "$(read_json "$sf" tmux)" == "$1" ]] && beat "$(basename "$sf" .json)"
+  done
 }
 run_log() { printf '%s/runs/%s.log' "$WT_DATA" "$1"; }
 cmd_run() {
@@ -180,6 +189,7 @@ cmd_wait() {
       [[ "$code" == 0 ]] && verdict="DONE" || verdict="FAILED (exit $code)"; break; fi
     if ! tmux_cmd has-session -t "$actual" >/dev/null 2>&1; then verdict="DIED (tmux session gone, no EXIT line)"; break; fi
     if (( waited >= limit )); then verdict="TIMEOUT after ${limit}s (still running; attach or kill it)"; break; fi
+    beat_for_tmux "$actual"
     sleep "${MAIPAI_WT_POLL:-5}"; waited=$((waited + ${MAIPAI_WT_POLL:-5}))
   done
   local sf; for sf in "$WT_SESSION_DIR"/*.json; do
@@ -286,6 +296,7 @@ cmd_check() {
   [[ $# -le 1 ]] || err "check accepts at most one tier; use: wt.sh check [T0|T1|T2]." 2
   base="$(git -C "$WT_ROOT" merge-base HEAD origin/main 2>/dev/null)" || err "cannot find merge-base with origin/main; fetch origin/main and retry."
   name="${MAIPAI_WT_SESSION:-$(current_session_name)}"; [[ -n "$name" ]] || name="$(git -C "$WT_ROOT" branch --show-current | sed 's#^wt/##')"
+  beat "$name"
   local files=() f
   while IFS= read -r f; do [[ -n "$f" ]] && files+=("$f"); done < <(changed_files "$base" | sort -u)
   auto_tier="$(classify_tier ${files[@]+"${files[@]}"})"
@@ -373,32 +384,63 @@ install_origin_guard_hook() {
   chmod +x "$hook"
 }
 
+# newest_within <seconds> <path>...: succeeds when any file under a path changed within the window.
+# .git and node_modules are skipped for a worktree's own files; git state is checked separately.
+recent_files() {
+  local mins=$(( $1 / 60 )); shift
+  (( mins > 0 )) || return 1
+  [[ -n "$(find "$1" \( -name .git -o -name node_modules \) -prune -o -type f -mmin "-$mins" -print -quit 2>/dev/null)" ]]
+}
+recent_path() {
+  local mins=$(( $1 / 60 )) p; shift
+  (( mins > 0 )) || return 1
+  for p in "$@"; do [[ -e "$p" && -n "$(find "$p" -maxdepth 0 -mmin "-$mins" -print 2>/dev/null)" ]] && return 0; done
+  return 1
+}
+# live_reason <name> <path> <pid> <tmux>: prints why a worktree is NOT provably dead (empty = provably dead).
+# Provably dead needs ALL of: pid gone, no tmux session, no heartbeat or file or git activity inside the quiet
+# window (default 24 h), no process with its cwd inside, clean tree (no changes, no untracked files) and a branch
+# already on origin/main. Anything unknown counts as alive.
+live_reason() {
+  local name="$1" path="$2" pid="$3" tmuxname="$4" quiet="${MAIPAI_WT_REAP_QUIET:-86400}" gitdir porcelain
+  [[ -n "$pid" ]] && kill -0 "$pid" 2>/dev/null && { echo "recorded pid $pid is running"; return; }
+  if [[ -n "$tmuxname" ]] && tmux_cmd has-session -t "$tmuxname" >/dev/null 2>&1; then echo "tmux session $tmuxname exists"; return; fi
+  command -v tmux >/dev/null 2>&1 && tmux_cmd has-session -t "$WT_REPO-$name" >/dev/null 2>&1 && { echo "tmux session $WT_REPO-$name exists"; return; }
+  if [[ ! -e "$path/.git" ]]; then echo "worktree path is gone or not a worktree (record only)"; return; fi
+  recent_path "$quiet" "$WT_SESSION_DIR/$name.beat" && { echo "heartbeat within the last ${quiet}s"; return; }
+  recent_files "$quiet" "$path" && { echo "file modified within the last ${quiet}s"; return; }
+  gitdir="$(git -C "$path" rev-parse --absolute-git-dir 2>/dev/null)" || { echo "git state unreadable"; return; }
+  recent_path "$quiet" "$gitdir/index" "$gitdir/HEAD" "$gitdir/logs/HEAD" && { echo "index, HEAD or reflog changed within the last ${quiet}s"; return; }
+  if command -v lsof >/dev/null 2>&1; then
+    lsof -d cwd -Fn 2>/dev/null | awk -v p="$path" 'substr($0,1,1)=="n" {d=substr($0,2); if (d==p || index(d, p "/")==1) f=1} END {exit !f}' && { echo "a process has its working directory inside"; return; }
+  else
+    echo "lsof missing, cannot rule out a running process"; return
+  fi
+  porcelain="$(git -C "$path" status --porcelain 2>/dev/null)" || { echo "git status failed"; return; }
+  [[ -z "$porcelain" ]] || { echo "uncommitted or untracked changes ($(printf '%s\n' "$porcelain" | wc -l | tr -d ' ') paths)"; return; }
+  git -C "$WT_MAIN" merge-base --is-ancestor "$(read_json "$(session_file "$name")" branch)" origin/main 2>/dev/null || { echo "branch has commits not on origin/main"; return; }
+}
+
+# The reaper is report-only except for one case: a worktree that is provably dead (see live_reason) is removed
+# with `git worktree remove` (no --force) and its merged branch deleted. It never adds, commits, stashes,
+# resets or creates a ref in anyone's worktree. Candidates it keeps are listed in reaped.md with the evidence.
 cmd_reap() {
   mkdir -p "$WT_SESSION_DIR" "$WT_PORT_DIR"
-  local f name pid tmuxname path branch alive dirty created age
+  local f name pid tmuxname path branch created age reason
   shopt -s nullglob
   for f in "$WT_SESSION_DIR"/*.json; do
     name="$(basename "$f" .json)"; pid="$(read_json "$f" pid)"; tmuxname="$(read_json "$f" tmux)"; path="$(read_json "$f" path)"; branch="$(read_json "$f" branch)"
-    alive=0; [[ -n "$pid" ]] && kill -0 "$pid" 2>/dev/null && alive=1
-    if [[ -n "$tmuxname" ]] && command -v tmux >/dev/null 2>&1 && tmux_cmd has-session -t "$tmuxname" >/dev/null 2>&1; then alive=1; fi
-    (( alive )) && continue
-    # A session's pid is the caller's shell, which can exit while the session lives on,
-    # so only sessions older than the grace period (default 4 h) are ever reaped.
     created="$(read_json "$f" created)"
     age=$(( $(date +%s) - $(date -u -j -f '%Y-%m-%dT%H:%M:%S' "${created%.*}" +%s 2>/dev/null || date -u -d "$created" +%s 2>/dev/null || echo 0) ))
     (( age >= ${MAIPAI_WT_REAP_AGE:-14400} )) || continue
-    if [[ ! -e "$path/.git" ]]; then rm -f "$f"; continue; fi
-    dirty="$(git -C "$path" status --porcelain)"
-    if [[ -z "$dirty" ]] && git -C "$WT_MAIN" merge-base --is-ancestor "$branch" origin/main 2>/dev/null; then
-      git -C "$WT_MAIN" worktree remove "$path" && git -C "$WT_MAIN" branch -D "$branch" >/dev/null 2>&1 || true
-      rm -f "$f"
+    if [[ ! -e "$path/.git" ]]; then rm -f "$f" "$WT_SESSION_DIR/$name.beat"; continue; fi
+    reason="$(live_reason "$name" "$path" "$pid" "$tmuxname")"
+    if [[ -z "$reason" ]]; then
+      git -C "$WT_MAIN" worktree remove "$path" >/dev/null 2>&1 && { git -C "$WT_MAIN" branch -d "$branch" >/dev/null 2>&1 || true; rm -f "$f" "$WT_SESSION_DIR/$name.beat"; }
     else
-      git -C "$path" add -A
-      if ! git -C "$path" diff --cached --quiet; then git -C "$path" -c user.name='MaiPai Reaper' -c user.email='reaper@localhost' commit -m "WIP: recover $name" >/dev/null || true; fi
-      git -C "$path" branch -f "wip/$name" HEAD >/dev/null 2>&1 || true
       mkdir -p "$WT_DATA"
-      printf '%s | %s | %s\n' "$(date -u +%Y-%m-%dT%H:%M:%SZ)" "$name" "$path" >> "$WT_DATA/reaped.md"
-      # Leave dirty/recovered worktree and session record for explicit recovery.
+      grep -qF "| $name | $path | kept: $reason" "$WT_DATA/reaped.md" 2>/dev/null || \
+        printf '%s | %s | %s | kept: %s\n' "$(date -u +%Y-%m-%dT%H:%M:%SZ)" "$name" "$path" "$reason" >> "$WT_DATA/reaped.md"
     fi
   done
   for f in "$WT_PORT_DIR"/*.lease; do
@@ -465,6 +507,7 @@ NODE
 cmd_land() {
   [[ $# == 0 ]] || err "land takes no arguments; run it from the active worktree." 2
   need_cmd git
+  beat "${MAIPAI_WT_SESSION:-$(current_session_name)}"
   local dirty_files
   dirty_files="$(git -C "$WT_ROOT" status --porcelain --untracked-files=no)"
   [[ -z "$dirty_files" ]] || err "the worktree has uncommitted changes, so the rebase cannot run:

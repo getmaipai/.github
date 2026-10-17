@@ -1,8 +1,8 @@
 import { afterAll, beforeAll, describe, expect, test } from "bun:test";
-import { mkdtempSync, mkdirSync, readFileSync, rmSync, writeFileSync } from "node:fs";
+import { existsSync, mkdtempSync, mkdirSync, readFileSync, rmSync, writeFileSync } from "node:fs";
 import { tmpdir } from "node:os";
 import { join } from "node:path";
-import { spawnSync } from "node:child_process";
+import { spawn, spawnSync } from "node:child_process";
 
 const scratch = mkdtempSync(join(tmpdir(), "maipai-wt-test-"));
 const repoRoot = join(import.meta.dir, "../../..");
@@ -149,36 +149,81 @@ describe("wt.sh worktree lifecycle", () => {
     expect(spawnSync("tmux", ["-L", socket, "has-session", "-t", tmuxName]).status).not.toBe(0);
   });
 
-  test("reap archives dirty dead work on wip and removes clean merged work", () => {
-    const dirtyStart = run(["start", "recover"]);
-    expect(dirtyStart.status).toBe(0);
-    const dirtyPath = dirtyStart.stdout.trim();
-    const dirtyName = dirtyPath.split("/").at(-1)!.replace(/^demo-/, "");
-    writeFileSync(join(dirtyPath, "lost-work.txt"), "keep this\n");
-    const dirtyFile = join(data, "sessions", `${dirtyName}.json`);
-    const dirtyRecord = JSON.parse(readFileSync(dirtyFile, "utf8"));
-    dirtyRecord.pid = 999999999;
-    writeFileSync(dirtyFile, JSON.stringify(dirtyRecord));
+  describe("reaper is report-only unless a worktree is provably dead", () => {
+    const realGit = spawnSync("bash", ["-c", "command -v git"], { encoding: "utf8" }).stdout.trim();
+    const shimDir = join(scratch, "git-shim");
+    const calls = join(scratch, "git-calls.txt");
+    const startDead = (slug: string) => {
+      const started = run(["start", slug]);
+      expect(started.status).toBe(0);
+      const path = started.stdout.trim();
+      const name = path.split("/").at(-1)!.replace(/^demo-/, "");
+      const file = join(data, "sessions", `${name}.json`);
+      const rec = JSON.parse(readFileSync(file, "utf8"));
+      rec.pid = 999999999;
+      writeFileSync(file, JSON.stringify(rec));
+      return { path, name, file };
+    };
+    const reap = (env: Record<string, string> = {}) => run(["reap"], { MAIPAI_WT_REAP_AGE: "0", ...env });
+    const listed = () => spawnSync("git", ["-C", fixture, "worktree", "list", "--porcelain"], { encoding: "utf8" }).stdout;
+    const cleanup = (w: { path: string; name: string; file: string }) => {
+      spawnSync("git", ["-C", fixture, "worktree", "remove", "--force", w.path]);
+      spawnSync("git", ["-C", fixture, "branch", "-D", `wt/${w.name}`]);
+      rmSync(w.file, { force: true });
+      rmSync(join(data, "sessions", `${w.name}.beat`), { force: true });
+    };
 
-    const cleanStart = run(["start", "clean"]);
-    expect(cleanStart.status).toBe(0);
-    const cleanPath = cleanStart.stdout.trim();
-    const cleanName = cleanPath.split("/").at(-1)!.replace(/^demo-/, "");
-    const cleanFile = join(data, "sessions", `${cleanName}.json`);
-    const cleanRecord = JSON.parse(readFileSync(cleanFile, "utf8"));
-    cleanRecord.pid = 999999999;
-    writeFileSync(cleanFile, JSON.stringify(cleanRecord));
+    test("dead pid but recent activity: untouched, uncommitted work preserved, never add or commit", () => {
+      const w = startDead("active");
+      writeFileSync(join(w.path, "wip.txt"), "keep this\n");
+      mkdirSync(shimDir, { recursive: true });
+      writeFileSync(join(shimDir, "git"), `#!/usr/bin/env bash\nprintf '%s\\n' "$*" >> '${calls}'\nexec '${realGit}' "$@"\n`, { mode: 0o755 });
+      rmSync(calls, { force: true });
+      const out = reap({ PATH: `${shimDir}:${process.env.PATH}` });
+      expect(out.status).toBe(0);
+      expect(readFileSync(join(w.path, "wip.txt"), "utf8")).toBe("keep this\n");
+      expect(listed()).toContain(`worktree ${w.path}`);
+      expect(spawnSync(realGit, ["-C", w.path, "log", "--author=MaiPai Reaper", "--oneline"], { encoding: "utf8" }).stdout).toBe("");
+      expect(spawnSync(realGit, ["-C", fixture, "show-ref", "--verify", `refs/heads/wip/${w.name}`]).status).not.toBe(0);
+      const seen = existsSync(calls) ? readFileSync(calls, "utf8") : "";
+      expect(seen.length).toBeGreaterThan(0);
+      expect(seen).not.toMatch(/(^|\s)(add|commit|stash|reset|checkout|clean|branch -f|update-ref)(\s|$)/m);
+      cleanup(w);
+    });
 
-    expect(run(["reap"], { MAIPAI_WT_REAP_AGE: "0" }).status).toBe(0);
-    expect(spawnSync("git", ["-C", fixture, "show-ref", "--verify", `refs/heads/wip/${dirtyName}`]).status).toBe(0);
-    expect(readFileSync(join(dirtyPath, "lost-work.txt"), "utf8")).toBe("keep this\n");
-    expect(readFileSync(join(data, "reaped.md"), "utf8")).toContain(dirtyName);
-    expect(spawnSync("git", ["-C", fixture, "worktree", "list", "--porcelain"], { encoding: "utf8" }).stdout).toContain(`worktree ${dirtyPath}`);
-    expect(spawnSync("git", ["-C", fixture, "worktree", "list", "--porcelain"], { encoding: "utf8" }).stdout).not.toContain(`worktree ${cleanPath}`);
-    spawnSync("git", ["-C", fixture, "worktree", "remove", "--force", dirtyPath]);
-    spawnSync("git", ["-C", fixture, "branch", "-D", `wt/${dirtyName}`, `wip/${dirtyName}`]);
-    rmSync(dirtyFile, { force: true });
-    rmSync(join(data, "sessions", `${cleanName}.json`), { force: true });
+    test("a clean merged worktree with no activity is removed", () => {
+      const w = startDead("cleanold");
+      expect(reap({ MAIPAI_WT_REAP_QUIET: "0" }).status).toBe(0);
+      expect(listed()).not.toContain(`worktree ${w.path}`);
+      expect(existsSync(w.file)).toBe(false);
+    });
+
+    test("a dirty old worktree is reported, not removed or committed", () => {
+      const w = startDead("dirtyold");
+      writeFileSync(join(w.path, "lost-work.txt"), "keep this\n");
+      expect(reap({ MAIPAI_WT_REAP_QUIET: "0" }).status).toBe(0);
+      expect(readFileSync(join(w.path, "lost-work.txt"), "utf8")).toBe("keep this\n");
+      expect(listed()).toContain(`worktree ${w.path}`);
+      const report = readFileSync(join(data, "reaped.md"), "utf8");
+      expect(report).toContain(w.name);
+      expect(report).toContain("uncommitted or untracked changes");
+      expect(spawnSync(realGit, ["-C", w.path, "log", "--author=MaiPai Reaper", "--oneline"], { encoding: "utf8" }).stdout).toBe("");
+      cleanup(w);
+    });
+
+    test("a fresh heartbeat or a live process keeps an otherwise clean old worktree", () => {
+      const w = startDead("beating");
+      expect(reap({ MAIPAI_WT_REAP_QUIET: "60" }).status).toBe(0);
+      expect(listed()).toContain(`worktree ${w.path}`);
+      const proc = spawn("sleep", ["30"], { cwd: w.path });
+      try {
+        rmSync(join(data, "sessions", `${w.name}.beat`), { force: true });
+        expect(reap({ MAIPAI_WT_REAP_QUIET: "0" }).status).toBe(0);
+        expect(listed()).toContain(`worktree ${w.path}`);
+        expect(readFileSync(join(data, "reaped.md"), "utf8")).toContain("working directory inside");
+      } finally { proc.kill(); }
+      cleanup(w);
+    });
   });
 });
 

@@ -18,8 +18,18 @@ own work directly on `main`, same as every other repo.
 ## Branches and worktrees
 
 **One session, one worktree on a short-lived `wt/*` branch, created by `scripts/wt.sh start`.** Land it with `wt.sh land`, then
-`wt.sh done`; never hand-run `git worktree`. A branch or worktree that outlives its session is a bug: `wt.sh reap` removes
-the ones it made and lists clean older ones (branch already on `origin/main`) that a person can remove.
+`wt.sh done`; never hand-run `git worktree`. A branch or worktree that outlives its session is a bug:
+`wt.sh reap` (run by every `wt.sh start`) removes a worktree only when it is provably dead, and otherwise only reports it.
+
+**The reaper never mutates a worktree (owner's ruling, 2026-10-17).** It never runs `git add`, `commit`, `stash` or `reset` and never
+creates a ref (the old "WIP: recover" commits and `wip/*` branches are gone as a behavior). A recorded pid is the short-lived shell
+that ran `start`, so it proves nothing. A session older than 4 h (`MAIPAI_WT_REAP_AGE`) is removed with a plain
+`git worktree remove` only when ALL hold: its pid is gone; no tmux session of that name; no heartbeat (`data-scratch/sessions/<name>.beat`,
+touched by `start`, `run`, `wait`, `check` and `land`), no file edit outside `.git` and no change to the index, HEAD or reflog within
+24 h (`MAIPAI_WT_REAP_QUIET`, seconds); no process has its working directory inside (`lsof`; if `lsof` is missing the worktree is kept);
+the tree is clean with no untracked files; and its branch is already on `origin/main`. Every other candidate is appended to
+`data-scratch/reaped.md` as `time | name | path | kept: <evidence>` and left alone, so a worktree with uncommitted changes is never
+touched at any age. Worktrees `wt.sh` did not create are listed on stderr when removable, never removed.
 
 **Codex runs write inside their own worktree only (owner's ruling, 2026-10-17).** `wt.sh run` launches
 `codex exec -s workspace-write -C <worktree>`. Plain `codex exec` defaults to a read-only sandbox, so every run ended "Blocked by
