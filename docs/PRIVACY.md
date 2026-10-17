@@ -49,9 +49,13 @@ check, a model download).
   (owner's ruling, 2026-10-17).** It is on by default for adults when
   SearXNG could not be set up, and an admin can turn it off. Each search
   is one the person asked for and the model decided to run, so it is not
-  phone-home. It never carries a child's, teen's or guest's query. The
-  privacy page row shows only while the helper runs and DuckDuckGo is
-  picked.
+  phone-home. It never carries a guest's query, and by default never a
+  child's or teen's. An owner or admin can opt teens, or teens and
+  children, in with `search.ddgs_for_minors` (owner's request, 2026-10-17):
+  the setting is off by default and warns that DuckDuckGo's filter is not
+  guaranteed. Even then ddgs is a second source beside SearXNG, never the
+  only one. The privacy page row shows only while the helper runs and
+  DuckDuckGo is picked.
 - **Every product keeps a user-tier privacy page** with the "what leaves the
   house" table: each outbound connection, when it happens, what it carries,
   and who receives it. Plain dad-test language. Adding or changing an
