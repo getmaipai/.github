@@ -26,8 +26,8 @@ creates a ref (the old "WIP: recover" commits and `wip/*` branches are gone as a
 that ran `start`, so it proves nothing. A session older than 4 h (`MAIPAI_WT_REAP_AGE`) is removed with a plain
 `git worktree remove` only when ALL hold: its pid is gone; no tmux session of that name; no heartbeat (`data-scratch/sessions/<name>.beat`,
 touched by `start`, `run`, `wait`, `check` and `land`), no file edit outside `.git` and no change to the index, HEAD or reflog within
-24 h (`MAIPAI_WT_REAP_QUIET`, seconds); no process has its working directory inside (`lsof`; if `lsof` is missing the worktree is kept);
-the tree is clean with no untracked files; and its branch is already on `origin/main`. Every other candidate is appended to
+24 h (`MAIPAI_WT_REAP_QUIET`, seconds, floor 60); `tmux` must be on PATH (otherwise nothing is removed); no process has its working directory inside (`lsof`; if `lsof` is missing or fails the worktree is kept);
+the tree is clean with no untracked or ignored files (`.env`, `data-scratch`, build output; caches such as `node_modules` excepted, since removal deletes ignored files); and its branch is already on `origin/main`. Every other candidate is appended to
 `data-scratch/reaped.md` as `time | name | path | kept: <evidence>` and left alone, so a worktree with uncommitted changes is never
 touched at any age. Worktrees `wt.sh` did not create are listed on stderr when removable, never removed.
 

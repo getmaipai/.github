@@ -387,37 +387,47 @@ install_origin_guard_hook() {
 # newest_within <seconds> <path>...: succeeds when any file under a path changed within the window.
 # .git and node_modules are skipped for a worktree's own files; git state is checked separately.
 recent_files() {
-  local mins=$(( $1 / 60 )); shift
-  (( mins > 0 )) || return 1
-  [[ -n "$(find "$1" \( -name .git -o -name node_modules \) -prune -o -type f -mmin "-$mins" -print -quit 2>/dev/null)" ]]
+  local mins=$(( $1 / 60 )) out
+  (( mins > 0 )) || return 0   # a window under a minute cannot prove quiet: count as recent
+  out="$(find "$2" \( -name .git -o -name node_modules \) -prune -o -type f -mmin "-$mins" -print -quit 2>/dev/null)" || return 0  # unreadable: assume active
+  [[ -n "$out" ]]
 }
 recent_path() {
-  local mins=$(( $1 / 60 )) p; shift
-  (( mins > 0 )) || return 1
-  for p in "$@"; do [[ -e "$p" && -n "$(find "$p" -maxdepth 0 -mmin "-$mins" -print 2>/dev/null)" ]] && return 0; done
+  local mins=$(( $1 / 60 )) p out; shift
+  (( mins > 0 )) || return 0
+  for p in "$@"; do
+    [[ -e "$p" ]] || continue
+    out="$(find "$p" -maxdepth 0 -mmin "-$mins" -print 2>/dev/null)" || return 0
+    [[ -n "$out" ]] && return 0
+  done
   return 1
 }
 # live_reason <name> <path> <pid> <tmux>: prints why a worktree is NOT provably dead (empty = provably dead).
-# Provably dead needs ALL of: pid gone, no tmux session, no heartbeat or file or git activity inside the quiet
-# window (default 24 h), no process with its cwd inside, clean tree (no changes, no untracked files) and a branch
-# already on origin/main. Anything unknown counts as alive.
+# Provably dead needs ALL of: pid gone, no tmux session (a missing tmux binary means "cannot prove", so keep), no
+# heartbeat or file or git activity inside the quiet window (default 24 h, floor 60 s), no process with its cwd
+# inside (an lsof failure means keep), a tree with no changes, untracked or ignored files (pure caches such as
+# node_modules excepted) and a branch already on origin/main. Anything unknown or unreadable counts as alive.
 live_reason() {
-  local name="$1" path="$2" pid="$3" tmuxname="$4" quiet="${MAIPAI_WT_REAP_QUIET:-86400}" gitdir porcelain
+  local name="$1" path="$2" pid="$3" tmuxname="$4" quiet="${MAIPAI_WT_REAP_QUIET:-86400}" gitdir porcelain real lsout lsrc=0
+  [[ "$quiet" =~ ^[0-9]+$ ]] || quiet=86400
+  (( quiet >= 60 )) || quiet=60
   [[ -n "$pid" ]] && kill -0 "$pid" 2>/dev/null && { echo "recorded pid $pid is running"; return; }
+  command -v tmux >/dev/null 2>&1 || { echo "tmux is not on PATH, so a live session cannot be ruled out"; return; }
   if [[ -n "$tmuxname" ]] && tmux_cmd has-session -t "$tmuxname" >/dev/null 2>&1; then echo "tmux session $tmuxname exists"; return; fi
-  command -v tmux >/dev/null 2>&1 && tmux_cmd has-session -t "$WT_REPO-$name" >/dev/null 2>&1 && { echo "tmux session $WT_REPO-$name exists"; return; }
+  tmux_cmd has-session -t "$WT_REPO-$name" >/dev/null 2>&1 && { echo "tmux session $WT_REPO-$name exists"; return; }
   if [[ ! -e "$path/.git" ]]; then echo "worktree path is gone or not a worktree (record only)"; return; fi
   recent_path "$quiet" "$WT_SESSION_DIR/$name.beat" && { echo "heartbeat within the last ${quiet}s"; return; }
-  recent_files "$quiet" "$path" && { echo "file modified within the last ${quiet}s"; return; }
+  recent_files "$quiet" "$path" && { echo "file modified within the last ${quiet}s, or the tree could not be read"; return; }
   gitdir="$(git -C "$path" rev-parse --absolute-git-dir 2>/dev/null)" || { echo "git state unreadable"; return; }
   recent_path "$quiet" "$gitdir/index" "$gitdir/HEAD" "$gitdir/logs/HEAD" && { echo "index, HEAD or reflog changed within the last ${quiet}s"; return; }
-  if command -v lsof >/dev/null 2>&1; then
-    lsof -d cwd -Fn 2>/dev/null | awk -v p="$path" 'substr($0,1,1)=="n" {d=substr($0,2); if (d==p || index(d, p "/")==1) f=1} END {exit !f}' && { echo "a process has its working directory inside"; return; }
-  else
-    echo "lsof missing, cannot rule out a running process"; return
-  fi
-  porcelain="$(git -C "$path" status --porcelain 2>/dev/null)" || { echo "git status failed"; return; }
-  [[ -z "$porcelain" ]] || { echo "uncommitted or untracked changes ($(printf '%s\n' "$porcelain" | wc -l | tr -d ' ') paths)"; return; }
+  command -v lsof >/dev/null 2>&1 || { echo "lsof missing, cannot rule out a running process"; return; }
+  real="$(cd "$path" 2>/dev/null && pwd -P)" || { echo "worktree path unreadable"; return; }
+  lsout="$(lsof -d cwd -Fn 2>/dev/null)" || lsrc=$?
+  if (( lsrc != 0 )) && [[ -z "$lsout" ]]; then echo "lsof failed, cannot rule out a running process"; return; fi
+  printf '%s\n' "$lsout" | WT_P="$real" awk 'substr($0,1,1)=="n" {d=substr($0,2); p=ENVIRON["WT_P"]; if (d==p || index(d, p "/")==1) f=1} END {exit !f}' && { echo "a process has its working directory inside"; return; }
+  porcelain="$(git -C "$path" status --porcelain --ignored 2>/dev/null)" || { echo "git status failed"; return; }
+  porcelain="$(printf '%s\n' "$porcelain" | grep -Ev '^!! (.*/)?(node_modules|__pycache__|\.pytest_cache|\.ruff_cache|\.turbo|\.vite)/$|^!! (.*/)?\.DS_Store$' || true)"
+  [[ -z "$porcelain" ]] || { echo "uncommitted, untracked or ignored files ($(printf '%s\n' "$porcelain" | wc -l | tr -d ' ') paths; removal would delete them)"; return; }
   git -C "$WT_MAIN" merge-base --is-ancestor "$(read_json "$(session_file "$name")" branch)" origin/main 2>/dev/null || { echo "branch has commits not on origin/main"; return; }
 }
 

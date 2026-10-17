@@ -164,6 +164,12 @@ describe("wt.sh worktree lifecycle", () => {
       writeFileSync(file, JSON.stringify(rec));
       return { path, name, file };
     };
+    // Make a worktree look 2 days idle: every file, its git state and its heartbeat.
+    const age = (w: { path: string; name: string }) => {
+      const gitdir = spawnSync(realGit, ["-C", w.path, "rev-parse", "--absolute-git-dir"], { encoding: "utf8" }).stdout.trim();
+      for (const dir of [w.path, gitdir]) spawnSync("find", [dir, "-exec", "touch", "-t", "202001010000", "{}", "+"]);
+      spawnSync("touch", ["-t", "202001010000", join(data, "sessions", `${w.name}.beat`)]);
+    };
     const reap = (env: Record<string, string> = {}) => run(["reap"], { MAIPAI_WT_REAP_AGE: "0", ...env });
     const listed = () => spawnSync("git", ["-C", fixture, "worktree", "list", "--porcelain"], { encoding: "utf8" }).stdout;
     const cleanup = (w: { path: string; name: string; file: string }) => {
@@ -187,13 +193,15 @@ describe("wt.sh worktree lifecycle", () => {
       expect(spawnSync(realGit, ["-C", fixture, "show-ref", "--verify", `refs/heads/wip/${w.name}`]).status).not.toBe(0);
       const seen = existsSync(calls) ? readFileSync(calls, "utf8") : "";
       expect(seen.length).toBeGreaterThan(0);
-      expect(seen).not.toMatch(/(^|\s)(add|commit|stash|reset|checkout|clean|branch -f|update-ref)(\s|$)/m);
+      expect(seen).not.toMatch(/(^|\s)(add|commit|stash|reset|checkout|clean|branch -f|branch -D|update-ref)(\s|$)/m);
+      expect(seen).not.toMatch(/worktree remove.*(--force|-f)(\s|$)/);
       cleanup(w);
     });
 
     test("a clean merged worktree with no activity is removed", () => {
       const w = startDead("cleanold");
-      expect(reap({ MAIPAI_WT_REAP_QUIET: "0" }).status).toBe(0);
+      age(w);
+      expect(reap().status).toBe(0);
       expect(listed()).not.toContain(`worktree ${w.path}`);
       expect(existsSync(w.file)).toBe(false);
     });
@@ -201,13 +209,59 @@ describe("wt.sh worktree lifecycle", () => {
     test("a dirty old worktree is reported, not removed or committed", () => {
       const w = startDead("dirtyold");
       writeFileSync(join(w.path, "lost-work.txt"), "keep this\n");
-      expect(reap({ MAIPAI_WT_REAP_QUIET: "0" }).status).toBe(0);
+      age(w);
+      expect(reap().status).toBe(0);
       expect(readFileSync(join(w.path, "lost-work.txt"), "utf8")).toBe("keep this\n");
       expect(listed()).toContain(`worktree ${w.path}`);
       const report = readFileSync(join(data, "reaped.md"), "utf8");
       expect(report).toContain(w.name);
-      expect(report).toContain("uncommitted or untracked changes");
+      expect(report).toContain("uncommitted, untracked or ignored files");
       expect(spawnSync(realGit, ["-C", w.path, "log", "--author=MaiPai Reaper", "--oneline"], { encoding: "utf8" }).stdout).toBe("");
+      cleanup(w);
+    });
+
+    test("an ignored file keeps the worktree; a pure cache does not", () => {
+      const w = startDead("ignored");
+      writeFileSync(join(w.path, ".gitignore"), ".env\nnode_modules/\n");
+      spawnSync(realGit, ["-C", w.path, "add", ".gitignore"]);
+      spawnSync(realGit, ["-C", w.path, "-c", "user.name=T", "-c", "user.email=t@example.invalid", "commit", "-qm", "ignore"]);
+      spawnSync(realGit, ["-C", fixture, "push", "-q", "origin", `wt/${w.name}:main`]);
+      spawnSync(realGit, ["-C", fixture, "fetch", "-q", "origin"]);
+      mkdirSync(join(w.path, "node_modules"), { recursive: true });
+      writeFileSync(join(w.path, "node_modules", "x.js"), "cache\n");
+      writeFileSync(join(w.path, ".env"), "SECRET=1\n");
+      age(w);
+      expect(reap().status).toBe(0);
+      expect(listed()).toContain(`worktree ${w.path}`);
+      expect(readFileSync(join(w.path, ".env"), "utf8")).toBe("SECRET=1\n");
+      expect(readFileSync(join(data, "reaped.md"), "utf8")).toContain("ignored files");
+      rmSync(join(w.path, ".env"));
+      age(w);
+      expect(reap().status).toBe(0);
+      expect(listed()).not.toContain(`worktree ${w.path}`);
+      spawnSync(realGit, ["-C", fixture, "reset", "-q", "--hard", "origin/main"]);
+    });
+
+    test("a quiet window under 60 s is clamped, so fresh work is kept", () => {
+      const w = startDead("clamp");
+      expect(reap({ MAIPAI_WT_REAP_QUIET: "0" }).status).toBe(0);
+      expect(listed()).toContain(`worktree ${w.path}`);
+      cleanup(w);
+    });
+
+    test("without tmux on PATH nothing is removed", () => {
+      const w = startDead("notmux");
+      age(w);
+      const bareDir = join(scratch, "no-tmux-bin");
+      mkdirSync(bareDir, { recursive: true });
+      for (const tool of ["git", "bash", "env", "dirname", "basename", "cat", "mkdir", "od", "awk", "grep", "tail", "cut", "sleep", "ls", "head", "tr", "find", "date", "rm", "touch", "wc", "sed", "lsof", "node", "sort", "uniq", "kill"]) {
+        const found = spawnSync("bash", ["-c", `command -v ${tool}`], { encoding: "utf8" }).stdout.trim();
+        if (found) spawnSync("ln", ["-sf", found, join(bareDir, tool)]);
+      }
+      const out = reap({ PATH: bareDir });
+      expect(out.status).toBe(0);
+      expect(listed()).toContain(`worktree ${w.path}`);
+      expect(readFileSync(join(data, "reaped.md"), "utf8")).toContain("tmux is not on PATH");
       cleanup(w);
     });
 
@@ -217,8 +271,8 @@ describe("wt.sh worktree lifecycle", () => {
       expect(listed()).toContain(`worktree ${w.path}`);
       const proc = spawn("sleep", ["30"], { cwd: w.path });
       try {
-        rmSync(join(data, "sessions", `${w.name}.beat`), { force: true });
-        expect(reap({ MAIPAI_WT_REAP_QUIET: "0" }).status).toBe(0);
+        age(w);
+        expect(reap().status).toBe(0);
         expect(listed()).toContain(`worktree ${w.path}`);
         expect(readFileSync(join(data, "reaped.md"), "utf8")).toContain("working directory inside");
       } finally { proc.kill(); }
