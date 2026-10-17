@@ -23,8 +23,8 @@ the ones it made and lists clean older ones (branch already on `origin/main`) th
 
 **Codex runs write inside their own worktree only (owner's ruling, 2026-10-17).** `wt.sh run` launches
 `codex exec -s workspace-write -C <worktree>`. Plain `codex exec` defaults to a read-only sandbox, so every run ended "Blocked by
-this session's enforced read-only filesystem policy". `MAIPAI_CODEX_BIN` swaps only the binary (tests); the sandbox flag stays, and
-no danger, full-access or bypass flag is ever passed (`standards/tests/ts/wt.test.ts` pins both). This supersedes the
+this session's enforced read-only filesystem policy". `MAIPAI_CODEX_BIN` swaps only the binary (tests; a program name or path, any space, argument or shell character is refused, use a wrapper script); the sandbox flag stays, and
+no danger, full-access or bypass flag is ever passed (`standards/tests/ts/wt.test.ts` pins both). A worktree's `.git` is a file pointing outside it, so git writes are blocked in a run and are not widened with `--add-dir`: briefs say not to run git write commands, `wt.sh wait` prints `git status --short` and the diffstat after DONE, and the dispatcher reviews, tests and commits by file name. This supersedes the
 `danger-full-access` note in `docs/COORDINATION.md` for runs started by `wt.sh`.
 
 ## The main checkout belongs to wt.sh

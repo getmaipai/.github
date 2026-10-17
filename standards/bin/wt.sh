@@ -39,6 +39,9 @@ need_cmd() {
   fi
   err "$1 is required; install it and retry."
 }
+# The run command is one string handed to tmux's shell, so a bin or path with quote, expansion or
+# redirection characters could change what runs. Reject them rather than escape them.
+unsafe_chars() { [[ "$1" == *[\'\"\;\$\&\|\<\>\`\\]* || "$1" == *$'\n'* ]]; }
 valid_name() { [[ "$1" =~ ^[a-zA-Z0-9][a-zA-Z0-9-]*$ ]]; }
 rand_index() { od -An -N4 -tu4 /dev/urandom | awk -v n="$1" 'NR == 1 {print $1 % n; exit}'; }
 make_name() { echo "${WT_ADJECTIVES[$(rand_index "${#WT_ADJECTIVES[@]}")]}-${WT_ANIMALS[$(rand_index "${#WT_ANIMALS[@]}")]}-$1"; }
@@ -151,6 +154,11 @@ cmd_run() {
   # (owner's ruling, 2026-10-17): always workspace-write, never a full-access or bypass flag.
   # MAIPAI_CODEX_BIN replaces only the binary; the sandbox flag stays on the command line.
   bin="${MAIPAI_CODEX_BIN:-codex}"
+  if unsafe_chars "$bin" || [[ "$bin" =~ [[:space:]] ]]; then
+    err "MAIPAI_CODEX_BIN must be a program name or path only (no spaces, arguments, quotes or shell characters); put extra setup in a wrapper script and set MAIPAI_CODEX_BIN to its path."
+  fi
+  unsafe_chars "$brief" && err "brief path '$brief' has a quote or shell character; rename the file to letters, digits, dots, hyphens and underscores."
+  unsafe_chars "$path" && err "worktree path '$path' has a quote or shell character; the run cannot be launched safely."
   tmux_cmd new-session -d -s "$actual" -c "$path" "$bin exec -s workspace-write -C '$path' - < '$brief' > '$log' 2>&1; echo EXIT=\$? >> '$log'" \
     || err "could not create tmux session '$actual'; check tmux and retry."
   write_session "$name" "$(read_json "$f" branch)" "$path" "$actual"
@@ -179,6 +187,16 @@ cmd_wait() {
   done
   echo "codex run $actual: $verdict"
   echo "-- last log lines"; tail -n 8 "$log"
+  if [[ "$verdict" == DONE ]]; then
+    local wpath="" wsf; for wsf in "$WT_SESSION_DIR"/*.json; do
+      [[ -f "$wsf" && "$(read_json "$wsf" tmux)" == "$actual" ]] && { wpath="$(read_json "$wsf" path)"; break; }
+    done
+    if [[ -n "$wpath" && -d "$wpath" ]]; then
+      echo "-- worktree changes (Codex leaves them uncommitted; you review, test and commit by file name)"
+      git -C "$wpath" status --short || true
+      git -C "$wpath" diff --stat HEAD || true
+    fi
+  fi
   if ls "$WT_MAIN"/data-scratch/reports/*.md >/dev/null 2>&1; then
     echo "-- newest report gate lines"
     grep -i -h -E 'gate|pass|fail' "$(ls -t "$WT_MAIN"/data-scratch/reports/*.md | head -1)" | head -8 || true

@@ -299,6 +299,51 @@ describe("wt.sh run and wait", () => {
     run(["done"], { MAIPAI_WT_SESSION: name });
   });
 
+  test("a bin with arguments or shell characters is refused, and the sandbox flag cannot be removed", () => {
+    const started = run(["start", "runbin"]);
+    const name = started.stdout.trim().split("/").at(-1)!.replace(/^demo-/, "");
+    const brief = join(scratch, "brief-bin.md");
+    writeFileSync(brief, "x\n");
+    for (const bad of ["codex --dangerously-bypass-approvals-and-sandbox", "codex;id", "codex'x", 'codex"x', "co$dex", "a&b", "a|b", "a<b", "a>b", "a`b`"]) {
+      const out = run(["run", "--detach", "bad", brief], { MAIPAI_WT_SESSION: name, MAIPAI_CODEX_BIN: bad });
+      expect(out.status).not.toBe(0);
+      expect(out.stderr).toContain("wrapper script");
+    }
+    const argvFile = join(scratch, `argv-bin-${name}.txt`);
+    const rec = fakeCodex(`cat >/dev/null; printf '%s\\n' "$@" > '${argvFile}'`);
+    expect(run(["run", "ok", brief], { MAIPAI_WT_SESSION: name, MAIPAI_WT_POLL: "1", MAIPAI_CODEX_BIN: rec }).stdout).toContain("DONE");
+    expect(readFileSync(argvFile, "utf8")).toContain("workspace-write");
+    run(["done"], { MAIPAI_WT_SESSION: name });
+  });
+
+  test("a brief filename with a quote or shell character is refused", () => {
+    const started = run(["start", "runbrief"]);
+    const name = started.stdout.trim().split("/").at(-1)!.replace(/^demo-/, "");
+    for (const file of ["it's.md", "a;b.md", "a$b.md"]) {
+      const brief = join(scratch, file);
+      writeFileSync(brief, "x\n");
+      const out = run(["run", "--detach", "q", brief], { MAIPAI_WT_SESSION: name, MAIPAI_CODEX_BIN: fakeCodex("cat >/dev/null") });
+      expect(out.status).not.toBe(0);
+      expect(out.stderr).toContain("brief path");
+    }
+    run(["done"], { MAIPAI_WT_SESSION: name });
+  });
+
+  test("wait prints git status and the diffstat of the worktree after DONE", () => {
+    const started = run(["start", "rundiff"]);
+    const path = started.stdout.trim();
+    const name = path.split("/").at(-1)!.replace(/^demo-/, "");
+    const brief = join(scratch, "brief-diff.md");
+    writeFileSync(brief, "x\n");
+    const out = run(["run", "codex", brief], { MAIPAI_WT_SESSION: name, MAIPAI_WT_POLL: "1", MAIPAI_CODEX_BIN: fakeCodex(`cat >/dev/null; echo edited >> README.md; echo new > fresh.txt`) });
+    expect(out.stdout).toContain("DONE");
+    expect(out.stdout).toContain("worktree changes");
+    expect(out.stdout).toContain(" M README.md");
+    expect(out.stdout).toContain("?? fresh.txt");
+    expect(out.stdout).toMatch(/README\.md \| 1 \+/);
+    run(["done"], { MAIPAI_WT_SESSION: name });
+  });
+
   test("a missing tmux or node names /opt/homebrew/bin when it is there", () => {
     const started = run(["start", "runpath"]);
     const name = started.stdout.trim().split("/").at(-1)!.replace(/^demo-/, "");

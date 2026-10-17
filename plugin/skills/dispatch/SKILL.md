@@ -16,8 +16,10 @@ One item = one worktree = one Codex run = one landing. No lanes, locks or claims
 ## 2. Write a complete brief first
 
 Save it as `data-scratch/briefs/<slug>.md` in the main checkout. It must hold: goal, files to touch, files not to touch,
-acceptance commands with expected output, the commit message, and "land with `scripts/wt.sh land`". An unfinished brief wastes
-the run; do not dispatch until it is complete.
+acceptance commands with expected output, and this line verbatim: "Do not run git commit, add, push or any git write command;
+leave changes in the working tree; the dispatcher reviews the diff, runs the tests and commits by file name." (A worktree's
+`.git` is a file pointing outside the worktree, so the workspace-write sandbox blocks git writes anyway; we do not widen it with
+`--add-dir`.) The dispatcher writes the commit message. An unfinished brief wastes the run; do not dispatch until it is complete.
 
 ## 3. Start the worktree
 
@@ -38,18 +40,18 @@ bash scripts/wt.sh run codex data-scratch/briefs/<slug>.md      # run THIS as a 
 - One command launches and reports. It starts the owned tmux session, runs `codex exec -s workspace-write` on the brief (no `--full-auto`, no
   approvals, no full-access or bypass flag; `codex exec` alone is read-only, so every edit would be blocked, and Codex may write
   only inside its own worktree), logs to `data-scratch/runs/<session>.log` (always ends `EXIT=<code>`), blocks until the run ends, then prints
-  DONE, FAILED, DIED (tmux gone, no `EXIT=`) or TIMEOUT (default 3600 s), the log tail and the newest report's gate lines.
+  DONE, FAILED, DIED (tmux gone, no `EXIT=`) or TIMEOUT (default 3600 s), the log tail, the newest report's gate lines and, after DONE, `git status --short` plus the diffstat of the worktree.
   Started in the background, the harness wakes you the moment it ends, so a finish cannot go unseen.
 - It records the owning Claude session and `runState` in `data-scratch/sessions/<name>.json` for status panes.
 - `--detach` returns at once; then you must run `bash scripts/wt.sh wait <session>` in the background yourself.
-- Never type into a running pane (the Enter is swallowed); a correction is a new `run`. Add `MAIPAI_CODEX_BIN` only in tests.
+- Never type into a running pane (the Enter is swallowed); a correction is a new `run`. Add `MAIPAI_CODEX_BIN` only in tests; it takes a program name or path, no arguments or shell characters (use a wrapper script), and the `-s workspace-write` flag cannot be removed.
 - Codex can die on "prompt flagged" (FAILED, exit 1). Check the worktree for partial work before re-dispatching.
 
 ## 5. Verify, then land
 
 1. Read the diff yourself once. Run `bash scripts/wt.sh check` (tier-aware) in the worktree.
 2. Anything wrong: fix it or re-brief; do not land.
-3. `bash scripts/wt.sh land`, then `bash scripts/wt.sh done`.
+3. Commit the changed files by name in the worktree (Codex does not commit), then `bash scripts/wt.sh land`, then `bash scripts/wt.sh done`.
 4. `tmux kill-session -t <repo>-<worktree>-codex` and delete the brief and log. Confirm `git worktree list` no longer shows it.
 
 ## 6. Done means clean
