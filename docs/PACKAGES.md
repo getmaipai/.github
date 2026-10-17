@@ -171,6 +171,14 @@ browser only when it is chosen and keeps `{lat, lon}` in memory as `<state>_geo`
 query key, a log line, a cache key or storage. The hero is the first `answer_blocks` node. A block kind the client does not know shows the
 block's `alt` sentence, which is also what a robot with no screen says.
 
+**Settings and the gear.** An app that keeps a person's own settings (Weather's saved places and default place) declares
+`contributes.settings_area`, the same record as an area in `spec/settings/areas.json`: an `id` (the route `/settings/<id>`), `app: "/apps/<package id>"`,
+`audience.min_role`, and `keys` sections whose cards name groups from the package's own `config[]` (a `location` key draws the kit place picker). Home lists
+the area on the app's row in `GET /api/apps` for a person whose role clears `audience.min_role`, draws it in the one settings shell, and shows a Settings gear in the
+app's toolbar named "<app label> settings"; back from it returns to the app. Install refuses an area whose id is a built-in settings page, whose `app` is not the
+package's own, or whose cards draw anything but the package's own `config[]` groups. Under Incognito the picker saves and searches nothing; a saved place keeps
+coordinates to two decimals.
+
 **Checks.** Install refuses an app whose page is missing, is not a schema page, binds to a data id the manifest does not declare, uses a
 node a package page may not, or reaches outside the package (`spec/ui/app-check.ts`, run by the hub). Tests to carry: the `index` page and
 each section validate against `spec/ui/schema.json`; a child, a teen and an adult each see or do not see the app as `min_role` says; a
