@@ -12,12 +12,10 @@
 <p align="center"><a href="https://getmaipai.github.io/"><b>getmaipai.github.io</b></a></p>
 
 <p align="center">
-Your own AI at home, a robot companion, and apps to reach them anywhere, all on your own hardware, never the cloud.
+Private, local AI for your family, on your own hardware, never the cloud.
 </p>
 
 ---
-
-<p align="center"><img src="https://raw.githubusercontent.com/getmaipai/.github/main/brand/maipai-ecosystem.png" alt="How the MaiPai products fit together: people and their devices reach MaiPai Home, which runs on MaiPai Stack; Go, Desktop and the web reach Home; Bot pairs with Home; local media and optional external services feed both" width="900"></p>
 
 <table>
   <tr>
@@ -36,41 +34,18 @@ Your own AI at home, a robot companion, and apps to reach them anywhere, all on 
         <img src="https://raw.githubusercontent.com/getmaipai/.github/main/brand/maipai-home-icon-light.png" alt="MaiPai Home" width="72">
       </picture>
     </td>
-    <td><b><a href="https://github.com/getmaipai/home">MaiPai Home</a></b><br>Your own AI, music, videos, podcasts, maps, books, and more, on your own hardware, online or offline - for protection, privacy, and independence.</td>
-  </tr>
-  <tr>
-    <td align="center">
-      <img src="https://raw.githubusercontent.com/getmaipai/.github/main/brand/maipai-brand-icon.png" alt="MaiPai Catalog" width="72">
-    </td>
-    <td><b><a href="https://github.com/getmaipai/catalog">MaiPai Catalog</a></b><br>New features and abilities for your Home and Bot, from one catalog: plugins, apps, companions and integrations, every one reviewed and signed.</td>
-  </tr>
-  <tr>
-    <td align="center">
-      <picture>
-        <source media="(prefers-color-scheme: dark)" srcset="https://raw.githubusercontent.com/getmaipai/.github/main/brand/maipai-go-icon-dark.png">
-        <img src="https://raw.githubusercontent.com/getmaipai/.github/main/brand/maipai-go-icon-light.png" alt="MaiPai Go" width="72">
-      </picture>
-    </td>
-    <td><b>MaiPai Go</b><br>iPhone and Apple TV app for your MaiPai Home and Bot: your own AI, media, and robot companion, wherever you are.</td>
-  </tr>
-  <tr>
-    <td align="center">
-      <picture>
-        <source media="(prefers-color-scheme: dark)" srcset="https://raw.githubusercontent.com/getmaipai/.github/main/brand/maipai-desktop-icon-dark.png">
-        <img src="https://raw.githubusercontent.com/getmaipai/.github/main/brand/maipai-desktop-icon-light.png" alt="MaiPai Desktop" width="72">
-      </picture>
-    </td>
-    <td><b>MaiPai Desktop</b><br>Mac and Windows app for your MaiPai Home and Bot, right on your desktop, integrated with your dock and your computer.</td>
-  </tr>
-  <tr>
-    <td align="center">
-      <picture>
-        <source media="(prefers-color-scheme: dark)" srcset="https://raw.githubusercontent.com/getmaipai/.github/main/brand/maipai-bot-icon-dark.png">
-        <img src="https://raw.githubusercontent.com/getmaipai/.github/main/brand/maipai-bot-icon-light.png" alt="MaiPai Bot" width="72">
-      </picture>
-    </td>
-    <td><b>MaiPai Bot</b><br>A robot friend with its own onboard AI: it sees, hears, talks, thinks, moves, self-charges, and guards your home in sentry mode. It recognizes each person by face and voice, keeps its own memories of people, facts, and experiences, and learns and evolves with your family.</td>
+    <td><b><a href="https://github.com/getmaipai/home">MaiPai Home</a></b><br>Your own private AI at home, with chat, voice, pictures and videos, on your own hardware - for protection, privacy, and independence.</td>
   </tr>
 </table>
+
+## What Home does today (v0.2.17)
+
+- Chat with memory and web search.
+- Voice: talk and listen.
+- Pictures and videos in Quick and Detailed, plus picture editing, all made on your own computer.
+- Kids and teens lanes with safety rules a grown-up cannot switch off, and a Videos app.
+- A setup wizard, health checks, and an AI engine that restarts itself.
+
+**Roadmap:** the Go app for iPhone and Apple TV, a Desktop app, the Bot robot companion, a package catalog, music and podcasts. None of these is released yet.
 
 <p>Built and maintained by <a href="https://github.com/JesseWebDotCom">Jesse Torres</a>.</p>

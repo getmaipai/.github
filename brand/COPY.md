@@ -6,10 +6,10 @@ here first.
 
 The formula: one sentence, bottom line up front. Only the home description
 carries the "- for protection, privacy, and independence" closer; suffixes
-are not repeated across products.
+are not repeated across products. Entries for products that have not shipped (catalog, go, desktop, bot) are held here for later; the org profile lists only shipped products until each one is released.
 
 **Org (getmaipai):**
-Your own AI at home, a robot companion, and apps to reach them anywhere, all on your own hardware, never the cloud.
+Private, local AI for your family, on your own hardware, never the cloud.
 
 **stack, repo description (one sentence, at most 120 characters, the GitHub field):**
 The headless engine layer under MaiPai Home: local AI engines and models, installed, sized, run, watched and updated.
@@ -27,8 +27,7 @@ Home's installer installs the Stack; a person never installs the Stack by itself
 MaiPai Commons: the org's libraries (ui, core, spec) every MaiPai product imports, pinned by tag.
 
 **home (MaiPai Home):**
-Your own AI, music, videos, podcasts, maps, books, and more, on your own
-hardware, online or offline - for protection, privacy, and independence.
+Your own private AI at home, with chat, voice, pictures and videos, on your own hardware - for protection, privacy, and independence.
 
 **catalog (MaiPai Catalog):**
 New features and abilities for your Home and Bot, from one catalog: plugins, apps, companions and integrations, every one reviewed and signed.
