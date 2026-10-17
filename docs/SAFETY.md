@@ -20,6 +20,15 @@ controls, they are architecture:
 - **Child profiles are restricted by default.** Unrestricted generation and
   chat are unlocked per-user by an adult, never inherited, never the default
   for a new profile. Safe-by-default, adult-opt-in.
+  Two named lanes, owner-approved 2026-10-17, are restricted modes rather than
+  unrestricted generation: a teen may make pictures and videos and edit
+  pictures with nothing adult or sexual, and a child may make cartoon pictures
+  and videos of safe content in a strict lane (the cartoon look forced, a
+  child-safe topic gate, no photos, no references, no real people, edits only
+  of their own cartoons, daily limits, a finished-item check that fails closed,
+  on by default with a switch for the home and one per child). Both are held by
+  the same finished-picture check and the same absolute lines; every other
+  child protection stays non-removable.
 - No feature is built whose purpose is generating imagery of identifiable
   real people, with one exception (owner's ruling, 2026-10-17): an adult
   may make a picture, video or saved style that looks like an adult in
