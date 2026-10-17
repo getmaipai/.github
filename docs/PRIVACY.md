@@ -45,6 +45,13 @@ check, a model download).
   engines (owner's ruling, 2026-10-11).** It carries no identity or
   household data, and a child's or teen's query is checked first for the
   home address, phone numbers, email addresses and household names.
+- **The optional ddgs source passes an adult's query text to DuckDuckGo
+  (owner's ruling, 2026-10-17).** It is on by default for adults when
+  SearXNG could not be set up, and an admin can turn it off. Each search
+  is one the person asked for and the model decided to run, so it is not
+  phone-home. It never carries a child's, teen's or guest's query. The
+  privacy page row shows only while the helper runs and DuckDuckGo is
+  picked.
 - **Every product keeps a user-tier privacy page** with the "what leaves the
   house" table: each outbound connection, when it happens, what it carries,
   and who receives it. Plain dad-test language. Adding or changing an

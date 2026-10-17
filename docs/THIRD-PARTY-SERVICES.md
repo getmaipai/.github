@@ -31,9 +31,12 @@ dark for a day. These rules exist so that never repeats, on any service.
   (owner's ruling, 2026-10-02): keyless search through the household's
   own SearXNG is the default path, not a fallback, and a hosted provider
   is an optional key (PRIVACY.md). An optional ddgs sidecar is a second
-  keyless source (owner's ruling, 2026-10-11): off by default, adults only,
-  one fixed browser identity, no rotation, no proxies, through the limiter
-  with back-off.
+  keyless source (owner's ruling, 2026-10-11): adults only, one fixed
+  browser identity, no rotation, no proxies, through the limiter with
+  back-off. It is on by default for adults when the household's SearXNG
+  could not be set up (owner's ruling, 2026-10-17, in chat, reversing the
+  2026-10-11 "off by default"); the age and surface gates are unchanged.
+  An admin can turn it off under Settings, Search, Web search sources.
 - **Back off on the first signal.** A 429, a captcha, a "confirm you're not a
   bot", a LOGIN_REQUIRED where none is expected: stop that class of traffic
   immediately (quiet mode), keep only user-initiated requests, probe on a
