@@ -101,6 +101,82 @@ standard in [`CLAUDE.md`](../CLAUDE.md).
   rolled-back index, and an unknown signer are all refused on hub and
   robot, with a clear message and no partial unpack.
 
+## Writing an app package
+
+An app is any package whose manifest lists `contributes.pages`. It opens at `/apps/<package id>` in Home, appears in search and the
+person's favorites, and draws pages written as data, so Home runs it with no per-package code and no rebuild. Weather is the first
+one: the chat tool and the app are one package and one recipe. Design record: `home`'s `docs/plans/app-kind-2026-10-16.md`. The
+contract lives in `commons` (`spec/schemas/manifest.schema.json`, `spec/ui/schema.json`, `spec/ui/app-check.ts`), from `spec-v0.1.153`
+and `ui-v0.5.239`.
+
+**The rules.** A page is a `page` document in `pages/<module>.json`. It may use only `page`, `section`, `empty_state`, `progress`,
+`detail_pane`, `answer_blocks` and `picker`. It can read only its own package (`source: "package"` bindings) and can call only
+`/api/plugins/<package id>/...` or navigate only to `/apps/<package id>/...`. `kind: "web"` pages are refused. All drawing is done by kit Elements reached through the answer-block dispatcher
+(design rule 9); a package never ships React.
+
+**The manifest.** One `index` page is required. `nav: true` on `index` makes the app a search and favorites entry; `nav: true` on any
+other page makes it one of the app's own sections (tabs on wide screens). `keywords` (up to 8, each up to 24 characters) are extra
+search words. Access is the package's own: `min_role`, `platforms` must include `home`, a passing smoke test, and its required
+capabilities. A package that fails any of them is absent (404), so its existence does not leak.
+
+```json
+{
+  "id": "forecast-example",
+  "version": "0.1.0",
+  "kind": "plugin",
+  "category": "Utilities",
+  "display": "Forecast",
+  "description": "The weather for a saved place or where you are.",
+  "min_role": "child",
+  "platforms": ["home"],
+  "incognito": "unaffected",
+  "returns_blocks": ["weather_card", "spec_sheet"],
+  "contributes": {
+    "pages": [
+      { "id": "index", "label": "Forecast", "icon": "cloud-sun", "nav": true, "kind": "schema", "module": "index", "keywords": ["rain", "temperature"] },
+      { "id": "week", "label": "Week", "icon": "calendar", "nav": true, "kind": "schema", "module": "week" }
+    ],
+    "data": [
+      { "id": "places", "surface": "weather", "rows": "places" },
+      { "id": "forecast", "surface": "weather", "refresh_s": 1800 }
+    ]
+  }
+}
+```
+
+**Data.** `contributes.data[]` names what a page may ask for. An entry with `surface` (`weather` or `maps`) runs the package recipe with the
+place the host resolved: the host, never the page or the model, injects the coordinates, rounded to two decimals (one for a child).
+An entry with `rows: "places"` returns the asking person's saved places for a picker and runs no recipe. The call is
+`POST /api/plugins/<id>/data/<data id>` with `{place?, current?}`; the answer is `{as_of, blocks?, rows?, degraded?, needs?}`, and `blocks`
+pass the manifest's `returns_blocks`, the person's age band and the output floor, like a chat turn's. A failed lookup shows only its kind.
+
+**A page.** `pages/index.json` for the manifest above:
+
+```json
+{
+  "type": "page", "id": "forecast", "title": "Forecast",
+  "body": [
+    { "type": "picker", "state": "place", "label": "Place", "placeholder": "Default place",
+      "leading": [{ "value": "current", "label": "Current location", "icon": "locate-fixed", "needs": "geolocation" }],
+      "bind": { "source": "package", "path": "places" }, "item_key_field": "id", "item_label_field": "label" },
+    { "type": "answer_blocks", "kinds": ["weather_card"],
+      "bind": { "source": "package", "path": "forecast", "params": { "place": "$state.place", "current": "$state.place_geo" } },
+      "empty_state": { "type": "empty_state", "icon": "cloud-off", "text": "The weather is not available right now. Check your connection and try again." } }
+  ]
+}
+```
+
+A picker writes its choice to page state `place`; `params` read page state with `$state.<name>`. A `needs: "geolocation"` option asks the
+browser only when it is chosen and keeps `{lat, lon}` in memory as `<state>_geo`; it rides the request body only, never a URL, a
+query key, a log line, a cache key or storage. The hero is the first `answer_blocks` node. A block kind the client does not know shows the
+block's `alt` sentence, which is also what a robot with no screen says.
+
+**Checks.** Install refuses an app whose page is missing, is not a schema page, binds to a data id the manifest does not declare, uses a
+node a package page may not, or reaches outside the package (`spec/ui/app-check.ts`, run by the hub). Tests to carry: the `index` page and
+each section validate against `spec/ui/schema.json`; a child, a teen and an adult each see or do not see the app as `min_role` says; a
+data call with no network shows the plain empty state. Uninstall hides the app and keeps its state, so a favorite comes back on reinstall.
+Use `192.0.2.x` and `example.com` in fixtures.
+
 ## Uninstall, and a person's files
 
 Why this section exists: a role turned off in the setup wizard or under
