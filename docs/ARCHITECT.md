@@ -75,6 +75,11 @@ checks two kit violations (org principle 6; Home RULES.md rule 9, owner's rule
 The verdict names the Element and the kit change that replaces the override
 or wrapper.
 
+A proposal that adds a status surface (a banner, dot, panel, toast or polling loop that
+tells a person the system's state) is `DUPLICATE` when an existing mechanism covers that kind
+of status (Home RULES.md S6, owner-approved 2026-10-17); the verdict names the mechanism and
+the data source to feed instead.
+
 Every verdict that leaves any custom code or Element non-adoption adds or cites a row in the repo's Elements decisions ledger (Home: `docs/design/ELEMENTS-DECISIONS.md`).
 
 A repo's UI-rule lints run early too: a pre-commit hook (`scripts/ui-rules-precommit.sh` in Home) rejects a className override, wrapper or grown baseline in about a second, and `check.sh` still runs the same script with no skip.

@@ -54,7 +54,13 @@ gap is really a missing rule, say NEEDS-RULE-CHANGE); code correctness.
    component that wraps, frames or re-skins an Element. Either one is
    REJECTED, naming the Element and the additive kit prop or variant that
    replaces it (org principle 6, owner's rule 2026-10-06).
-8. Write the verdict record (below).
+8. If the proposal adds a way to tell a person the system's state (a
+   banner, dot, panel, toast or polling loop for starting, paused, low
+   memory, a job or install running, a service down or a failed background
+   action), check it against the existing mechanisms (Home RULES.md S6).
+   It is DUPLICATE when an existing mechanism covers that kind of status;
+   name the mechanism and the data source to feed instead.
+9. Write the verdict record (below).
 
 **Analysis Process:**
 1. Restate the proposal in one sentence and name the areas it touches

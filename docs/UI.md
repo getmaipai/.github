@@ -111,6 +111,15 @@ bad example, the TV column, and the lint that guards it. The full pattern
 table is platform plan section 6.4; new patterns are added to the kit
 first, never invented inline in a package.
 
+**System status, in one rule (owner-approved 2026-10-17):** a change that must tell a person
+the system's state (starting, paused, low memory, a job or install running, a service down, a
+failed background action) uses the surface that already carries that kind of status and feeds
+its data source a new reason or state: background progress to the progress strip, something to
+fix to a Repairs item with Try again, the AI not ready to the chat paused or starting state and
+Send hold, a job to its own card, admin attention to Notifications, a failed form to the
+destructive Alert. It never adds a banner, dot, panel or polling loop. One readiness function
+per concern serves every client. Home's table is RULES.md S6.
+
 **Batch actions, in one rule:** every list of things a household can
 delete offers a multi-select and a batch delete, and a list whose whole
 contents are safely disposable (memories, notifications, history) also
