@@ -37,6 +37,14 @@ dark for a day. These rules exist so that never repeats, on any service.
   could not be set up (owner's ruling, 2026-10-17, in chat, reversing the
   2026-10-11 "off by default"); the age and surface gates are unchanged.
   An admin can turn it off under Settings, Search, Web search sources.
+  It stays closed for teens and children unless an owner or admin turns on
+  `search.ddgs_for_minors` (Settings, Search, Web search; owner's request,
+  2026-10-17, in chat). That setting is off by default and says plainly that
+  DuckDuckGo's own filter is not guaranteed and the ddgs text search may
+  ignore the strict safe-search request Home sends, so adult results may reach
+  that age group. When on, ddgs is only a second source beside SearXNG, never
+  the sole source, never on a spoken turn, never for a guest, and every other
+  gate (the band's web switch, blocklists, page cleaning, output gate) stays.
 - **Back off on the first signal.** A 429, a captcha, a "confirm you're not a
   bot", a LOGIN_REQUIRED where none is expected: stop that class of traffic
   immediately (quiet mode), keep only user-initiated requests, probe on a
