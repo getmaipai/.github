@@ -3,6 +3,8 @@
 Dev tier. Full definition of done and the testing standards, with the dated reasons. Hooks that enforce parts of it: `require-gate-before-commit.sh`, `mark-gate-checked.sh` (see `plugin/hooks/README.md`); `gate-lock.sh` and `check-core.sh` in `standards/bin/`. Load before gating, benching, writing tests, or claiming something is done.
 
 > **Tiers (2026-10-15):** the gate is chosen by what changed. T0 docs: `check.sh --docs`. T1 ordinary code: `check.sh --pre` plus the tests beside the change. T2 risky surface: the full `check.sh` under the machine lock, a medium `code-review`, and an architect verdict when the design changes. `scripts/wt.sh check` picks the tier and writes the stamp that `wt.sh land` and the commit hook require; the `main-gate` job re-runs the full gate on origin/main. The text below still defines what "verified" means.
+>
+> **GATE-FAST-01 (2026-10-16):** measured over 2026-10-09 to 10-16, 1527 gate runs took 56 hours of wall clock, 83% of full gates were red, and 31% of those reds passed unchanged on a rerun (flaky tests). Decided: T2 is the safety and auth surface only (auth, credentials, consent, child and teen gates, migrations, `RULES.md`, `check.sh`, `wt.sh`); pins, plans, the turn pipeline and spec records are T1. A stamp counts for 4 hours, and `wt.sh land` re-gates after a rebase only when the rebase touched a pin or a file the branch also changed. Tests that need the real network or wall-clock timing are listed under `bench` in `scripts/gate/flakes.json` and run only in `check.sh --bench`, on demand. `main-gate` runs once a day, reports a red with the commits since last green, and never reverts.
 
 ## The gate: check.sh per push, not per commit (owner's rule, 2026-09-23)
 

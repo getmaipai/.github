@@ -6,6 +6,12 @@ incident or review that prompted each. The rule itself lives in
 why, so the rule can be revisited on the facts rather than re-argued
 from memory. Newest first.
 
+## 2026-10-16: fast iteration gate, GATE-FAST-01 (owner's ruling)
+
+After one week of the tiered workflow the gate was the bottleneck: 1527 runs, 56 hours wall, 10 hours waiting for the lock, 83% of full gates red, 31% of reds flaky, and the `main-gate` loop reverted 7 good commits on false reds. Decided: `main-gate` runs once a day and only reports (no auto-revert, no loop); flaky network and wall-clock tests move to a bench lane (`check.sh --bench`) and out of the gate; T2 is the safety and auth surface only (auth, credentials, consent, child and teen gates, migrations, `RULES.md`, `check.sh`, `wt.sh`), so pins, plans, the turn pipeline and spec records are T1; a gate stamp counts for 4 hours; `wt.sh land` re-gates after a rebase only when the rebase touched a pin or a file the branch changed; backend and frontend test shards cap at 2 so two sessions fit on the machine. Design record: `docs/dev.md` GATE-FAST-01 in `home`.
+
+Owner-approved: 2026-10-16
+
 ## 2026-10-15: tiered workflow, a worktree per session (owner's ruling)
 
 Context load, lane locks and per-commit gates were slowing delivery and blocking concurrent sessions. Decided: one session, one worktree (`scripts/wt.sh`), checks by tier (T0 docs, T1 `check.sh --pre` plus tests beside the change, T2 risky surfaces get the full gate, a medium review and an architect verdict when the design changes), a gate stamp that `land` and the commit hook both check, a `main-gate` job that re-runs the full gate on origin/main and reverts a single red commit, the architect gate narrowed to design notes, plans, rules and new backlog rows, the review gate narrowed to T2, the blind-staging and shared-checkout hooks retired, and the `dispatch` skill (Codex first, one item, one worktree) replacing `coordinate`, lane locks and claims. The org CLAUDE.md shrank by about 65%. Design record: the `workflow-redesign` notes in Jesse's private scratch.

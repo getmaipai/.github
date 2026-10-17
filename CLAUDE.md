@@ -83,7 +83,10 @@ measured and reported with the rule named, never dropped (full text and the dele
 |---|---|
 | Docs only | `scripts/check.sh --docs` (secrets, PII, prose) |
 | Ordinary code | `scripts/check.sh --pre` plus the tests beside the changed files; read your own diff once |
-| Risky surface (turn, safety, auth, credentials, consent, child and teen gates, wire shapes, spec records, migrations, pins, `check.sh`, paths an area's `Governs:` line names) | full `check.sh` under the machine lock, `code-review` at medium, architect verdict when the design changes |
+| Risky surface (auth, credentials, consent, child and teen gates, migrations, `RULES.md`, `check.sh`, `wt.sh`) | full `check.sh` under the machine lock, `code-review` at medium, architect verdict when the design changes |
+
+Everything else, the turn pipeline, wire shapes, spec records and pins included, is ordinary code (GATE-FAST-01, 2026-10-16). Tests that need
+the real network or wall-clock timing live in the bench lane (`check.sh --bench`, on demand), never in the gate. A gate stamp is good for 4 hours.
 
 Secrets scan and PII wordlist run on every change. Rollout: until the hooks follow this table, the hooks' stricter checks apply.
 "Verified" means exercised for real, not "it compiles". Never hand Jesse something you have not checked, and never ask him to run

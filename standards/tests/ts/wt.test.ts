@@ -122,7 +122,11 @@ describe("wt.sh worktree lifecycle", () => {
     expect(run(["tier", "spec/schemas/record.json"]).stdout.trim()).toBe("T2");
     expect(run(["tier", "scripts/check.sh"]).stdout.trim()).toBe("T2");
     expect(run(["tier", "docs/api/openapi.json"]).stdout.trim()).toBe("T1");
-    expect(run(["tier", "ui/package.json"]).stdout.trim()).toBe("T2");
+    // GATE-FAST-01 (2026-10-16): pins, lockfiles and plans are T1; only RULES.md and the gate itself are always T2.
+    expect(run(["tier", "ui/package.json"]).stdout.trim()).toBe("T1");
+    expect(run(["tier", "docs/plans/anything.md"]).stdout.trim()).toBe("T0");
+    expect(run(["tier", "docs/design/RULES.md"]).stdout.trim()).toBe("T2");
+    expect(run(["tier", "scripts/wt.sh"]).stdout.trim()).toBe("T2");
     const started = run(["start", "tier"]);
     const path = started.stdout.trim();
     writeFileSync(join(path, "backend-change.ts"), "code\n");
@@ -224,8 +228,8 @@ describe("wt.sh land gate stamp", () => {
     refused(s.sh(["land"]), "need tier T1", `${next} T1`);
 
     writeFileSync(s.stampPath, good);
-    s.edit((j) => { j.created = new Date(Date.now() - 31 * 60 * 1000).toISOString(); });
-    refused(s.sh(["land"]), "only 30 minutes counts", next);
+    s.edit((j) => { j.created = new Date(Date.now() - 241 * 60 * 1000).toISOString(); });
+    refused(s.sh(["land"]), "only 4 hours counts", next);
 
     writeFileSync(s.stampPath, good);
     writeFileSync(join(s.path, "tools/stamped.ts"), "changed after the check\n");

@@ -29,7 +29,8 @@ stamp="${MAIPAI_WT_DATA:-$root/data-scratch}/gate-stamps/$name.json"
 read -r stamped rc < <(node -e 'const j=require(process.argv[1]);console.log(j.tier,j.exitCode)' "$stamp")
 epoch=$(stat -f %m "$stamp" 2>/dev/null || stat -c %Y "$stamp" 2>/dev/null)
 age=$(( $(date +%s)-epoch ))
-(( age >= 0 && age < 1800 )) || deny "The wt.sh stamp is over 30 minutes old. Run 'bash scripts/wt.sh check' and retry."
+# 4 hours since 2026-10-16 (GATE-FAST-01): the 30 minute window re-ran the gate 868 of 962 times for nothing.
+(( age >= 0 && age < 14400 )) || deny "The wt.sh stamp is over 4 hours old. Run 'bash scripts/wt.sh check' and retry."
 [ "$rc" = 0 ] || deny "The last wt.sh check failed with exit code $rc. Fix the failure, run 'bash scripts/wt.sh check', and retry."
 if [ "$tier" = T2 ] && [ "$stamped" != T2 ]; then deny "This commit requires T2, but the stamp is $stamped. Run 'bash scripts/wt.sh check T2' and retry."; fi
 if [ "$tier" = T1 ] && [ "$stamped" != T1 ] && [ "$stamped" != T2 ]; then deny "This commit requires T1, but the stamp is $stamped. Run 'bash scripts/wt.sh check T1' and retry."; fi

@@ -1,7 +1,7 @@
 {
   "name": "maipai",
   "description": "MaiPai org shared skills: release ceremony, docs refresh, verification contract, platform package scaffolding, standards pin check, screenshot verification, build status dashboard, dispatch (one item to Codex in its own worktree; replaces the coordinator role), and duplicate-safe issue filing. Hooks: a tiered gate-stamp commit gate, a review gate for risky (T2) paths, and session-start repo context. Agents: design-resolver, an opus subagent for resolving design/spec ambiguities, and architect, a sonnet subagent that rules on a proposal against the repo's design rulebook. Hook: an architect-verdict gate on design-surface commits.",
-  "version": "0.10.0",
+  "version": "0.11.0",
   "author": {
     "name": "JesseWebDotCom"
   }

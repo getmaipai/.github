@@ -32,7 +32,7 @@ review.
   that prints T2. A repo without `wt.sh` keeps the older rule: it denies a
   `git commit` whose committed files include anything beyond `*.md`,
   `LICENSE`, or `NOTICE` unless the `code-review` skill has run in this
-  repo within the last 30 minutes. Checks `--cached` plus, when the
+  repo within the last 4 hours. Checks `--cached` plus, when the
   command carries a `-a`/`--all`/an `-a`-flag-cluster (`-am`, `-av`...),
   unstaged tracked changes too: a first cut checked only `--cached`, so a
   bare `git commit -am` with nothing pre-staged sailed through with an
@@ -66,7 +66,7 @@ to run it any better than "review before committing" did.
 - **`require-gate-before-commit.sh`** (PreToolUse, `Bash`): denies a
   `git commit` unless `scripts/check.sh` is on record for this repo, in
   a scope that actually covers the files about to be committed, within
-  the last 30 minutes. Detects a commit more broadly than
+  the last 4 hours. Detects a commit more broadly than
   `require-review-before-commit.sh` does (`git -C <path> commit`,
   `git --no-pager commit`, `git --git-dir=<path> commit` - not just a
   bare `git commit`, and a review found all three bypassed that hook's

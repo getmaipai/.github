@@ -1,7 +1,7 @@
 #!/usr/bin/env bash
 # PreToolUse (Bash matcher): refuses a `git commit` unless `scripts/
 # check.sh` has run to completion, in a scope that actually covers what
-# is about to be committed, within the last 30 minutes, AND every file
+# is about to be committed, within the last 4 hours (GATE-FAST-01, 2026-10-16), AND every file
 # about to be committed still carries exactly the content that run
 # tested (GATE-HOOK-02 - the org's own "gate per push, not per commit"
 # rule needs a batch of commits off one gate run to go through, but a
@@ -112,7 +112,7 @@ gate_head=""
 manifest=""
 if [ -f "$flag_file" ]; then
   age=$(( $(date +%s) - $(stat -f %m "$flag_file" 2>/dev/null || stat -c %Y "$flag_file" 2>/dev/null) ))
-  if [ "$age" -lt 1800 ]; then
+  if [ "$age" -lt 14400 ]; then
     stamped_scope=$(sed -n '1p' "$flag_file" 2>/dev/null || true)
     gate_head=$(sed -n '2p' "$flag_file" 2>/dev/null || true)
     manifest=$(tail -n +3 "$flag_file" 2>/dev/null || true)
@@ -120,7 +120,7 @@ if [ -f "$flag_file" ]; then
 fi
 
 if [ -z "$stamped_scope" ]; then
-  deny "No scripts/check.sh run is on record for this repo in the last 30 minutes. Run it (the right scope for your diff, or --docs for a docs-only change), then retry this commit. This is a soft gate: once the gate runs, the same commit goes through."
+  deny "No scripts/check.sh run is on record for this repo in the last 4 hours. Run it (the right scope for your diff, or --docs for a docs-only change), then retry this commit. This is a soft gate: once the gate runs, the same commit goes through."
 fi
 
 # GATE-HOOK-02 (the org's own "gate per push, not per commit" rule): a

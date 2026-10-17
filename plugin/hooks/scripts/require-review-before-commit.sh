@@ -1,7 +1,7 @@
 #!/usr/bin/env bash
 # PreToolUse (Bash matcher): refuses a `git commit` that touches a T2 path
 # (in a repo without scripts/wt.sh: code, not just docs) unless the `code-review` skill has run in this repo
-# within the last 30 minutes. Jesse's rule (2026-09-04): relying on a
+# within the last 4 hours (30 minutes until GATE-FAST-01, 2026-10-16). Jesse's rule (2026-09-04): relying on a
 # session "remembering" to review its own work doesn't survive a fresh
 # session, so this is enforced a mechanical gate, not left to memory. Soft gate: run /code-review,
 # address what it finds, and the same commit goes through.
@@ -71,11 +71,11 @@ flag_file="$git_dir/maipai-review-checked"
 
 if [ -f "$flag_file" ]; then
   age=$(( $(date +%s) - $(stat -f %m "$flag_file" 2>/dev/null || stat -c %Y "$flag_file" 2>/dev/null) ))
-  if [ "$age" -lt 1800 ]; then
+  if [ "$age" -lt 14400 ]; then
     exit 0
   fi
 fi
 
-reason="This commit touches a T2 path (or, in a repo without scripts/wt.sh, code) and no code-review run is on record for this repo in the last 30 minutes. Run the code-review skill (at least medium effort) against the diff, address what it finds, then retry this commit. This is a soft gate: once code-review runs, the same commit goes through."
+reason="This commit touches a T2 path (or, in a repo without scripts/wt.sh, code) and no code-review run is on record for this repo in the last 4 hours. Run the code-review skill (at least medium effort) against the diff, address what it finds, then retry this commit. This is a soft gate: once code-review runs, the same commit goes through."
 jq -n --arg reason "$reason" '{decision: "deny", reason: $reason}' >&2
 exit 2

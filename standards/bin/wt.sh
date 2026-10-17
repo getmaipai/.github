@@ -214,8 +214,9 @@ classify_tier() {
   fi
   for f in ${files[@]+"${files[@]}"}; do
     case "$f" in docs/api/*) all_docs=0;; *.md|docs/*|screenshots/*|*.png|*.jpg|*.jpeg|*.webp|*.avif|*.gif) :;; *) all_docs=0;; esac
-    # Always risky: the gate itself, pins and lockfiles, the worktree scripts, design rules and plans.
-    case "$f" in docs/design/RULES.md|docs/plans/*|scripts/check.sh|scripts/wt.sh|package.json|*/package.json|bun.lock|*/bun.lock|*/uv.lock|*/pyproject.toml) t2=1;; esac
+    # Always risky: the gate itself and the design rules. Pins, lockfiles and plans are T1 since
+    # 2026-10-16 (GATE-FAST-01): a pin bump ran 438 full gates in 8 days and found nothing a T1 did not.
+    case "$f" in docs/design/RULES.md|scripts/check.sh|scripts/wt.sh) t2=1;; esac
     for glob in ${t2globs[@]+"${t2globs[@]}"}; do
       # shellcheck disable=SC2254
       case "$f" in $glob) t2=1;; esac
@@ -395,7 +396,7 @@ cmd_reap() {
 }
 
 # Refuse to push unless this session's gate stamp is green, at least as strong as the
-# changed files need, fresh (default 30 minutes), and about exactly the committed content.
+# changed files need, fresh (default 4 hours, GATE-FAST-01 2026-10-16), and about exactly the committed content.
 require_gate_stamp() {
   local name="$1" stamp files=() f required tag="MAIPAI_WT_SESSION=$1 bash scripts/wt.sh check"
   stamp="$WT_STAMP_DIR/$name.json"
@@ -403,7 +404,7 @@ require_gate_stamp() {
   while IFS= read -r f; do [[ -n "$f" ]] && files+=("$f"); done < <(git -C "$WT_ROOT" diff --name-only origin/main...HEAD | sort -u)
   required="$(classify_tier ${files[@]+"${files[@]}"})"
   local verdict
-  verdict="$(node - "$stamp" "$required" "${MAIPAI_WT_STAMP_MAX_AGE:-1800}" "$WT_ROOT" ${files[@]+"${files[@]}"} <<'NODE'
+  verdict="$(node - "$stamp" "$required" "${MAIPAI_WT_STAMP_MAX_AGE:-14400}" "$WT_ROOT" ${files[@]+"${files[@]}"} <<'NODE'
 const cp = require("child_process"), fs = require("fs");
 const [stampPath, required, maxAge, root, ...files] = process.argv.slice(2);
 let s;
@@ -427,7 +428,7 @@ NODE
     unreadable) err "gate stamp $stamp is not valid JSON, so it proves nothing. Run: $tag";;
     failed:*) err "the last check for session '$name' failed (exit code ${verdict#failed:}), so these commits are not safe to land. Fix the failures, then run: $tag";;
     tier:*) local pair="${verdict#tier:}"; err "the gate stamp covers tier ${pair%%:*} but the changed files need tier ${pair##*:}. Run: $tag ${pair##*:}";;
-    stale:*) err "the gate stamp for session '$name' is ${verdict#stale:} seconds old and only 30 minutes counts. Run: $tag";;
+    stale:*) err "the gate stamp for session '$name' is ${verdict#stale:} seconds old and only 4 hours counts. Run: $tag";;
     content:*) err "the committed files changed since the gate stamp was written (${verdict#content:}). Run: $tag";;
     *) err "could not verify the gate stamp ($verdict). Run: $tag";;
   esac
@@ -442,7 +443,7 @@ cmd_land() {
 $dirty_files
 Commit them by file name (git add -f for a tracked file under an ignored folder), or discard them, then rerun wt.sh land."
   git -C "$WT_ROOT" fetch origin || err "could not fetch origin; check network access and retry landing."
-  local before after attempt changed_pin changed_pkg name d
+  local before after attempt changed_pin changed_pkg overlap name d
   before="$(git -C "$WT_ROOT" rev-parse HEAD)"
   for attempt in 1 2 3; do
     git -C "$WT_ROOT" rebase origin/main || { git -C "$WT_ROOT" rebase --abort >/dev/null 2>&1 || true; err "rebase onto origin/main failed; resolve the conflict and rerun wt.sh land."; }
@@ -453,7 +454,15 @@ Commit them by file name (git add -f for a tracked file under an ignored folder)
       if [[ -n "$changed_pkg" ]]; then
         for d in $WT_INSTALL_DIRS; do [[ -d "$WT_ROOT/$d" ]] && { (cd "$WT_ROOT/$d" && bun install --force) || err "bun install --force failed in $d after the rebase changed package metadata; fix the install error and rerun wt.sh land."; }; done
       fi
-      cmd_check || err "checks failed after rebase; fix the failures before landing."
+      # GATE-FAST-01 (2026-10-16): re-check only when the rebase could change the verdict,
+      # that is, a pin moved or main touched a file this branch also changed. Otherwise the
+      # stamp from the pre-rebase check still describes this branch's own changes.
+      overlap="$(comm -12 <(git -C "$WT_ROOT" diff --name-only "$before" "$after" | sort -u) <(git -C "$WT_ROOT" diff --name-only origin/main...HEAD | sort -u) || true)"
+      if [[ -n "$changed_pkg" || -n "$overlap" ]]; then
+        cmd_check || err "checks failed after rebase; fix the failures before landing."
+      else
+        echo "rebase moved HEAD but touched none of this branch's files and no pin; keeping the gate stamp."
+      fi
     fi
     name="${MAIPAI_WT_SESSION:-$(current_session_name)}"
     require_gate_stamp "$name"
