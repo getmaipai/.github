@@ -20,25 +20,34 @@ controls, they are architecture:
 - **Child profiles are restricted by default.** Unrestricted generation and
   chat are unlocked per-user by an adult, never inherited, never the default
   for a new profile. Safe-by-default, adult-opt-in.
-  Two named lanes, owner-approved 2026-10-17, are restricted modes rather than
-  unrestricted generation: a teen may make pictures and videos and edit
-  pictures with nothing adult or sexual, and a child may make cartoon pictures
-  and videos of safe content in a strict lane (the cartoon look forced, a
-  child-safe topic gate, no photos, no references, no real people, edits only
-  of their own cartoons, daily limits, a finished-item check that fails closed,
-  on by default with a switch for the home and one per child). Both are held by
-  the same finished-picture check and the same absolute lines; every other
-  child protection stays non-removable.
-- No feature is built whose purpose is generating imagery of identifiable
-  real people, with one exception (owner's ruling, 2026-10-17): an adult
-  may make a picture, video or saved style that looks like an adult in
-  their own household who agreed to it. The agreement is that person's own
-  setting, off by default, with a separate switch for adult content; a
-  child or teen is never the subject; a photo of a real person is never
-  turned into adult content; the person is told each time and sees a log;
-  taking the agreement back stops everything waiting and removes saved
-  styles of them. Public figures and anyone outside the household stay
-  refused. Home's `docs/design/likeness-consent-2026-10-17.md` is the design.
+  Two named lanes, owner-approved 2026-10-17 and extended to songs 2026-10-18,
+  are restricted modes rather than unrestricted generation: a teen may make
+  pictures, videos and songs and edit pictures with nothing adult or sexual,
+  and a child may make cartoon pictures and videos and kid-friendly songs of
+  safe content in a strict lane (the cartoon look forced, a child-safe topic
+  gate, no photos, no references, no real people, edits only of their own
+  cartoons, daily limits, a finished-item check that fails closed and checks a
+  song as sung, on by default with a switch for the home and one per child). A
+  child's request that is too scary or too adult is rewritten into a
+  kid-friendly version, not refused. Both lanes are held by the same
+  finished-item check and the same absolute lines; every other child
+  protection stays non-removable.
+- **One set of content protections per person, by age, for everything Home
+  makes** (owner's ruling, 2026-10-18): chat, search, pictures, videos and
+  songs read the same definition (swearing, drugs, gambling, gore and the
+  rest), so a person with a filter on gets none of it in a reply, a song, a
+  picture or a video, including a picture of themselves and friends doing it.
+  Nothing sexual involving a minor is allowed anywhere, and that is not
+  negotiable. Sexual content, gore and other adult content are adult only.
+- Real people in generated pictures, videos and songs (owner's ruling,
+  2026-10-18, replacing the 2026-10-17 consent exception): anyone in the
+  household may make pictures, videos, songs and saved styles with or of any
+  household member, as a household option that is on by default. A photo of a
+  real person is never turned into adult content, and nothing sexual involving
+  a minor is ever made. Public figures and anyone outside the household stay
+  refused. Per-person agreement and notices were removed on purpose and can be
+  added back later. Home's `docs/design/likeness-consent-2026-10-17.md` is the
+  earlier design, now superseded where it differs.
 
 Marketing and copy rule (all tiers, all repos): never pitch generation
 features as "uncensored", "unfiltered", "no restrictions", or any
