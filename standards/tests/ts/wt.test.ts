@@ -314,6 +314,76 @@ describe("wt.sh worktree lifecycle", () => {
   });
 });
 
+describe("session files that are empty, truncated or garbage", () => {
+  const bad: Record<string, Buffer | string> = {
+    empty: "",
+    truncated: '{"owner": "x", "pid": 12, "path"',
+    binary: Buffer.from([0, 255, 254, 1, 2, 3, 128, 0, 0, 77]),
+  };
+  for (const [kind, content] of Object.entries(bad)) {
+    test(`${kind} file: start and reap skip it, name it, and leave its session alone`, () => {
+      mkdirSync(join(data, "sessions"), { recursive: true });
+      const badFile = join(data, "sessions", `clever-badger-${kind}.json`);
+      writeFileSync(badFile, content);
+      const started = run(["start", `after${kind}`]);
+      expect(started.status).toBe(0);
+      expect(started.stderr).toContain(badFile);
+      expect(started.stderr).toContain("unreadable");
+      const path = started.stdout.trim();
+      const name = path.split("/").at(-1)!.replace(/^demo-/, "");
+      const reaped = run(["reap"], { MAIPAI_WT_REAP_AGE: "0" });
+      expect(reaped.status).toBe(0);
+      expect(existsSync(badFile)).toBe(true);
+      expect(readFileSync(join(data, "reaped.md"), "utf8")).toContain(`clever-badger-${kind} | ${badFile} | kept: session file unreadable`);
+      // The healthy session is still usable and finishes normally.
+      expect(run(["done"], { MAIPAI_WT_SESSION: name }).status).toBe(0);
+      rmSync(badFile, { force: true });
+    });
+  }
+
+  test("a corrupt own session file gives a plain error for run and tmux, and done still cleans up", () => {
+    const started = run(["start", "ownbad"]);
+    const path = started.stdout.trim();
+    const name = path.split("/").at(-1)!.replace(/^demo-/, "");
+    const file = join(data, "sessions", `${name}.json`);
+    writeFileSync(file, "");
+    const brief = join(scratch, "brief-ownbad.md");
+    writeFileSync(brief, "x\n");
+    const ran = run(["run", "p", brief], { MAIPAI_WT_SESSION: name });
+    expect(ran.status).not.toBe(0);
+    expect(ran.stderr).toContain("unreadable");
+    expect(run(["done"], { MAIPAI_WT_SESSION: name }).status).toBe(0);
+    expect(existsSync(file)).toBe(false);
+  });
+
+  test("20 concurrent writers never leave an empty or invalid session file", () => {
+    mkdirSync(join(data, "sessions"), { recursive: true });
+    const probe = `
+      source '${script}'
+      f="$(session_file race)"
+      write_session race wt/race /tmp/race ""
+      ( for i in $(seq 1 60); do
+          if [[ ! -s "$f" ]] || ! session_ok "$f"; then echo BAD; fi
+        done ) > "${scratch}/race-reader.txt" &
+      reader=$!
+      for i in $(seq 1 20); do
+        ( for j in 1 2; do write_session race wt/race /tmp/race ""; set_run_state race "state$i"; done ) &
+      done
+      wait
+      session_ok "$f" && echo FINAL_OK
+    `;
+    const out = spawnSync("bash", ["-c", probe], {
+      cwd: fixture, encoding: "utf8",
+      env: { ...process.env, ...repoEnv, MAIPAI_WT_DATA: data, MAIPAI_WT_SOURCE_ONLY: "1" },
+    });
+    expect(out.stdout).toContain("FINAL_OK");
+    expect(readFileSync(join(scratch, "race-reader.txt"), "utf8")).not.toContain("BAD");
+    const leftovers = spawnSync("bash", ["-c", `ls '${join(data, "sessions")}' | grep 'race.json.tmp' || true`], { encoding: "utf8" }).stdout.trim();
+    expect(leftovers).toBe("");
+    rmSync(join(data, "sessions", "race.json"), { force: true });
+  }, 120000);
+});
+
 describe("wt.sh land gate stamp", () => {
   const originMain = () => spawnSync("git", ["--git-dir", bare, "rev-parse", "main"], { encoding: "utf8" }).stdout.trim();
   // A worktree with one committed file; `file` decides the tier (docs T0, other code T1).

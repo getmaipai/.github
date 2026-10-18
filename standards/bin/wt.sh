@@ -47,14 +47,29 @@ rand_index() { od -An -N4 -tu4 /dev/urandom | awk -v n="$1" 'NR == 1 {print $1 %
 make_name() { echo "${WT_ADJECTIVES[$(rand_index "${#WT_ADJECTIVES[@]}")]}-${WT_ANIMALS[$(rand_index "${#WT_ANIMALS[@]}")]}-$1"; }
 
 session_file() { printf '%s/%s.json' "$WT_SESSION_DIR" "$1"; }
-read_json() { node -e 'const fs=require("fs");let j=JSON.parse(fs.readFileSync(process.argv[1],"utf8"));process.stdout.write(String(j[process.argv[2]]??""))' "$1" "$2"; }
+# read_json <file> <field>: the field's value, or nothing when the file is missing, empty or not JSON. It never
+# fails, so one corrupt session file cannot abort a command (set -e) for the other sessions.
+read_json() { node -e 'try{const fs=require("fs");const j=JSON.parse(fs.readFileSync(process.argv[1],"utf8"));process.stdout.write(String(j[process.argv[2]]??""))}catch{}' "$1" "$2" || true; }
+# session_ok <file>: succeeds when the file is a readable JSON object. session_usable also says why it is skipped.
+session_ok() { node -e 'try{const j=JSON.parse(require("fs").readFileSync(process.argv[1],"utf8"));process.exit(j&&typeof j==="object"&&!Array.isArray(j)?0:1)}catch{process.exit(1)}' "$1" 2>/dev/null; }
+session_usable() {
+  session_ok "$1" && return 0
+  echo "wt: session file $1 is unreadable (empty, truncated or not JSON); skipping it. Delete it if its session is finished." >&2
+  return 1
+}
+# Session files are only ever replaced whole: write a temp file in the same directory, then rename it over the
+# live file. A reader or a second writer never sees a truncated file; with two writers the last rename wins.
+atomic_write() {
+  local f="$1" tmp; tmp="$f.tmp.$$.$RANDOM"
+  if cat > "$tmp" && [[ -s "$tmp" ]]; then mv -f "$tmp" "$f"; else rm -f "$tmp"; return 1; fi
+}
 # Heartbeat: a file touched by start, run, wait, check and land. The reaper reads it as proof of life;
 # the recorded pid (the short-lived shell that ran `start`) is never proof of anything.
 beat() { [[ -n "${1:-}" ]] || return 0; mkdir -p "$WT_SESSION_DIR" 2>/dev/null && touch "$WT_SESSION_DIR/$1.beat" 2>/dev/null || true; }
 write_session() {
   local name="$1" branch="$2" path="$3" tmux="${4:-}"
   mkdir -p "$WT_SESSION_DIR"; beat "$name"
-  node - "$name" "$branch" "$path" "$tmux" "${MAIPAI_WT_PID:-$PPID}" <<'NODE' > "$(session_file "$name")"
+  node - "$name" "$branch" "$path" "$tmux" "${MAIPAI_WT_PID:-$PPID}" <<'NODE' | atomic_write "$(session_file "$name")"
 const [name, branch, path, tmux, pid] = process.argv.slice(2);
 const owner = process.env.CLAUDE_CODE_SESSION_ID || process.env.CLAUDE_SESSION_ID || process.env.CODEX_SESSION_ID || "codex";
 console.log(JSON.stringify({owner, pid: Number(pid), tmux: tmux || null, created: new Date().toISOString(), branch, path}, null, 2));
@@ -110,13 +125,15 @@ cmd_tmux() {
   if [[ ! -f "$f" ]]; then
     for candidate in "$WT_SESSION_DIR"/*.json; do
       [[ -f "$candidate" ]] || continue
+      session_usable "$candidate" || continue
       candidate_pid="$(read_json "$candidate" pid)"
       [[ "$candidate_pid" == "${MAIPAI_WT_PID:-$PPID}" ]] && matches+=("$candidate")
     done
     if (( ${#matches[@]} == 1 )); then f="${matches[0]}"; name="$(basename "$f" .json)"; fi
   fi
   [[ -f "$f" ]] || err "no session file for this worktree; run wt.sh start <slug> and enter its worktree first."
-  need_cmd tmux
+  need_cmd tmux; need_cmd node
+  session_ok "$f" || err "session file $f is unreadable (empty, truncated or not JSON); delete it and run wt.sh start <slug> again."
   branch="$(read_json "$f" branch)"; path="$(read_json "$f" path)"
   worktree_name="$(basename "$path")"; worktree_name="${worktree_name#"$WT_REPO"-}"
   actual="$WT_REPO-$worktree_name-$purpose"
@@ -133,16 +150,19 @@ cmd_tmux() {
 set_run_state() {
   local f; f="$(session_file "$1")"; [[ -f "$f" ]] || return 0
   beat "$1"
-  node - "$f" "$2" <<'NODE'
+  session_usable "$f" || return 0
+  node - "$f" "$2" <<'NODE' | atomic_write "$f" || true
 const fs = require("fs"); const [f, state] = process.argv.slice(2);
-const j = JSON.parse(fs.readFileSync(f, "utf8")); j.runState = state; j.runStateAt = new Date().toISOString();
-fs.writeFileSync(f, JSON.stringify(j, null, 2) + "\n");
+let j; try { j = JSON.parse(fs.readFileSync(f, "utf8")); } catch { process.exit(1); }
+j.runState = state; j.runStateAt = new Date().toISOString();
+process.stdout.write(JSON.stringify(j, null, 2) + "\n");
 NODE
 }
 beat_for_tmux() {
   local sf; for sf in "$WT_SESSION_DIR"/*.json; do
-    [[ -f "$sf" && "$(read_json "$sf" tmux)" == "$1" ]] && beat "$(basename "$sf" .json)"
+    [[ -f "$sf" ]] && session_ok "$sf" && [[ "$(read_json "$sf" tmux)" == "$1" ]] && beat "$(basename "$sf" .json)"
   done
+  return 0
 }
 run_log() { printf '%s/runs/%s.log' "$WT_DATA" "$1"; }
 cmd_run() {
@@ -155,6 +175,7 @@ cmd_run() {
   name="${MAIPAI_WT_SESSION:-$(current_session_name)}"; f="$(session_file "$name")"
   [[ -f "$f" ]] || err "no session file for '$name'; run wt.sh start <slug> first and export MAIPAI_WT_SESSION."
   need_cmd tmux; need_cmd node
+  session_ok "$f" || err "session file $f is unreadable (empty, truncated or not JSON); delete it and run wt.sh start <slug> again."
   path="$(read_json "$f" path)"
   actual="$WT_REPO-${name}-$purpose"
   tmux_cmd has-session -t "$actual" >/dev/null 2>&1 && err "tmux session '$actual' already exists; wait for it or pick another purpose name."
@@ -187,19 +208,23 @@ cmd_wait() {
   while :; do
     if grep -q '^EXIT=' "$log"; then code="$(grep '^EXIT=' "$log" | tail -1 | cut -d= -f2)"
       [[ "$code" == 0 ]] && verdict="DONE" || verdict="FAILED (exit $code)"; break; fi
-    if ! tmux_cmd has-session -t "$actual" >/dev/null 2>&1; then verdict="DIED (tmux session gone, no EXIT line)"; break; fi
+    if ! tmux_cmd has-session -t "$actual" >/dev/null 2>&1; then
+      # The run can finish between the EXIT check above and this one; look once more before calling it dead.
+      if grep -q '^EXIT=' "$log"; then continue; fi
+      verdict="DIED (tmux session gone, no EXIT line)"; break
+    fi
     if (( waited >= limit )); then verdict="TIMEOUT after ${limit}s (still running; attach or kill it)"; break; fi
     beat_for_tmux "$actual"
     sleep "${MAIPAI_WT_POLL:-5}"; waited=$((waited + ${MAIPAI_WT_POLL:-5}))
   done
   local sf; for sf in "$WT_SESSION_DIR"/*.json; do
-    [[ -f "$sf" && "$(read_json "$sf" tmux)" == "$actual" ]] && set_run_state "$(basename "$sf" .json)" "${verdict%% *}"
+    [[ -f "$sf" ]] && session_ok "$sf" && [[ "$(read_json "$sf" tmux)" == "$actual" ]] && set_run_state "$(basename "$sf" .json)" "${verdict%% *}"
   done
   echo "codex run $actual: $verdict"
   echo "-- last log lines"; tail -n 8 "$log"
   if [[ "$verdict" == DONE ]]; then
     local wpath="" wsf; for wsf in "$WT_SESSION_DIR"/*.json; do
-      [[ -f "$wsf" && "$(read_json "$wsf" tmux)" == "$actual" ]] && { wpath="$(read_json "$wsf" path)"; break; }
+      [[ -f "$wsf" ]] && session_ok "$wsf" && [[ "$(read_json "$wsf" tmux)" == "$actual" ]] && { wpath="$(read_json "$wsf" path)"; break; }
     done
     if [[ -n "$wpath" && -d "$wpath" ]]; then
       echo "-- worktree changes (Codex leaves them uncommitted; you review, test and commit by file name)"
@@ -400,12 +425,16 @@ cmd_done() {
     local candidate candidate_pid matches=()
     for candidate in "$WT_SESSION_DIR"/*.json; do
       [[ -f "$candidate" ]] || continue
+      session_usable "$candidate" || continue
       candidate_pid="$(read_json "$candidate" pid)"
       [[ "$candidate_pid" == "${MAIPAI_WT_PID:-$PPID}" ]] && matches+=("$candidate")
     done
     if (( ${#matches[@]} == 1 )); then f="${matches[0]}"; name="$(basename "$f" .json)"; fi
   fi
-  if [[ -f "$f" ]]; then
+  if [[ -f "$f" ]] && ! session_usable "$f"; then
+    # Our own record is corrupt: finish from what git knows about this worktree, then drop the bad file.
+    branch="$(git -C "$WT_ROOT" branch --show-current)"; path="$WT_ROOT"; tmuxname=""
+  elif [[ -f "$f" ]]; then
     branch="$(read_json "$f" branch)"; path="$(read_json "$f" path)"; tmuxname="$(read_json "$f" tmux)"
   else branch="$(git -C "$WT_ROOT" branch --show-current)"; path="$WT_ROOT"; tmuxname=""; fi
   if [[ -n "$tmuxname" ]] && command -v tmux >/dev/null 2>&1; then tmux_cmd kill-session -t "$tmuxname" >/dev/null 2>&1 || true; fi
@@ -496,7 +525,15 @@ cmd_reap() {
   local f name pid tmuxname path branch created age reason
   shopt -s nullglob
   for f in "$WT_SESSION_DIR"/*.json; do
-    name="$(basename "$f" .json)"; pid="$(read_json "$f" pid)"; tmuxname="$(read_json "$f" tmux)"; path="$(read_json "$f" path)"; branch="$(read_json "$f" branch)"
+    name="$(basename "$f" .json)"
+    if ! session_usable "$f"; then
+      # Cannot prove it dead, so its worktree is never touched; list the file for a person.
+      mkdir -p "$WT_DATA"
+      grep -qF "| $name | $f | kept: session file unreadable" "$WT_DATA/reaped.md" 2>/dev/null || \
+        printf '%s | %s | %s | kept: session file unreadable (empty, truncated or not JSON)\n' "$(date -u +%Y-%m-%dT%H:%M:%SZ)" "$name" "$f" >> "$WT_DATA/reaped.md"
+      continue
+    fi
+    pid="$(read_json "$f" pid)"; tmuxname="$(read_json "$f" tmux)"; path="$(read_json "$f" path)"; branch="$(read_json "$f" branch)"
     created="$(read_json "$f" created)"
     age=$(( $(date +%s) - $(date -u -j -f '%Y-%m-%dT%H:%M:%S' "${created%.*}" +%s 2>/dev/null || date -u -d "$created" +%s 2>/dev/null || echo 0) ))
     (( age >= ${MAIPAI_WT_REAP_AGE:-14400} )) || continue
@@ -614,6 +651,9 @@ Commit them by file name (git add -f for a tracked file under an ignored folder)
   done
   err "push to origin/main was rejected three times; inspect origin/main and rerun wt.sh land."
 }
+
+# Tests source the functions without running a command.
+[[ -n "${MAIPAI_WT_SOURCE_ONLY:-}" ]] && return 0
 
 case "${1:-}" in
   start|land|check|done) "$(std_bin)/origin-guard.sh" "$WT_ROOT" || exit 1;; esac

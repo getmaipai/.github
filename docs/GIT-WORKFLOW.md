@@ -31,6 +31,13 @@ the tree is clean with no untracked or ignored files (`.env`, `data-scratch`, bu
 `data-scratch/reaped.md` as `time | name | path | kept: <evidence>` and left alone, so a worktree with uncommitted changes is never
 touched at any age. Worktrees `wt.sh` did not create are listed on stderr when removable, never removed.
 
+**Session files are written whole and read defensively.** Every writer (`start`, `run`, `tmux`, run state, the heartbeat) writes a temp file in
+`data-scratch/sessions/` and renames it over the live file, so a reader never sees a truncated file and two writers leave the last
+one's complete file. Every reader skips an empty, truncated or non-JSON session file, prints `wt: session file <path> is unreadable`
+on stderr and carries on for the other sessions. `reap` lists such a file in `reaped.md` and never removes that session's worktree
+(it cannot prove it dead). A session's own corrupt file stops `run` and `tmux` with a plain error; `done` still cleans up. Delete a
+stray unreadable file once its session is finished.
+
 **T1 test selection (`wt.sh check`).** For a changed TS/JS module, T1 runs its sibling test plus every test in `WT_TEST_WORKSPACES`
 that imports it (import, require, `mock.module`, `vi.mock`; relative specifiers resolved against the test's folder, path-like
 ones such as `lib/apps` matched by suffix). A test that merely contains the module's name in a string is not selected. Other changed
