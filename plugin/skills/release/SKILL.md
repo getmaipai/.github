@@ -15,14 +15,22 @@ Jesse's own message asks for one, matching the description's trigger.
 ## 1. Preflight
 
 - Working tree clean, on `main`, local `main` pushed or pushable.
-- `scripts/check.sh` passes.
+- The gate passes: `scripts/check.sh --release` where the repo's check.sh
+  takes it (Home), else `scripts/check.sh`. `--release` reuses a clean,
+  green full gate from the last 4 hours when only docs and the version
+  field changed since (Home runs one on `main` after every landing), and
+  then runs only the docs checks; otherwise it runs the full gate. Run it
+  after the changelog and version bump are written, so it sees them.
 - **Full-history secrets audit**: `gitleaks git --no-banner --redact .` over
   the whole repo. The per-commit standards core only scans the working tree
   (`gitleaks dir`); this is the one point in the cycle that re-checks all of
   committed history, so it happens here instead of on every commit.
-- **Clean-clone build**: clone the repo into a temp dir, run `check.sh` there,
-  and boot/build the app. This catches missing files and gitignore mistakes.
-  A release never ships from only the working copy's word.
+- **Clean-clone build**: clone the repo into a scratch directory at the same
+  depth as the checkout (relative pins such as `../../commons-tags` must
+  still resolve), install with the frozen lockfile, typecheck and build.
+  Do not run `check.sh` again there: the gate above already tested the same
+  content. This catches missing files and gitignore mistakes. A release
+  never ships from only the working copy's word.
 
 ## 2. Version
 
