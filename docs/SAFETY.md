@@ -9,10 +9,12 @@ MaiPai gives adults full control of their own local AI. Two things are not
 controls, they are architecture:
 
 - **Child-safety protections on generation and chat are non-removable for
-  children and teens, and on every generation.** For an adult's chat text
-  they are the explicit-term and request-to-generate checks, which no
-  setting disables; an adult's discussion of the subject (a film, the news,
-  fiction, health, advice) is not filtered (owner's ruling, 2026-10-19). No
+  children and teens, and on every generation.** An adult's typed
+  message and the assistant's reply to an adult have no word rule; what
+  stops production there is the model's own refusal, and no setting
+  disables the generation checks. An adult's discussion of the subject (a
+  film, the news, fiction, a conviction, health, advice) is not filtered
+  (owner's ruling, 2026-10-19, amended the same day). No
   admin setting, config flag, environment variable, or "advanced mode" may
   disable or weaken the protections that remain, including for the
   household's own admin. Code review treats any change that makes a
