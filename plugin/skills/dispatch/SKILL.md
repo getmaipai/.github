@@ -10,6 +10,7 @@ One item = one worktree = one Codex run = one landing. No lanes, locks or claims
 ## 1. Decide the route
 
 - Decided, verifiable work (clear acceptance, tests can prove it): Codex first.
+- Small or medium decided work (one to about six files, acceptance that can fail) when Codex is limited or the item is cheap to hand off: the local lane (Studio only): write the brief, `~/.local/bin/local-lane status` must say ready, then run `local-lane dispatch --worktree <wt> --brief <file> --test "<cmd>" --detach --name <slug>` as a background command and `local-lane wait <slug> --worktree <wt>`; it runs OpenCode on the household's own model with guardrails (scope, imports, silenced tests, tsc and test repair loop) and writes a receipt under `data-scratch/runs/`. It never commits: read the diff, run the real tests and the gate, commit by file name, land. Files the hub safety floor refuses are skipped; give those to Codex. Details: `data-scratch/reports/opencode-local-setup.md`.
 - Needs judgment or design: a Claude subagent (Sonnet default, Opus for one bounded question, Haiku to gather evidence).
 - Never Fable unless Jesse says. At most one Haiku, one Sonnet, one Opus at a time.
 

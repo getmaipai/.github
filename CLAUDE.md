@@ -70,9 +70,13 @@ measured and reported with the rule named, never dropped (full text and the dele
 - **No pull requests** (only `catalog` takes community PRs). Land directly on `main`; push at natural boundaries; deploys and releases
   need Jesse's word in the moment. Commit only completed, verified work, one logical change per commit, by file name, never
   `git add -A` or `.`. Author identity is the GitHub noreply address.
-- **Parallel work:** Codex does decided, verifiable work first (GPT-6 Luna, low effort, high when needed); Claude does what needs
-  judgment. Sonnet is the default, Opus gets one bounded question, Haiku gathers evidence, Fable only when Jesse says.
-  Dispatching Codex: use the `dispatch` skill (`scripts/wt.sh run` then `wait`); `docs/COORDINATION.md` is history plus role policy.
+- **Parallel work, in this order (Jesse, 2026-10-19):** (1) Codex first for decided, verifiable work (GPT-6 Luna, low effort, high when needed); (2) the
+  local lane second for small and medium decided tasks (one to about six files, a test that can fail) and whenever Codex is limited: OpenCode against the
+  household's own coding model through `local-lane dispatch` (`~/.local/bin/local-lane`, setup in `data-scratch/reports/opencode-local-setup.md`; guardrails
+  and receipts built in; Studio only; files the hub's safety floor refuses are skipped); (3) Claude subagents and this session for what needs judgment or
+  design. Sonnet is the default, Opus gets one bounded question, Haiku gathers evidence, Fable only when Jesse says. Dispatching: use the `dispatch` skill
+  (`scripts/wt.sh run codex` then `wait`, or `local-lane dispatch ... --detach` then `local-lane wait`); the dispatcher always reads the diff, runs the
+  tests and the gate and commits by file name. `docs/COORDINATION.md` is history plus role policy.
 - **Clean up on sight:** a merged or abandoned branch, finished worktree, dead file, leftover claim, lock or tmux session you own or
   can prove dead is removed this session; anything that may be another session's or Jesse's data is listed with evidence.
 - Load `docs/GIT-WORKFLOW.md` when a hook denies a git command or before a review. Before reporting a force-push or missing history, run `git remote -v` and `git reflog show origin/main`: a wrong `origin` URL looks like a rewrite (`standards/bin/origin-guard.sh`).
