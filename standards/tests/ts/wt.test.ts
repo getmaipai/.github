@@ -658,6 +658,27 @@ describe("wt.sh done never discards unlanded work", () => {
     expect(s.sh(["done", "--abandon"]).status).toBe(0);
   }, 30000);
 
+  test("wt.sh's own gate stamp is not work: done removes the worktree where data-scratch is not ignored", () => {
+    const s = session("ownstamp");
+    mkdirSync(join(s.path, "data-scratch", "gate-stamps"), { recursive: true });
+    writeFileSync(join(s.path, "data-scratch", "gate-stamps", `${s.name}.json`), "{}\n");
+    expect(s.sh(["done"]).status).toBe(0);
+    expect(s.hasWorktree()).toBe(false);
+  });
+
+  test("other files under data-scratch are still work: done refuses", () => {
+    const s = session("scratchnote");
+    mkdirSync(join(s.path, "data-scratch", "gate-stamps"), { recursive: true });
+    writeFileSync(join(s.path, "data-scratch", "gate-stamps", `${s.name}.json`), "{}\n");
+    writeFileSync(join(s.path, "data-scratch", "notes.md"), "keep me\n");
+    const r = s.sh(["done"]);
+    expect(r.status).not.toBe(0);
+    expect(r.stderr).toContain("data-scratch/notes.md");
+    expect(r.stderr).not.toContain("gate-stamps");
+    expect(s.hasWorktree()).toBe(true);
+    expect(s.sh(["done", "--abandon"]).status).toBe(0);
+  });
+
   test("--abandon: done removes an unlanded, dirty worktree and its branch", () => {
     const s = session("abandon");
     s.commit("abandon.txt");

@@ -431,12 +431,13 @@ refuse_unlanded() {
     git -C "$WT_MAIN" merge-base --is-ancestor "$tip" origin/main 2>/dev/null && continue
     commits+="$(git -C "$WT_MAIN" log -n 20 --format='  %h %s' origin/main.."$tip")"$'\n'
   done
-  (( removing )) && { dirty="$(git -C "$path" status --porcelain 2>&1)" || dirty="  git status failed in $path: $dirty"; }
+  # The gate stamp is wt.sh's own scratch, written inside the worktree, and not ignored in every repo.
+  (( removing )) && { dirty="$(git -C "$path" status --porcelain --untracked-files=all -- . ':(exclude)data-scratch/gate-stamps' 2>&1)" || dirty="git status failed in $path: $dirty"; }
   [[ -n "$commits$dirty" ]] || return 0
   if [[ -n "$commits" ]]; then msg="done refused, because removing this worktree would lose commits that are not on origin/main."
   else msg="done refused: every commit is on origin/main, but removing this worktree would delete the files below."; fi
   [[ -z "$commits" ]] || msg+=$'\n'"Commits on ${branch:-this worktree} not on origin/main:"$'\n'"$(printf '%s' "$commits" | awk '!seen[$0]++')"
-  [[ -z "$dirty" ]] || msg+=$'\n'"Uncommitted or untracked files in $path:"$'\n'"$(printf '%s\n' "$dirty" | sed 's/^/  /')"
+  [[ -z "$dirty" ]] || msg+=$'\n'"Uncommitted or untracked files in $path:"$'\n'"$(printf '%s\n' "$dirty" | awk 'NR <= 20 {print "  " $0} END {if (NR > 20) print "  ... and " NR - 20 " more"}')"
   err "$msg
 Either land them (commit any changes by file name, then run wt.sh land), or discard them on purpose: wt.sh done --abandon"
 }
