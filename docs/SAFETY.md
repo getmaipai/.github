@@ -108,6 +108,15 @@ Adult freedom comes with three standing pieces:
   minor's gate, and it chooses between two checked modes; nothing turns
   the gate off.
 
+- **Making a voice from a clip is for an owner or an admin, and it is unrestricted (owner's ruling, 2026-10-18).** "Admin can create
+  a voice with whatever they want, no limitations." An owner or admin can make a voice from any recording of 6 to 30 seconds:
+  no consent step, no attestation, no confirmation and no content check on the clip; the screen says "You are responsible for
+  having the right to use this voice." and nothing more. A member, teen or child cannot make one. A child or teen never lists,
+  picks or hears a voice made from a clip, and a robot that belongs to a child speaks a preset only. Making a voice leaves one
+  line in the hub log (who made it, with which settings, never the name of the voice or the clip). Everything a made voice
+  says is held by the same text floors as every other voice. Why: the person who runs the home answers for what they put
+  in it, and a consent ceremony protects no one when the owner is the one recording.
+
 - **Web search for child and teen controls runs through SafeSearch, safe
   engines only, a pinned adult-site host list and the page-text cleaning
   (owner's ruling, 2026-10-11; SafeSearch level, sources and cleaning
