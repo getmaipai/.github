@@ -21,6 +21,10 @@ own work directly on `main`, same as every other repo.
 `wt.sh done`; never hand-run `git worktree`. A branch or worktree that outlives its session is a bug:
 `wt.sh reap` (run by every `wt.sh start`) removes a worktree only when it is provably dead, and otherwise only reports it.
 
+**`wt.sh done` never discards unlanded work (2026-10-20).** It fetches, then refuses while the branch has a commit not on
+`origin/main` or the worktree has an uncommitted or untracked file, and names them. Land the work, or discard it on purpose with
+`wt.sh done --abandon`. A failed `land` followed by a plain `done` once deleted a branch whose only copy was a dangling commit.
+
 **The reaper never mutates a worktree (owner's ruling, 2026-10-17).** It never runs `git add`, `commit`, `stash` or `reset` and never
 creates a ref (the old "WIP: recover" commits and `wip/*` branches are gone as a behavior). A recorded pid is the short-lived shell
 that ran `start`, so it proves nothing. A session older than 4 h (`MAIPAI_WT_REAP_AGE`) is removed with a plain

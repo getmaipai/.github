@@ -417,8 +417,36 @@ NODE
   return "$rc"
 }
 
+# refuse_unlanded <branch> <path>: exits with the evidence when removing this worktree or deleting this
+# branch would lose work: a commit not reachable from a freshly fetched origin/main, or an uncommitted or
+# untracked file. A failed fetch judges against the last known origin/main, which can only refuse more.
+refuse_unlanded() {
+  local branch="$1" path="$2" removing=0 deleting=0 tip commits="" dirty="" msg
+  [[ "$path" != "$WT_MAIN" ]] && git -C "$WT_MAIN" worktree list --porcelain | grep -Fqx "worktree $path" && removing=1
+  [[ "$branch" == wt/* ]] && git -C "$WT_MAIN" show-ref --verify --quiet "refs/heads/$branch" && deleting=1
+  (( removing || deleting )) || return 0
+  git -C "$WT_MAIN" fetch origin >/dev/null 2>&1 || echo "wt: could not fetch origin; judging against the last known origin/main." >&2
+  git -C "$WT_MAIN" rev-parse --verify --quiet origin/main >/dev/null || err "origin/main is unknown, so nothing proves this work is landed; fetch origin, or discard it on purpose with: wt.sh done --abandon"
+  for tip in $( (( deleting )) && echo "refs/heads/$branch"; (( removing )) && git -C "$path" rev-parse --verify --quiet HEAD); do
+    git -C "$WT_MAIN" merge-base --is-ancestor "$tip" origin/main 2>/dev/null && continue
+    commits+="$(git -C "$WT_MAIN" log -n 20 --format='  %h %s' origin/main.."$tip")"$'\n'
+  done
+  (( removing )) && { dirty="$(git -C "$path" status --porcelain 2>&1)" || dirty="  git status failed in $path: $dirty"; }
+  [[ -n "$commits$dirty" ]] || return 0
+  if [[ -n "$commits" ]]; then msg="done refused, because removing this worktree would lose commits that are not on origin/main."
+  else msg="done refused: every commit is on origin/main, but removing this worktree would delete the files below."; fi
+  [[ -z "$commits" ]] || msg+=$'\n'"Commits on ${branch:-this worktree} not on origin/main:"$'\n'"$(printf '%s' "$commits" | awk '!seen[$0]++')"
+  [[ -z "$dirty" ]] || msg+=$'\n'"Uncommitted or untracked files in $path:"$'\n'"$(printf '%s\n' "$dirty" | sed 's/^/  /')"
+  err "$msg
+Either land them (commit any changes by file name, then run wt.sh land), or discard them on purpose: wt.sh done --abandon"
+}
+
 cmd_done() {
-  [[ $# == 0 ]] || err "done takes no arguments; use the current worktree's session file." 2
+  local abandon=0
+  while (( $# )); do
+    case "$1" in --abandon) abandon=1;; *) err "done takes only --abandon; run it from the worktree to finish." 2;; esac
+    shift
+  done
   local branch path name f tmuxname
   name="${MAIPAI_WT_SESSION:-$(current_session_name)}"; f="$(session_file "$name")"
   if [[ ! -f "$f" ]]; then
@@ -437,6 +465,7 @@ cmd_done() {
   elif [[ -f "$f" ]]; then
     branch="$(read_json "$f" branch)"; path="$(read_json "$f" path)"; tmuxname="$(read_json "$f" tmux)"
   else branch="$(git -C "$WT_ROOT" branch --show-current)"; path="$WT_ROOT"; tmuxname=""; fi
+  (( abandon )) || refuse_unlanded "$branch" "$path"
   if [[ -n "$tmuxname" ]] && command -v tmux >/dev/null 2>&1; then tmux_cmd kill-session -t "$tmuxname" >/dev/null 2>&1 || true; fi
   if [[ "$path" != "$WT_MAIN" ]] && git -C "$WT_MAIN" worktree list --porcelain | grep -Fqx "worktree $path"; then git -C "$WT_MAIN" worktree remove --force "$path" || err "could not remove worktree '$path'; resolve its Git state and retry wt.sh done."; fi
   if [[ "$branch" == wt/* ]] && git -C "$WT_MAIN" show-ref --verify --quiet "refs/heads/$branch"; then git -C "$WT_MAIN" branch -D "$branch" >/dev/null || err "could not delete branch '$branch'; remove it manually after checking its work is landed."; fi
@@ -644,7 +673,9 @@ Commit them by file name (git add -f for a tracked file under an ignored folder)
     changed_pin="$(git -C "$WT_ROOT" diff origin/main...HEAD -- scripts/check.sh '*package.json' | grep -E '^[+-].*(core-v|ui-v|spec-v|std-v)' || true)"
     if git -C "$WT_ROOT" push origin HEAD:main; then
       [[ -z "$changed_pin" || -z "${WT_PIN_REMINDER:-}" ]] || echo "Reminder: $WT_PIN_REMINDER"
-      cmd_done
+      # The push succeeded, so the land did too. done may still keep the worktree for untracked files
+      # (land checks tracked files only); it runs in a subshell so its refusal cannot turn this into a failure.
+      ( cmd_done ) || echo "wt: landed on origin/main; the worktree was kept for the files listed above. Run wt.sh done once they are handled." >&2
       return 0
     fi
     if (( attempt < 3 )); then git -C "$WT_ROOT" fetch origin || err "push was rejected and fetch failed; retry wt.sh land after network access returns."; before="$(git -C "$WT_ROOT" rev-parse HEAD)"; fi

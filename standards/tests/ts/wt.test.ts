@@ -74,7 +74,7 @@ describe("wt.sh worktree lifecycle", () => {
     const stamp = JSON.parse(readFileSync(join(data, "gate-stamps", `${name}.json`), "utf8"));
     expect(stamp.tier).toBe("T0");
     expect(stamp.head).toBe(spawnSync("git", ["-C", path, "rev-parse", "HEAD"], { encoding: "utf8" }).stdout.trim());
-    expect(run(["done"], { MAIPAI_WT_SESSION: name }).status).toBe(0);
+    expect(run(["done", "--abandon"], { MAIPAI_WT_SESSION: name }).status).toBe(0);
   });
 
   test("T1 check runs check.sh --pre and then the repo's test hook with the changed files", () => {
@@ -87,7 +87,7 @@ describe("wt.sh worktree lifecycle", () => {
     expect(checked.status).toBe(0);
     expect(readFileSync(join(data, "tests-ran.txt"), "utf8")).toContain("lib/thing.ts");
     expect(JSON.parse(readFileSync(join(data, "gate-stamps", `${name}.json`), "utf8")).tier).toBe("T1");
-    run(["done"], { MAIPAI_WT_SESSION: name });
+    run(["done", "--abandon"], { MAIPAI_WT_SESSION: name });
   });
 
   test("T1 selects tests that import the changed module, not tests that only say its name", () => {
@@ -120,7 +120,7 @@ describe("wt.sh worktree lifecycle", () => {
     expect(out).not.toContain("other.test.ts");
     const capped = spawnSync("bash", [script, "check"], { cwd: path, encoding: "utf8", env: { ...env, MAIPAI_WT_T1_CAP: "2" } });
     expect(capped.stdout).toContain("2 more tests also match and are NOT run");
-    run(["done"], { MAIPAI_WT_SESSION: name });
+    run(["done", "--abandon"], { MAIPAI_WT_SESSION: name });
   });
 
   test("a file that is already staged still lands in the stamp manifest", () => {
@@ -132,7 +132,7 @@ describe("wt.sh worktree lifecycle", () => {
     const checked = spawnSync("bash", [script, "check"], { cwd: path, encoding: "utf8", env: { ...process.env, ...repoEnv, MAIPAI_WT_DATA: data, MAIPAI_WT_SESSION: name } });
     expect(checked.status).toBe(0);
     expect(Object.keys(JSON.parse(readFileSync(join(data, "gate-stamps", `${name}.json`), "utf8")).manifest)).toContain("NOTE.md");
-    run(["done"], { MAIPAI_WT_SESSION: name });
+    run(["done", "--abandon"], { MAIPAI_WT_SESSION: name });
   });
 
   test("without MAIPAI_WT_DATA the stamp lands inside the worktree, where the commit hook reads it", () => {
@@ -145,7 +145,7 @@ describe("wt.sh worktree lifecycle", () => {
     const checked = spawnSync("bash", [script, "check"], { cwd: path, encoding: "utf8", env });
     expect(checked.status).toBe(0);
     expect(JSON.parse(readFileSync(join(path, "data-scratch/gate-stamps", `${name}.json`), "utf8")).tier).toBe("T0");
-    run(["done"], { MAIPAI_WT_SESSION: name });
+    run(["done", "--abandon"], { MAIPAI_WT_SESSION: name });
   });
 
   test("tier classifies explicit paths and the branch diff", () => {
@@ -165,7 +165,7 @@ describe("wt.sh worktree lifecycle", () => {
     writeFileSync(join(path, "backend-change.ts"), "code\n");
     expect(spawnSync("bash", [script, "tier"], { cwd: path, encoding: "utf8", env: { ...process.env, ...repoEnv, MAIPAI_WT_DATA: data } }).stdout.trim()).toBe("T1");
     const name = path.split("/").at(-1)!.replace(/^demo-/, "");
-    run(["done"], { MAIPAI_WT_SESSION: name });
+    run(["done", "--abandon"], { MAIPAI_WT_SESSION: name });
   });
 
   test("tmux creates only a session on its private socket and done kills it", () => {
@@ -288,7 +288,9 @@ describe("wt.sh worktree lifecycle", () => {
       const bareDir = join(scratch, "no-tmux-bin");
       mkdirSync(bareDir, { recursive: true });
       for (const tool of ["git", "bash", "env", "dirname", "basename", "cat", "mkdir", "od", "awk", "grep", "tail", "cut", "sleep", "ls", "head", "tr", "find", "date", "rm", "touch", "wc", "sed", "lsof", "node", "sort", "uniq", "kill"]) {
-        const found = spawnSync("bash", ["-c", `command -v ${tool}`], { encoding: "utf8" }).stdout.trim();
+        // A version manager's node may be a shim that breaks when linked elsewhere; link the binary it runs.
+        const lookup = tool === "node" ? "node -p process.execPath" : `command -v ${tool}`;
+        const found = spawnSync("bash", ["-c", lookup], { encoding: "utf8" }).stdout.trim();
         if (found) spawnSync("ln", ["-sf", found, join(bareDir, tool)]);
       }
       const out = reap({ PATH: bareDir });
@@ -412,7 +414,7 @@ describe("wt.sh land gate stamp", () => {
     const s = session("nostamp", "docs/nostamp.md");
     refused(s.sh(["land"]), "no gate stamp", `MAIPAI_WT_SESSION=${s.name} bash scripts/wt.sh check`);
     expect(originMain()).toBe(before);
-    s.sh(["done"]);
+    s.sh(["done", "--abandon"]);
   });
 
   test("refuses a failed, too-weak, stale, or drifted stamp, then lands after a fresh green check", () => {
@@ -479,7 +481,7 @@ describe("wt.sh run and wait", () => {
     const detached = run(["run", "--detach", "again", brief], { MAIPAI_WT_SESSION: name, MAIPAI_CODEX_BIN: fakeCodex("cat >/dev/null; echo two") });
     expect(detached.stdout).toContain("next: bash scripts/wt.sh wait");
     expect(run(["wait", `demo-${name}-again`, "30"], { MAIPAI_WT_POLL: "1" }).stdout).toContain("DONE");
-    run(["done"], { MAIPAI_WT_SESSION: name });
+    run(["done", "--abandon"], { MAIPAI_WT_SESSION: name });
   });
 
   test("run passes -s workspace-write by default, respects a binary override, and never grants full access", () => {
@@ -498,7 +500,7 @@ describe("wt.sh run and wait", () => {
     const script_ = readFileSync(script, "utf8");
     expect(script_).toContain("exec -s workspace-write");
     expect(script_).not.toMatch(/danger-full-access|dangerously|--yolo|bypass-approvals/);
-    run(["done"], { MAIPAI_WT_SESSION: name });
+    run(["done", "--abandon"], { MAIPAI_WT_SESSION: name });
   });
 
   test("a bin with arguments or shell characters is refused, and the sandbox flag cannot be removed", () => {
@@ -515,7 +517,7 @@ describe("wt.sh run and wait", () => {
     const rec = fakeCodex(`cat >/dev/null; printf '%s\\n' "$@" > '${argvFile}'`);
     expect(run(["run", "ok", brief], { MAIPAI_WT_SESSION: name, MAIPAI_WT_POLL: "1", MAIPAI_CODEX_BIN: rec }).stdout).toContain("DONE");
     expect(readFileSync(argvFile, "utf8")).toContain("workspace-write");
-    run(["done"], { MAIPAI_WT_SESSION: name });
+    run(["done", "--abandon"], { MAIPAI_WT_SESSION: name });
   });
 
   test("a brief filename with a quote or shell character is refused", () => {
@@ -528,7 +530,7 @@ describe("wt.sh run and wait", () => {
       expect(out.status).not.toBe(0);
       expect(out.stderr).toContain("brief path");
     }
-    run(["done"], { MAIPAI_WT_SESSION: name });
+    run(["done", "--abandon"], { MAIPAI_WT_SESSION: name });
   });
 
   test("wait prints git status and the diffstat of the worktree after DONE", () => {
@@ -543,7 +545,7 @@ describe("wt.sh run and wait", () => {
     expect(out.stdout).toContain(" M README.md");
     expect(out.stdout).toContain("?? fresh.txt");
     expect(out.stdout).toMatch(/README\.md \| 1 \+/);
-    run(["done"], { MAIPAI_WT_SESSION: name });
+    run(["done", "--abandon"], { MAIPAI_WT_SESSION: name });
   });
 
   test("a missing tmux or node names /opt/homebrew/bin when it is there", () => {
@@ -560,7 +562,7 @@ describe("wt.sh run and wait", () => {
     const out = run(["run", "codex", brief], { MAIPAI_WT_SESSION: name, PATH: bare_ });
     expect(out.status).not.toBe(0);
     expect(out.stderr).toMatch(/tmux is (not on PATH but exists at \/opt\/homebrew\/bin\/tmux|required)/);
-    run(["done"], { MAIPAI_WT_SESSION: name });
+    run(["done", "--abandon"], { MAIPAI_WT_SESSION: name });
   });
 
   test("a failing run reports FAILED and a killed session reports DIED", () => {
@@ -582,6 +584,108 @@ describe("wt.sh run and wait", () => {
       return run(["wait", `demo-${name}-hang`, "2"], { MAIPAI_WT_POLL: "1" });
     })();
     expect(timedOut.stdout).toContain("TIMEOUT");
-    run(["done"], { MAIPAI_WT_SESSION: name });
+    run(["done", "--abandon"], { MAIPAI_WT_SESSION: name });
+  });
+});
+
+describe("wt.sh done never discards unlanded work", () => {
+  const gitEnv = { ...process.env, GIT_AUTHOR_NAME: "T", GIT_AUTHOR_EMAIL: "t@example.invalid", GIT_COMMITTER_NAME: "T", GIT_COMMITTER_EMAIL: "t@example.invalid" };
+  const session = (slug: string) => {
+    const started = run(["start", slug]);
+    if (started.status !== 0 || !started.stdout.trim()) throw new Error(`wt.sh start failed: ${started.stderr}`);
+    const path = started.stdout.trim();
+    const name = path.split("/").at(-1)!.replace(/^demo-/, "");
+    const branch = `wt/${name}`;
+    const sh = (args: string[]) => spawnSync("bash", [script, ...args], { cwd: path, encoding: "utf8", env: { ...process.env, ...repoEnv, MAIPAI_WT_DATA: data, MAIPAI_WT_SESSION: name } });
+    const commit = (file: string) => {
+      writeFileSync(join(path, file), `${slug}\n`);
+      spawnSync("git", ["-C", path, "add", file]);
+      spawnSync("git", ["-C", path, "commit", "-m", `${slug} ${file}`], { env: gitEnv });
+      return spawnSync("git", ["-C", path, "rev-parse", "--short", "HEAD"], { encoding: "utf8" }).stdout.trim();
+    };
+    const hasWorktree = () => spawnSync("git", ["-C", fixture, "worktree", "list", "--porcelain"], { encoding: "utf8" }).stdout.includes(`worktree ${path}\n`);
+    const hasBranch = () => spawnSync("git", ["-C", fixture, "show-ref", "--verify", "--quiet", `refs/heads/${branch}`]).status === 0;
+    return { path, name, sh, commit, hasWorktree, hasBranch };
+  };
+
+  test("an unlanded commit: done refuses, names the commit and both ways forward, and keeps branch and worktree", () => {
+    const s = session("unlanded");
+    const sha = s.commit("unlanded.txt");
+    const r = s.sh(["done"]);
+    expect(r.status).not.toBe(0);
+    expect(r.stderr).toContain(sha);
+    expect(r.stderr).toContain("wt.sh land");
+    expect(r.stderr).toContain("--abandon");
+    expect(s.hasWorktree()).toBe(true);
+    expect(s.hasBranch()).toBe(true);
+    expect(existsSync(join(data, "sessions", `${s.name}.json`))).toBe(true);
+    expect(s.sh(["done", "--abandon"]).status).toBe(0);
+  });
+
+  test("uncommitted or untracked changes: done refuses and keeps them", () => {
+    const s = session("dirty");
+    writeFileSync(join(s.path, "untracked.txt"), "keep me\n");
+    const r = s.sh(["done"]);
+    expect(r.status).not.toBe(0);
+    expect(r.stderr).toContain("untracked.txt");
+    expect(r.stderr).toContain("--abandon");
+    expect(s.hasWorktree()).toBe(true);
+    expect(readFileSync(join(s.path, "untracked.txt"), "utf8")).toBe("keep me\n");
+    expect(s.sh(["done", "--abandon"]).status).toBe(0);
+  });
+
+  test("a landed branch: done removes the worktree and branch", () => {
+    const s = session("landed");
+    s.commit("landed.txt");
+    expect(spawnSync("git", ["-C", s.path, "push", "origin", "HEAD:main"]).status).toBe(0);
+    const r = s.sh(["done"]);
+    expect(r.status).toBe(0);
+    expect(s.hasWorktree()).toBe(false);
+    expect(s.hasBranch()).toBe(false);
+  });
+
+  test("land with an untracked file: lands, keeps the worktree, and says so", () => {
+    const s = session("landuntracked");
+    s.commit("landuntracked.txt");
+    expect(s.sh(["check"]).status).toBe(0);
+    writeFileSync(join(s.path, "notes.txt"), "keep me\n");
+    const r = s.sh(["land"]);
+    expect(r.status).toBe(0);
+    expect(r.stderr).toContain("every commit is on origin/main");
+    expect(r.stderr).toContain("notes.txt");
+    expect(r.stderr).toContain("landed on origin/main; the worktree was kept");
+    expect(s.hasWorktree()).toBe(true);
+    expect(s.sh(["done", "--abandon"]).status).toBe(0);
+  }, 30000);
+
+  test("--abandon: done removes an unlanded, dirty worktree and its branch", () => {
+    const s = session("abandon");
+    s.commit("abandon.txt");
+    writeFileSync(join(s.path, "scratch.txt"), "x\n");
+    const r = s.sh(["done", "--abandon"]);
+    expect(r.status).toBe(0);
+    expect(s.hasWorktree()).toBe(false);
+    expect(s.hasBranch()).toBe(false);
+    expect(existsSync(join(data, "sessions", `${s.name}.json`))).toBe(false);
+  });
+
+  test("a corrupt own record still refuses unlanded work, and --abandon still cleans up", () => {
+    const s = session("corruptunlanded");
+    s.commit("c.txt");
+    const file = join(data, "sessions", `${s.name}.json`);
+    writeFileSync(file, "");
+    expect(s.sh(["done"]).status).not.toBe(0);
+    expect(s.hasBranch()).toBe(true);
+    expect(s.sh(["done", "--abandon"]).status).toBe(0);
+    expect(s.hasWorktree()).toBe(false);
+    expect(existsSync(file)).toBe(false);
+  });
+
+  test("an unknown argument is refused", () => {
+    const s = session("badarg");
+    const r = s.sh(["done", "--force"]);
+    expect(r.status).toBe(2);
+    expect(s.hasWorktree()).toBe(true);
+    s.sh(["done", "--abandon"]);
   });
 });
