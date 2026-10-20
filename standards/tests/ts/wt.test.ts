@@ -145,6 +145,10 @@ describe("wt.sh worktree lifecycle", () => {
     const checked = spawnSync("bash", [script, "check"], { cwd: path, encoding: "utf8", env });
     expect(checked.status).toBe(0);
     expect(JSON.parse(readFileSync(join(path, "data-scratch/gate-stamps", `${name}.json`), "utf8")).tier).toBe("T0");
+    // A second check must not list the first stamp as a changed file (data-scratch is not ignored here).
+    expect(spawnSync("bash", [script, "check"], { cwd: path, encoding: "utf8", env }).status).toBe(0);
+    const manifest = JSON.parse(readFileSync(join(path, "data-scratch/gate-stamps", `${name}.json`), "utf8")).manifest;
+    expect(Object.keys(manifest)).toEqual(["NOTE.md"]);
     run(["done", "--abandon"], { MAIPAI_WT_SESSION: name });
   });
 

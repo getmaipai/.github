@@ -23,6 +23,8 @@ WT_PORT_DIR="$WT_DATA/ports"
 # The commit-gate hook reads the stamp from the worktree it commits in, so the stamp
 # lives there (removed with the worktree); sessions and ports are shared in the main checkout.
 WT_STAMP_DIR="${MAIPAI_WT_DATA:-$WT_ROOT/data-scratch}/gate-stamps"
+# wt.sh's own scratch inside a worktree is never work, even in a repo that does not ignore data-scratch/.
+WT_OWN_SCRATCH=':(exclude)data-scratch/gate-stamps'
 WT_INSTALL_DIRS="${WT_INSTALL_DIRS:-}"
 WT_T2_GLOBS="${WT_T2_GLOBS:-}"
 WT_TEST_WORKSPACES="${WT_TEST_WORKSPACES:-}"
@@ -263,7 +265,7 @@ changed_files() {
   git -C "$WT_ROOT" diff --name-only "$base"...HEAD
   git -C "$WT_ROOT" diff --name-only
   git -C "$WT_ROOT" diff --cached --name-only
-  git -C "$WT_ROOT" ls-files --others --exclude-standard
+  git -C "$WT_ROOT" ls-files --others --exclude-standard -- . "$WT_OWN_SCRATCH"
 }
 
 classify_tier() {
@@ -431,8 +433,7 @@ refuse_unlanded() {
     git -C "$WT_MAIN" merge-base --is-ancestor "$tip" origin/main 2>/dev/null && continue
     commits+="$(git -C "$WT_MAIN" log -n 20 --format='  %h %s' origin/main.."$tip")"$'\n'
   done
-  # The gate stamp is wt.sh's own scratch, written inside the worktree, and not ignored in every repo.
-  (( removing )) && { dirty="$(git -C "$path" status --porcelain --untracked-files=all -- . ':(exclude)data-scratch/gate-stamps' 2>&1)" || dirty="git status failed in $path: $dirty"; }
+  (( removing )) && { dirty="$(git -C "$path" status --porcelain --untracked-files=all -- . "$WT_OWN_SCRATCH" 2>&1)" || dirty="git status failed in $path: $dirty"; }
   [[ -n "$commits$dirty" ]] || return 0
   if [[ -n "$commits" ]]; then msg="done refused, because removing this worktree would lose commits that are not on origin/main."
   else msg="done refused: every commit is on origin/main, but removing this worktree would delete the files below."; fi
