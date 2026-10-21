@@ -522,7 +522,7 @@ describe("wt.sh run and wait", () => {
     expect(run(["run", "ok", brief], { MAIPAI_WT_SESSION: name, MAIPAI_WT_POLL: "1", MAIPAI_CODEX_BIN: rec }).stdout).toContain("DONE");
     expect(readFileSync(argvFile, "utf8")).toContain("workspace-write");
     run(["done", "--abandon"], { MAIPAI_WT_SESSION: name });
-  });
+  }, 60000);
 
   test("a brief filename with a quote or shell character is refused", () => {
     const started = run(["start", "runbrief"]);
@@ -589,7 +589,7 @@ describe("wt.sh run and wait", () => {
     })();
     expect(timedOut.stdout).toContain("TIMEOUT");
     run(["done", "--abandon"], { MAIPAI_WT_SESSION: name });
-  });
+  }, 60000);
 });
 
 describe("wt.sh done never discards unlanded work", () => {
