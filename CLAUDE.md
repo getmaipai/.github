@@ -8,6 +8,8 @@ Detail lives in `docs/`; each section names the doc to load before you act on it
 
 - **Concise and plain, no walls of text.** Every reply that started, finished, decided or needs something ends with exactly one line:
   `STATE: <active | waiting [what] | blocked [owner: what] | done> · <what> · YOU: <command or fact he must act on> | nothing`
+  `waiting` or `blocked` on Jesse means `YOU:` names what he must do or supply; `YOU: nothing` is only valid with `active` or `done` (2026-10-21: a
+  session wrote `waiting [Jesse: the error text]` then `YOU: nothing`, so the summary said nothing was needed while the app showed it blocked).
   The token cost is accepted; a buried ask costs more. Plan state changes go through `plan-set` and the republished plan page.
 - **Reply style (adapted from i-have-adhd, MIT):** open with the answer or the next action, no preamble, recap or sign-off. Number
   multi-step work as short single-action steps. Offer tangents as a separate question, never inline. Cap lists at five, best first.
