@@ -58,8 +58,10 @@ describe("wt.sh worktree lifecycle", () => {
   test("port leases the first available port and records a session", () => {
     const result = run(["port"], { MAIPAI_WT_SESSION: "test-session" });
     expect(result.status).toBe(0);
-    expect(result.stdout.trim()).toBe("8800");
-    expect(readFileSync(join(data, "ports", "8800.lease"), "utf8")).toContain("test-session");
+    // The first free port in 8800-8899: another live session (a dev server, a Codex backend) may hold 8800.
+    const port = result.stdout.trim();
+    expect(port).toMatch(/^88\d\d$/);
+    expect(readFileSync(join(data, "ports", `${port}.lease`), "utf8")).toContain("test-session");
   });
 
   test("check classifies docs, then stamps the selected tier and HEAD", () => {
@@ -241,7 +243,7 @@ describe("wt.sh worktree lifecycle", () => {
       expect(reap().status).toBe(0);
       expect(listed()).not.toContain(`worktree ${w.path}`);
       expect(existsSync(w.file)).toBe(false);
-    });
+    }, 15000); // reap runs git per worktree; 5s is too tight on a loaded machine
 
     test("a dirty old worktree is reported, not removed or committed", () => {
       const w = startDead("dirtyold");
