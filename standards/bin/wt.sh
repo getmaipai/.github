@@ -433,18 +433,20 @@ NODE
 }
 
 # refuse_unlanded <branch> <path>: exits with the evidence when removing this worktree or deleting this
-# branch would lose work: a commit not reachable from a freshly fetched origin/main, or an uncommitted or
-# untracked file. A failed fetch judges against the last known origin/main, which can only refuse more.
+# branch would lose work: a commit without a patch equivalent on freshly fetched origin/main, or an
+# uncommitted or untracked file. A failed fetch judges against the last known origin/main, which can only refuse more.
 refuse_unlanded() {
-  local branch="$1" path="$2" removing=0 deleting=0 tip commits="" dirty="" msg
+  local branch="$1" path="$2" removing=0 deleting=0 tip cherry_line cherry_sha commits="" dirty="" msg
   [[ "$path" != "$WT_MAIN" ]] && git -C "$WT_MAIN" worktree list --porcelain | grep -Fqx "worktree $path" && removing=1
   [[ "$branch" == wt/* ]] && git -C "$WT_MAIN" show-ref --verify --quiet "refs/heads/$branch" && deleting=1
   (( removing || deleting )) || return 0
   git -C "$WT_MAIN" fetch origin >/dev/null 2>&1 || echo "wt: could not fetch origin; judging against the last known origin/main." >&2
   git -C "$WT_MAIN" rev-parse --verify --quiet origin/main >/dev/null || err "origin/main is unknown, so nothing proves this work is landed; fetch origin, or discard it on purpose with: wt.sh done --abandon"
-  for tip in $( (( deleting )) && echo "refs/heads/$branch"; (( removing )) && git -C "$path" rev-parse --verify --quiet HEAD); do
-    git -C "$WT_MAIN" merge-base --is-ancestor "$tip" origin/main 2>/dev/null && continue
-    commits+="$(git -C "$WT_MAIN" log -n 20 --format='  %h %s' origin/main.."$tip")"$'\n'
+  for tip in $( (( removing )) && echo HEAD; (( ! removing && deleting )) && echo "refs/heads/$branch"); do
+    while read -r cherry_line cherry_sha; do
+      [[ "$cherry_line" == "+" ]] || continue
+      commits+="$(git -C "$path" show -s --format='  %h %s' "$cherry_sha")"$'\n'
+    done < <(git -C "$path" cherry origin/main "$tip")
   done
   (( removing )) && { dirty="$(git -C "$path" status --porcelain --untracked-files=all -- . "$WT_OWN_SCRATCH" 2>&1)" || dirty="git status failed in $path: $dirty"; }
   [[ -n "$commits$dirty" ]] || return 0

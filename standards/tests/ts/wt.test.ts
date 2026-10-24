@@ -631,6 +631,7 @@ describe("wt.sh done never discards unlanded work", () => {
     const r = s.sh(["done"]);
     expect(r.status).not.toBe(0);
     expect(r.stderr).toContain(sha);
+    expect(r.stderr).toContain("unlanded unlanded.txt");
     expect(r.stderr).toContain("wt.sh land");
     expect(r.stderr).toContain("--abandon");
     expect(s.hasWorktree()).toBe(true);
@@ -660,6 +661,25 @@ describe("wt.sh done never discards unlanded work", () => {
     expect(s.hasWorktree()).toBe(false);
     expect(s.hasBranch()).toBe(false);
   });
+
+  test("a rebased equivalent commit on main: done removes the worktree without --abandon", () => {
+    const s = session("rebased");
+    const original = s.commit("rebased.txt");
+    expect(spawnSync("git", ["-C", s.path, "push", "origin", "HEAD:refs/heads/rebased-source"]).status).toBe(0);
+    const clone = join(scratch, "rebased-main");
+    expect(spawnSync("git", ["clone", bare, clone], { encoding: "utf8" }).status).toBe(0);
+    spawnSync("git", ["-C", clone, "config", "user.name", "Test User"]);
+    spawnSync("git", ["-C", clone, "config", "user.email", "test@example.invalid"]);
+    expect(spawnSync("git", ["-C", clone, "cherry-pick", original], { encoding: "utf8" }).status).toBe(0);
+    const rebased = spawnSync("git", ["-C", clone, "rev-parse", "--short", "HEAD"], { encoding: "utf8" }).stdout.trim();
+    expect(rebased).not.toBe(original);
+    expect(spawnSync("git", ["-C", clone, "push", "origin", "HEAD:main"], { encoding: "utf8" }).status).toBe(0);
+
+    const r = s.sh(["done"]);
+    expect(r.status).toBe(0);
+    expect(s.hasWorktree()).toBe(false);
+    expect(s.hasBranch()).toBe(false);
+  }, 30000);
 
   test("land with an untracked file: lands, keeps the worktree, and says so", () => {
     const s = session("landuntracked");
