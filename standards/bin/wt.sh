@@ -279,15 +279,26 @@ classify_tier() {
   fi
   for f in ${files[@]+"${files[@]}"}; do
     case "$f" in docs/api/*) all_docs=0;; *.md|docs/*|screenshots/*|*.png|*.jpg|*.jpeg|*.webp|*.avif|*.gif) :;; *) all_docs=0;; esac
-    # Always risky: the design rules only. The full gate (T2) is optional and never blocks a land: check.sh and wt.sh changes are T1 (2026-10-23, Jesse). Pins, lockfiles and plans are T1 since
+    # Always risky: the design rules and the gate itself. Pins, lockfiles and plans are T1 since
     # 2026-10-16 (GATE-FAST-01): a pin bump ran 438 full gates in 8 days and found nothing a T1 did not.
-    case "$f" in docs/design/RULES.md) t2=1;; esac
+    # classify_tier reports the full tier; blocking_tier decides what a land must prove (2026-10-23, Jesse).
+    case "$f" in docs/design/RULES.md|scripts/check.sh|scripts/wt.sh) t2=1;; esac
     for glob in ${t2globs[@]+"${t2globs[@]}"}; do
       # shellcheck disable=SC2254
       case "$f" in $glob) t2=1;; esac
     done
   done
   if (( t2 )); then echo T2; elif (( all_docs )) && (( ${#files[@]} )); then echo T0; else echo T1; fi
+}
+
+# blocking_tier: the tier a check or land must pass inline. The full gate (T2) never blocks: a T2 diff
+# needs the quick T1 check here, and the full gate runs after the land (home's post-land main gate,
+# RELEASE-GATE-01). `wt.sh check T2` still runs the full gate on demand.
+blocking_tier() {
+  local t
+  t="$(classify_tier "$@")"
+  [[ "$t" == T2 ]] && t=T1
+  echo "$t"
 }
 
 cmd_tier() { printf '%s\n' "$(classify_tier "$@")"; }
@@ -383,7 +394,7 @@ cmd_check() {
   beat "$name"
   local files=() f
   while IFS= read -r f; do [[ -n "$f" ]] && files+=("$f"); done < <(changed_files "$base" | sort -u)
-  auto_tier="$(classify_tier ${files[@]+"${files[@]}"})"
+  auto_tier="$(blocking_tier ${files[@]+"${files[@]}"})"
   tier="$auto_tier"
   if [[ -n "$requested" ]]; then
     requested="$(printf '%s' "$requested" | tr '[:lower:]' '[:upper:]')"
@@ -607,7 +618,7 @@ require_gate_stamp() {
   stamp="$WT_STAMP_DIR/$name.json"
   [[ -f "$stamp" ]] || err "no gate stamp for session '$name' at $stamp, so nothing proves these commits were checked. Run: $tag"
   while IFS= read -r f; do [[ -n "$f" ]] && files+=("$f"); done < <(git -C "$WT_ROOT" diff --name-only origin/main...HEAD | sort -u)
-  required="$(classify_tier ${files[@]+"${files[@]}"})"
+  required="$(blocking_tier ${files[@]+"${files[@]}"})"
   local verdict
   verdict="$(node - "$stamp" "$required" "${MAIPAI_WT_STAMP_MAX_AGE:-14400}" "$WT_ROOT" ${files[@]+"${files[@]}"} <<'NODE'
 const cp = require("child_process"), fs = require("fs");
