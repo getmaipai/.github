@@ -22,6 +22,9 @@ files=$(sed '/^$/d' <<< "$files")
 deny() { jq -n --arg reason "$1" '{decision:"deny",reason:$reason}' >&2; exit 2; }
 tier=$(cd "$cwd" && bash scripts/wt.sh tier $files 2>/dev/null | tail -1)
 case "$tier" in T0) exit 0;; T1|T2) :;; *) deny "Could not classify the staged files. Run 'bash scripts/wt.sh tier' from the repository, fix the issue, and retry.";; esac
+# A repo with a lander (scripts/land.sh) runs the static check at landing and the suite after it,
+# so a T1 commit needs no stamp here. T2 keeps the stamp and the review (the safety surface).
+if [ "$tier" = T1 ] && [ -x "$root/scripts/land.sh" ]; then exit 0; fi
 name=${MAIPAI_WT_SESSION:-$(git -C "$root" branch --show-current)}
 name=${name#wt/}
 stamp="${MAIPAI_WT_DATA:-$root/data-scratch}/gate-stamps/$name.json"

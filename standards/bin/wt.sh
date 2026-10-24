@@ -653,6 +653,8 @@ NODE
 }
 
 cmd_land() {
+  # A repo with a lander lands through it (Home, 2026-10-24): the lander runs the static check and the push.
+  if [[ -x "$WT_ROOT/scripts/land.sh" ]]; then exec bash "$WT_ROOT/scripts/land.sh" "$@"; fi
   [[ $# == 0 ]] || err "land takes no arguments; run it from the active worktree." 2
   need_cmd git
   beat "${MAIPAI_WT_SESSION:-$(current_session_name)}"

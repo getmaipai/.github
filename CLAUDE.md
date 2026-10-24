@@ -88,7 +88,7 @@ measured and reported with the rule named, never dropped (full text and the dele
 | Change | Before landing |
 |---|---|
 | Docs only | `scripts/check.sh --docs` (secrets, PII, prose) |
-| Ordinary code | `scripts/check.sh --pre` plus the tests beside the changed files; read your own diff once |
+| Ordinary code | `bash scripts/land.sh` in a repo with a lander (Home): the lander runs the static check at landing, the watcher runs the suite after; elsewhere `scripts/check.sh --pre` plus the tests beside the changed files; read your own diff once |
 | Risky surface (auth, credentials, consent, child and teen gates, migrations, `RULES.md`, `check.sh`, `wt.sh`) | full `check.sh` under the machine lock, `code-review` at medium, architect verdict when the design changes |
 
 Everything else, the turn pipeline, wire shapes, spec records and pins included, is ordinary code (GATE-FAST-01, 2026-10-16). Tests that need

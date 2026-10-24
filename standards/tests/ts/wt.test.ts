@@ -415,6 +415,17 @@ describe("wt.sh land gate stamp", () => {
     expect(r.stderr).toContain(next);
   };
 
+  test("hands land to the repo lander without pushing", () => {
+    const before = originMain();
+    writeFileSync(join(fixture, "scripts/land.sh"), "#!/usr/bin/env bash\nprintf 'land.sh called with: %s\\n' \"$*\"\nexit 0\n");
+    spawnSync("chmod", ["+x", join(fixture, "scripts/land.sh")]);
+    const landed = run(["land", "--detach"]);
+    expect(landed.status).toBe(0);
+    expect(landed.stdout).toContain("land.sh called with: --detach");
+    expect(originMain()).toBe(before);
+    rmSync(join(fixture, "scripts/land.sh"));
+  });
+
   test("refuses with the exact next command when no stamp exists", () => {
     const before = originMain();
     const s = session("nostamp", "docs/nostamp.md");

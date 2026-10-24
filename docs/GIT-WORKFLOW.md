@@ -17,7 +17,7 @@ own work directly on `main`, same as every other repo.
 
 ## Branches and worktrees
 
-**One session, one worktree on a short-lived `wt/*` branch, created by `scripts/wt.sh start`.** Land it with `wt.sh land`, then
+**One session, one worktree on a short-lived `wt/*` branch, created by `scripts/wt.sh start`.** Land it with `wt.sh land` (which hands off to `scripts/land.sh` where the repo has a lander), then
 `wt.sh done`; never hand-run `git worktree`. A branch or worktree that outlives its session is a bug:
 `wt.sh reap` (run by every `wt.sh start`) removes a worktree only when it is provably dead, and otherwise only reports it.
 

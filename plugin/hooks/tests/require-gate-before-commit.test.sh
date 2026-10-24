@@ -56,4 +56,19 @@ git -C "$repo" reset -q --hard HEAD
 echo auth-change >> "$repo/backend/src/auth/session.ts"; git -C "$repo" add backend/src/auth/session.ts
 make_stamp T1
 assert_deny 'requires T2'
+
+# A lander waives only the T1 commit stamp, not T2.
+rm -f "$repo/data-scratch/gate-stamps/main.json"
+cat > "$repo/scripts/land.sh" <<'SH'
+#!/usr/bin/env bash
+exit 0
+SH
+chmod +x "$repo/scripts/land.sh"
+git -C "$repo" add scripts/land.sh && git -C "$repo" commit -qm 'add lander fixture'
+git -C "$repo" reset -q --hard HEAD
+echo lander-t1 >> "$repo/app.ts"; git -C "$repo" add app.ts
+assert_ok 'T1 with lander and no stamp'
+git -C "$repo" reset -q --hard HEAD
+echo lander-t2 >> "$repo/backend/src/auth/session.ts"; git -C "$repo" add backend/src/auth/session.ts
+assert_deny 'No wt.sh gate stamp'
 echo 'hook tier tests passed'

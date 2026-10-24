@@ -67,6 +67,7 @@ to run it any better than "review before committing" did.
   `git commit` unless `scripts/check.sh` is on record for this repo, in
   a scope that actually covers the files about to be committed, within
   the last 4 hours. Detects a commit more broadly than
+  a repo with `scripts/land.sh` skips the stamp for T1 commits; T2 is unchanged.
   `require-review-before-commit.sh` does (`git -C <path> commit`,
   `git --no-pager commit`, `git --git-dir=<path> commit` - not just a
   bare `git commit`, and a review found all three bypassed that hook's
