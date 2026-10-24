@@ -381,7 +381,9 @@ run_beside_tests() {
       i=$((i + 1))
     done
     (( n > cap )) && echo "   $((n - cap)) more tests also match and are NOT run here (cap $cap, MAIPAI_WT_T1_CAP); run 'bash scripts/wt.sh check T2' for the full suite."
-    (cd "$WT_ROOT/$ws" && bun test "${group[@]}") || rc=$?
+    # Same 20 s per-test timeout as scripts/gate/shardTests.ts (getmaipai/home#216): bun's 5 s default
+    # failed the app port and stop-dev-home tests under gate load on 2026-10-23.
+    (cd "$WT_ROOT/$ws" && bun test --timeout 20000 "${group[@]}") || rc=$?
   done
   return "$rc"
 }
