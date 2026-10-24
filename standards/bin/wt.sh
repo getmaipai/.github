@@ -279,9 +279,9 @@ classify_tier() {
   fi
   for f in ${files[@]+"${files[@]}"}; do
     case "$f" in docs/api/*) all_docs=0;; *.md|docs/*|screenshots/*|*.png|*.jpg|*.jpeg|*.webp|*.avif|*.gif) :;; *) all_docs=0;; esac
-    # Always risky: the gate itself and the design rules. Pins, lockfiles and plans are T1 since
+    # Always risky: the design rules only. The full gate (T2) is optional and never blocks a land: check.sh and wt.sh changes are T1 (2026-10-23, Jesse). Pins, lockfiles and plans are T1 since
     # 2026-10-16 (GATE-FAST-01): a pin bump ran 438 full gates in 8 days and found nothing a T1 did not.
-    case "$f" in docs/design/RULES.md|scripts/check.sh|scripts/wt.sh) t2=1;; esac
+    case "$f" in docs/design/RULES.md) t2=1;; esac
     for glob in ${t2globs[@]+"${t2globs[@]}"}; do
       # shellcheck disable=SC2254
       case "$f" in $glob) t2=1;; esac
