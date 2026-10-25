@@ -28,6 +28,8 @@ beforeAll(() => {
   mkdirSync(join(fixture, "scripts"), { recursive: true });
   writeFileSync(join(fixture, "scripts", "check.sh"), "#!/usr/bin/env bash\necho '== scope: fixture'\n");
   writeFileSync(join(fixture, "scripts", "wt-tests.sh"), "#!/usr/bin/env bash\nprintf '%s\\n' \"$@\" > \"$MAIPAI_WT_DATA/tests-ran.txt\"\n");
+  mkdirSync(join(fixture, "backend"), { recursive: true });
+  writeFileSync(join(fixture, "backend", "package.json"), JSON.stringify({ dependencies: { "@maipai/ui": "file:../../commons-tags/ui-ui-v9.9.9/ui" } }));
   spawnSync("git", ["-C", fixture, "add", "."]);
   spawnSync("git", ["-C", fixture, "commit", "-m", "initial"]);
   spawnSync("git", ["-C", fixture, "remote", "add", "origin", bare]);
@@ -40,6 +42,46 @@ afterAll(() => {
 });
 
 describe("wt.sh worktree lifecycle", () => {
+  const commons = join(scratch, "commons");
+  const tags = join(scratch, "commons-tags");
+  const bunBin = join(scratch, "bun-bin");
+  const ensure = join(commons, "scripts", "ensure-tag.sh");
+  const tagCalls = join(scratch, "ensure-tag-calls.txt");
+  const withTagSetup = (body: string) => {
+    mkdirSync(join(commons, "scripts"), { recursive: true });
+    mkdirSync(bunBin, { recursive: true });
+    rmSync(join(tags, "ui-ui-v9.9.9"), { recursive: true, force: true });
+    writeFileSync(join(bunBin, "bun"), "#!/usr/bin/env bash\nexit 0\n", { mode: 0o755 });
+    writeFileSync(ensure, body, { mode: 0o755 });
+    rmSync(tagCalls, { force: true });
+  };
+  const tagEnv = { WT_INSTALL_DIRS: "backend", MAIPAI_COMMONS_DIR: commons, PATH: `${bunBin}:${process.env.PATH}`, MAIPAI_WT_DATA: data };
+
+  test("start creates each missing pinned commons tag once before install", () => {
+    withTagSetup(`#!/usr/bin/env bash\nprintf '%s %s\\n' "$1" "$2" >> '${tagCalls}'\nmkdir -p '${tags}/'"$1-$2"\n`);
+    const first = run(["start", "tagfirst"], tagEnv);
+    expect(first.status).toBe(0);
+    expect(readFileSync(tagCalls, "utf8")).toBe("ui ui-v9.9.9\n");
+    const firstName = first.stdout.trim().split("/").at(-1)!.replace(/^demo-/, "");
+    expect(run(["done", "--abandon"], { MAIPAI_WT_SESSION: firstName }).status).toBe(0);
+
+    const second = run(["start", "tagsecond"], tagEnv);
+    expect(second.status).toBe(0);
+    expect(readFileSync(tagCalls, "utf8")).toBe("ui ui-v9.9.9\n");
+    const secondName = second.stdout.trim().split("/").at(-1)!.replace(/^demo-/, "");
+    expect(run(["done", "--abandon"], { MAIPAI_WT_SESSION: secondName }).status).toBe(0);
+  });
+
+  test("start removes its worktree and branch when commons tag creation fails", () => {
+    withTagSetup("#!/usr/bin/env bash\nexit 1\n");
+    const failed = run(["start", "tagfail"], tagEnv);
+    expect(failed.status).not.toBe(0);
+    expect(failed.stderr).toContain("wt: could not create the commons tag worktree ui-ui-v9.9.9; fetch the commons repo");
+    const worktrees = spawnSync("git", ["-C", fixture, "worktree", "list", "--porcelain"], { encoding: "utf8" }).stdout;
+    expect(worktrees).not.toMatch(/worktree .*\/wt\/demo-/);
+    expect(spawnSync("git", ["-C", fixture, "branch", "--list", "wt/*"], { encoding: "utf8" }).stdout.trim()).toBe("");
+  });
+
   test("start and done remove the worktree, branch, and session file", () => {
     const started = run(["start", "x"]);
     expect(started.status).toBe(0);
@@ -515,7 +557,7 @@ describe("wt.sh run and wait", () => {
     expect(argv.slice(argv.indexOf("-s"), argv.indexOf("-s") + 2)).toEqual(["-s", "workspace-write"]);
     expect(argv.join(" ")).not.toMatch(/danger|full-access|bypass|yolo|full-auto/);
     const script_ = readFileSync(script, "utf8");
-    expect(script_).toContain("exec -s workspace-write");
+    expect(script_).toContain('MAIPAI_TEST_NO_PORTS=1 \\"$bin\\" exec -s workspace-write');
     expect(script_).not.toMatch(/danger-full-access|dangerously|--yolo|bypass-approvals/);
     run(["done", "--abandon"], { MAIPAI_WT_SESSION: name });
   });

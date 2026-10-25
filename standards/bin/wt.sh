@@ -105,7 +105,37 @@ cmd_start() {
   for sib in commons-tags commons .github home stack catalog bot go; do
     if [[ -d "$WT_PARENT/$sib" && ! -e "$WT_PARENT/wt/$sib" ]]; then ln -s "$WT_PARENT/$sib" "$WT_PARENT/wt/$sib"; fi
   done
-  local d
+  local d commons
+  commons="${MAIPAI_COMMONS_DIR:-$WT_PARENT/commons}"
+  for d in $WT_INSTALL_DIRS; do
+    if [[ -f "$path/$d/package.json" ]]; then
+      while IFS=$'\t' read -r workspace tag folder; do
+        [[ -n "$folder" ]] || continue
+        [[ -e "$WT_PARENT/commons-tags/$folder" ]] && continue
+        if ! bash "$commons/scripts/ensure-tag.sh" "$workspace" "$tag"; then
+          git -C "$WT_MAIN" worktree remove --force "$path" >/dev/null 2>&1 || true
+          git -C "$WT_MAIN" branch -D "$branch" >/dev/null 2>&1 || true
+          err "could not create the commons tag worktree $folder; fetch the commons repo (git -C $commons fetch --tags) and rerun wt.sh start $slug."
+        fi
+      done < <(node - "$path/$d/package.json" <<'NODE'
+const fs = require("fs");
+const pkg = JSON.parse(fs.readFileSync(process.argv[2], "utf8"));
+for (const section of ["dependencies", "devDependencies", "optionalDependencies", "peerDependencies"]) {
+  for (const value of Object.values(pkg[section] || {})) {
+    if (typeof value !== "string") continue;
+    const match = value.match(/^file:\.\.\/\.\.\/commons-tags\/([^/]+)\/([^/]+)$/);
+    if (!match) continue;
+    const [, folder, workspace] = match;
+    const tag = folder.slice(workspace.length + 1);
+    if (folder.startsWith(`${workspace}-${workspace}-`) && tag.startsWith(`${workspace}-`)) {
+      console.log(`${workspace}\t${tag}\t${folder}`);
+    }
+  }
+}
+NODE
+)
+    fi
+  done
   for d in $WT_INSTALL_DIRS; do
     if [[ -d "$path/$d" ]]; then
       if ! (cd "$path/$d" && bun install --frozen-lockfile); then
@@ -191,7 +221,7 @@ cmd_run() {
   fi
   unsafe_chars "$brief" && err "brief path '$brief' has a quote or shell character; rename the file to letters, digits, dots, hyphens and underscores."
   unsafe_chars "$path" && err "worktree path '$path' has a quote or shell character; the run cannot be launched safely."
-  tmux_cmd new-session -d -s "$actual" -c "$path" "$bin exec -s workspace-write -C '$path' - < '$brief' > '$log' 2>&1; echo EXIT=\$? >> '$log'" \
+  tmux_cmd new-session -d -s "$actual" -c "$path" "MAIPAI_TEST_NO_PORTS=1 \"$bin\" exec -s workspace-write -C '$path' - < '$brief' > '$log' 2>&1; echo EXIT=\$? >> '$log'" \
     || err "could not create tmux session '$actual'; check tmux and retry."
   write_session "$name" "$(read_json "$f" branch)" "$path" "$actual"
   set_run_state "$name" running
