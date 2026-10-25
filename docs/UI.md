@@ -25,7 +25,11 @@ Home overrides the phone navigation (owner-approved 2026-10-06, Home
 RULES S1): the main navigation is a 56 px icon rail from 640 px up, and a
 phone gets one slide-over drawer with the app switcher, not a bottom bar.
 The five-entry bottom bar text above and the `PhoneNav` part do not apply
-to Home.
+to Home's main navigation, which stays the drawer and the app switcher. One
+exception (owner, 2026-10-25): an app's own sections (News: Today, My Mix,
+Following, Saved) may be the `PhoneNav` part in its floating variant, with
+the app's own Search as its last item. That bar never lists apps and its
+search never reaches past that app's own records.
 
 ## Pages are data
 
