@@ -67,6 +67,9 @@ measured and reported with the rule named, never dropped (full text and the dele
   Use `scripts/wt.sh` (start, run, wait, check, land, done, reap), never hand-run `git worktree` commands. If `scripts/wt.sh` is
   missing the checkout is stale: `git fetch`, fast-forward `main`, then `wt.sh start` / `wt.sh run`. Never run `codex exec` directly
   (a user-level hook and deny rule block it).
+- **Preview every UI change before you hand it over (2026-10-24).** In a repo with `scripts/dev.sh` (Home), `bun run dev` in your worktree starts a
+  seeded hot-reload app in a second or two; open it yourself with the built-in browser, judge the screenshot, then give Jesse its URL. Ports, sign-in,
+  and what never to preview on (the live hub, 8787) are in that repo's `AGENTS.md`, "Previewing a change". Never preview on the live hub.
 - **tmux sessions are disposable and owned.** Create one with a unique plain name (`<repo>-<worktree-name>-<purpose>`), touch only your
   own, tear it down when done.
 - **No pull requests** (only `catalog` takes community PRs). Land directly on `main`; push at natural boundaries; deploys and releases
