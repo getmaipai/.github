@@ -37,7 +37,7 @@ controls, they are architecture:
   song as sung, on by default with a switch for the home and one per child). A
   child's request that is too scary or too adult is rewritten into a
   kid-friendly version, not refused. Both lanes are held by the same
-  finished-item check and the same absolute lines; every other child
+  finished-item check and the same minor line; every other child
   protection stays non-removable.
 - **One set of content protections per person, by age, for everything Home
   makes** (owner's ruling, 2026-10-18): chat, search, pictures, videos and
@@ -46,15 +46,30 @@ controls, they are architecture:
   picture or a video, including a picture of themselves and friends doing it.
   Nothing sexual involving a minor is allowed anywhere, and that is not
   negotiable. Sexual content, gore and other adult content are adult only.
-- Real people in generated pictures, videos and songs (owner's ruling,
-  2026-10-18, replacing the 2026-10-17 consent exception): anyone in the
-  household may make pictures, videos, songs and saved styles with or of any
-  household member, as a household option that is on by default. A photo of a
-  real person is never turned into adult content, and nothing sexual involving
-  a minor is ever made. Public figures and anyone outside the household stay
-  refused. Per-person agreement and notices were removed on purpose and can be
-  added back later. Home's `docs/design/likeness-consent-2026-10-17.md` is the
-  earlier design, now superseded where it differs.
+- **Models decide for adults; the app filters only to protect kids** (owner's
+  ruling, 2026-10-25, Home's `docs/design/models-censor-app-protects-kids-2026-10-25.md`):
+  for an adult on their own written screen the app adds no content filter, no
+  word list, no classifier refusal on content, no consent step for content and
+  no fail-closed content check; whether something is made is the model's own
+  judgment. The app's content filtering is for a child or a teen, plus one line
+  that holds for everyone: nothing sexual involving a minor, with the minor
+  checks failing closed on adult-only or sexual work (when the check cannot
+  run, the work is withheld). A person's own opt-in filter for themselves
+  stays; the app imposes none. Not content censorship, and kept: the age and
+  surface gates, the credential catch, prompt-injection, jailbreak and
+  PII-extraction handling, crisis handling, a household's feature switches and
+  quotas, and the disclosures below.
+- Real people in generated pictures, videos and songs (owner's rulings
+  2026-10-18 and 2026-10-25, replacing the 2026-10-17 consent exception):
+  anyone in the household may make pictures, videos, songs and saved styles
+  with or of any household member, as a household option that is on by
+  default. An adult may make any picture or video of a real person, a public
+  figure or a historical person; the model decides. Nothing sexual involving a
+  minor is ever made. A teen or a child never gets a real person outside the
+  household or a public figure at all. Per-person agreement and notices were
+  removed on purpose and can be added back later. Home's
+  `docs/design/likeness-consent-2026-10-17.md` is the earlier design, now
+  superseded where it differs.
 
 Marketing and copy rule (all tiers, all repos): never pitch generation
 features as "uncensored", "unfiltered", "no restrictions", or any
