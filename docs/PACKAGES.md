@@ -185,6 +185,36 @@ each section validate against `spec/ui/schema.json`; a child, a teen and an adul
 data call with no network shows the plain empty state. Uninstall hides the app and keeps its state, so a favorite comes back on reinstall.
 Use `192.0.2.x` and `example.com` in fixtures.
 
+## Chat cards
+
+Every package a person can call from chat shows its result as a card, or says in one line why it does not. A card is an
+answer block (`spec/schemas/answer-block.schema.json`) drawn by the kit as shipped; a package never ships React and Home has
+no per-package chat code.
+
+**Declare it.** A `plugin`, `app` or `project` manifest carries `chat_card`, one of:
+
+- `{ "block": "<kind>", "actions": [...], "open_page": "<page id>", "fallback": "alt" | "reply" }`, where the kind is also in
+  `returns_blocks`;
+- `{ "native": "<name>" }`, deprecated and removed by CHAT-CARDS-11; until then it names a value from the closed list Home draws itself (picture, video and song jobs, project, artifact, confirm, sources); a package cannot add a name;
+- `{ "none": "<20 to 120 characters, why the reply text alone is right>" }`, for fire-and-forget or prose-only tools. Refused
+  when the package has pages or lists `returns_blocks`.
+
+**Produce it.** A Tier 1 handler returns `blocks`. A Tier 0 recipe uses the `format` step's `card` binding. The hub validates
+the block, applies the person's age band and the output floor, and drops what fails; the reply text is always complete.
+
+**Actions.** Use the standard names (`open_app`, `open`, `save`, `play`, `add_to_list`, `undo`, `copy`). `open_app` is
+"Open in <App>" and needs pages. An action reaches only the package's own `/api/plugins/<id>/` routes and
+`/apps/<id>/` pages. A block never names a route.
+
+**Images** in a block must be hub cache references; the browser never fetches an image from another host.
+
+**States.** Empty uses the kind's empty text; failure draws no card and the answer continues; an offline-degraded package
+draws from cache with an "As of" line.
+
+**Checks.** `chatCardCheck` (in `commons` `spec/ui`) runs in catalog lint, in Home's bundled-package test and at install. A
+package with neither a card nor a one-line `none` reason cannot ship in the bundled or catalog set. Carry one render
+fixture per declared kind and a child/teen/adult run.
+
 ## Uninstall, and a person's files
 
 Why this section exists: a role turned off in the setup wizard or under
