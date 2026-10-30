@@ -17,6 +17,9 @@
 #                                         (exits 1 past the wait cap)
 #   gate-lock.sh release <label>          frees it if <label> holds it
 #   gate-lock.sh status                   holder or "free", plus queue
+#   gate-lock.sh heavy <label> [--mem-gb N] -- <command...>
+#                                         RUN-GUARD-01: runs a heavy command in one of two
+#                                         machine-wide slots (see "Heavy runs" below)
 #
 # <label> names the caller unambiguously in `status`, e.g. "home-12345"
 # (repo dirname plus the check.sh shell's PID). [item] is free text for
@@ -314,8 +317,131 @@ _gl_status() {
   fi
 }
 
+# ---------------------------------------------------------------------------
+# Heavy runs (RUN-GUARD-01 and RELIABILITY-PREVENT-09, 2026-10-30). The full
+# gate is one mutex above; every other heavy run (an ad hoc `bun test`, a
+# `--pre` run, a bench, an evaluation, `bun run screenshots`, an Xcode build)
+# goes through `heavy`, which holds one of GATE_HEAVY_SLOTS (2) machine-wide
+# slots under $GATE_LOCK_ROOT/heavy-slots/. On 2026-10-30 tests, installs,
+# Playwright and Xcode running at once took the load to 65 and the Mac had to
+# be restarted. The run
+#   1. waits, with a plain message every 30 s, while both slots are held, the
+#      one-minute load average is over GATE_HEAVY_MAX_LOAD (20), or the free
+#      memory reported by memory_pressure is under GATE_HEAVY_MIN_FREE_PCT (25);
+#      it gives up after GATE_HEAVY_MAX_WAIT_SECONDS (900) with exit 75;
+#   2. starts the command at background priority (`taskpolicy -b`) in its own
+#      process group, whose id is the one recorded pid the cap and the cleanup
+#      act on;
+#   3. every GATE_HEAVY_SAMPLE_SECONDS (5) adds up the resident memory of that
+#      group; over the cap (--mem-gb, else GATE_HEAVY_MEM_GB, default 8) it
+#      stops the group (TERM, then KILL after 10 s) and exits 137 saying so;
+#   4. when the command ends, stops whatever it left in the group (headless
+#      browsers, dev servers), and prints the group's peak memory.
+# Nothing outside the group is ever signalled, and nothing is found by name.
+# A heavy run started inside a heavy run (GATE_HEAVY_HELD is set) just runs, so
+# the full gate calling tests cannot wait on its own slot. The load and memory
+# readers can be replaced (GATE_HEAVY_LOAD_CMD, GATE_HEAVY_FREE_CMD,
+# GATE_HEAVY_RSS_CMD, GATE_HEAVY_TASKPOLICY) for this script's tests.
+
+_gh_dir() { echo "$GATE_LOCK_ROOT/heavy-slots"; }
+_gh_load() { if [ -n "${GATE_HEAVY_LOAD_CMD:-}" ]; then sh -c "$GATE_HEAVY_LOAD_CMD"; else sysctl -n vm.loadavg 2>/dev/null | awk '{print $2}'; fi; }
+_gh_free_pct() {
+  if [ -n "${GATE_HEAVY_FREE_CMD:-}" ]; then sh -c "$GATE_HEAVY_FREE_CMD"; return; fi
+  command -v memory_pressure >/dev/null 2>&1 || { echo 100; return; }
+  memory_pressure 2>/dev/null | awk '/free percentage/ {gsub("%","",$NF); print $NF}'
+}
+# KB of resident memory summed over one process group.
+_gh_group_rss_kb() {
+  if [ -n "${GATE_HEAVY_RSS_CMD:-}" ]; then GATE_HEAVY_PGID="$1" sh -c "$GATE_HEAVY_RSS_CMD"; return; fi
+  ps -ax -o pgid=,rss= 2>/dev/null | awk -v g="$1" '$1 == g {s += $2} END {print s + 0}'
+}
+
+# Claims a free slot (reclaiming a dead owner's) and prints its path, or returns 1.
+_gh_claim() {
+  local dir n f pid slots="${GATE_HEAVY_SLOTS:-2}"
+  dir="$(_gh_dir)"; mkdir -p "$dir" || return 1
+  for n in $(seq 1 "$slots"); do
+    f="$dir/slot-$n"
+    if [ -f "$f" ]; then
+      pid="$(cut -f2 "$f" 2>/dev/null)"
+      _gl_alive "$pid" && continue
+      rm -f "$f"
+    fi
+    if (set -o noclobber; printf '%s\t%s\t%s\n' "$1" "$$" "$(_gl_now)" > "$f") 2>/dev/null; then echo "$f"; return 0; fi
+  done
+  return 1
+}
+
+_gh_stop_group() {
+  local pgid="$1"
+  kill -TERM -- "-$pgid" 2>/dev/null || return 0
+  local i=0
+  while [ "$i" -lt 10 ] && [ "$(_gh_group_rss_kb "$pgid")" != 0 ]; do sleep 1; i=$((i + 1)); done
+  kill -KILL -- "-$pgid" 2>/dev/null || true
+}
+
+_gl_heavy() {
+  local label="${1:-}" cap_gb="${GATE_HEAVY_MEM_GB:-8}"
+  [ -n "$label" ] || { echo "usage: gate-lock.sh heavy <label> [--mem-gb N] -- <command...>" >&2; return 2; }
+  shift
+  if [ "${1:-}" = "--mem-gb" ]; then cap_gb="${2:?--mem-gb needs a number}"; shift 2; fi
+  [ "${1:-}" = "--" ] && shift
+  [ "$#" -gt 0 ] || { echo "gate-lock: heavy needs a command after --" >&2; return 2; }
+  if [ -n "${GATE_HEAVY_HELD:-}" ]; then "$@"; return $?; fi
+
+  local max_load="${GATE_HEAVY_MAX_LOAD:-20}" min_free="${GATE_HEAVY_MIN_FREE_PCT:-25}"
+  local max_wait="${GATE_HEAVY_MAX_WAIT_SECONDS:-900}" poll="${GATE_HEAVY_POLL_SECONDS:-5}" note_every="${GATE_HEAVY_NOTE_SECONDS:-30}"
+  local sample="${GATE_HEAVY_SAMPLE_SECONDS:-5}" tp="${GATE_HEAVY_TASKPOLICY:-taskpolicy}"
+  local start slot why load free last_note=-1 elapsed
+  start=$(date +%s)
+  while :; do
+    load="$(_gh_load)"; free="$(_gh_free_pct)"; why=""
+    if awk -v l="${load:-0}" -v m="$max_load" 'BEGIN {exit !(l > m)}'; then why="the computer is busy (load $load, limit $max_load)"
+    elif awk -v f="${free:-100}" -v m="$min_free" 'BEGIN {exit !(f < m)}'; then why="the computer is low on free memory (${free}% free, need ${min_free}%)"; fi
+    if [ -z "$why" ] && slot="$(_gh_claim "$label")"; then break; fi
+    [ -n "$why" ] || why="both heavy-run slots are in use ($(cut -f1 "$(_gh_dir)"/slot-* 2>/dev/null | tr '\n' ' '))"
+    elapsed=$(( $(date +%s) - start ))
+    if [ "$elapsed" -ge "$max_wait" ]; then
+      echo "gate-lock: gave up after ${elapsed}s: $why. Nothing was started; try again when the computer is quieter." >&2
+      return 75
+    fi
+    if [ $(( elapsed / note_every )) -gt "$last_note" ]; then
+      last_note=$(( elapsed / note_every ))
+      echo "gate-lock: $label is waiting to start: $why. It starts by itself when that clears (gives up after ${max_wait}s)." >&2
+    fi
+    sleep "$poll"
+  done
+
+  local pid pgid rc=0 peak=0 cur capped=0 cap_kb
+  cap_kb=$(awk -v g="$cap_gb" 'BEGIN {printf "%d", g * 1048576}')
+  # The slot is freed on every way out. The command runs as a group leader (setpgrp), so one pgid names all of it.
+  trap 'rm -f "$slot"' EXIT
+  GATE_HEAVY_HELD=1 perl -e 'setpgrp(0, 0); my @c = @ARGV; if (my $tp = shift @c) { exec($tp, "-b", @c) if $tp ne "-" } exec(@c)' -- "$tp" "$@" &
+  pid=$!; pgid=$pid
+  trap '_gh_stop_group "$pgid"; rm -f "$slot"; exit 130' INT TERM HUP
+  while kill -0 "$pid" 2>/dev/null; do
+    cur="$(_gh_group_rss_kb "$pgid")"
+    [ "${cur:-0}" -gt "$peak" ] && peak="$cur"
+    if [ "$cap_kb" -gt 0 ] && [ "${cur:-0}" -gt "$cap_kb" ]; then
+      capped=1
+      echo "gate-lock: $label used $(( cur / 1048576 )) GB of memory, over its $cap_gb GB limit. Stopping it and everything it started (process group $pgid). Raise the limit with --mem-gb if this run really needs more." >&2
+      _gh_stop_group "$pgid"
+      break
+    fi
+    sleep "$sample" &
+    wait $! 2>/dev/null || true
+  done
+  wait "$pid" 2>/dev/null; rc=$?
+  # Helpers the run left behind (headless browsers, dev servers) are in its group.
+  if [ "$(_gh_group_rss_kb "$pgid")" != 0 ]; then _gh_stop_group "$pgid"; fi
+  rm -f "$slot"; trap - EXIT INT TERM HUP
+  echo "gate-lock: $label peak memory $(awk -v k="$peak" 'BEGIN {printf "%.1f", k / 1048576}') GB (limit $cap_gb GB)" >&2
+  [ "$capped" = 1 ] && return 137
+  return "$rc"
+}
+
 gate_lock() {
-  local usage="usage: gate-lock.sh acquire <label> [item] | release <label> | status"
+  local usage="usage: gate-lock.sh acquire <label> [item] | release <label> | status | heavy <label> [--mem-gb N] -- <command...>"
   case "${1:-}" in
     acquire)
       [ -n "${2:-}" ] || { echo "$usage" >&2; return 2; }
@@ -331,6 +457,10 @@ gate_lock() {
       ;;
     status)
       _gl_status
+      ;;
+    heavy)
+      shift
+      _gl_heavy "$@"
       ;;
     *)
       echo "$usage" >&2

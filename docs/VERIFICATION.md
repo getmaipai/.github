@@ -82,6 +82,15 @@ kind it is. Why: the port clashes that started the rule were fixed by
 FLAKE-PORT-01, and on 2026-09-23 a lane waited an hour behind a
 token-count measurement the gate could not have disturbed.
 
+**Every other heavy run is guarded too (RUN-GUARD-01, RELIABILITY-PREVENT-09, 2026-10-30).** On 2026-10-30 tests, installs,
+Playwright and Xcode running at once took the load to 65 and the Mac had to be restarted. `gate-lock.sh heavy <label> [--mem-gb N] -- <command>`
+runs a command in one of two machine-wide slots: it waits (with a plain message every 30 s, giving up after 15 minutes) while both slots are
+held, the load is over 20 or free memory is under 25 percent; starts the command at background priority (`taskpolicy -b`) in its own
+process group; stops that group, and nothing outside it, if its memory passes the cap (8 GB unless `--mem-gb` or
+`MAIPAI_HEAVY_MEM_GB` says otherwise; a bench sets its own); and stops whatever the run left in the group (headless browsers, dev servers)
+when it ends, printing the group's peak memory. `wt.sh check` runs its gates and tests through it. Run ad hoc `bun test`, benches,
+evaluations, `bun run screenshots` and Xcode builds the same way; a heavy run started inside a heavy run just runs.
+
 ## Checks never change the machine; browsers are headless
 
 **A check, test, bench, or screenshot script never changes the machine

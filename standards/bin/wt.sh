@@ -413,7 +413,7 @@ run_beside_tests() {
     (( n > cap )) && echo "   $((n - cap)) more tests also match and are NOT run here (cap $cap, MAIPAI_WT_T1_CAP); run 'bash scripts/wt.sh check T2' for the full suite."
     # Same 20 s per-test timeout as scripts/gate/shardTests.ts (getmaipai/home#216): bun's 5 s default
     # failed the app port and stop-dev-home tests under gate load on 2026-10-23.
-    (cd "$WT_ROOT/$ws" && bun test --timeout 20000 "${group[@]}") || rc=$?
+    (cd "$WT_ROOT/$ws" && heavy_run "$WT_REPO-tests" bun test --timeout 20000 "${group[@]}") || rc=$?
   done
   return "$rc"
 }
@@ -442,15 +442,15 @@ cmd_check() {
   fi
   local script="$WT_ROOT/scripts/check.sh"
   local check_env=("MAIPAI_COMMONS_DIR=$WT_PARENT/commons" "MAIPAI_STANDARDS_DIR=$WT_PARENT/.github")
-  if [[ "$tier" == T0 ]]; then env "${check_env[@]}" bash "$script" --docs || rc=$?
+  if [[ "$tier" == T0 ]]; then env "${check_env[@]}" bash "$script" --docs || rc=$?  # docs only: light, no slot
   elif [[ "$tier" == T1 ]]; then
-    env "${check_env[@]}" bash "$script" --pre || rc=$?
+    heavy_run "$WT_REPO-pre" env "${check_env[@]}" bash "$script" --pre || rc=$?
     if (( rc == 0 )); then
       if [[ -n "$WT_TEST_HOOK" ]]; then
-        (cd "$WT_ROOT" && env "${check_env[@]}" bash "$WT_TEST_HOOK" ${files[@]+"${files[@]}"}) || rc=$?
+        (cd "$WT_ROOT" && heavy_run "$WT_REPO-tests" env "${check_env[@]}" bash "$WT_TEST_HOOK" ${files[@]+"${files[@]}"}) || rc=$?
       else run_beside_tests ${files[@]+"${files[@]}"} || rc=$?; fi
     fi
-  else env "${check_env[@]}" bash "$script" || rc=$?; fi
+  else heavy_run "$WT_REPO-gate" env "${check_env[@]}" bash "$script" || rc=$?; fi
   sha="$(git -C "$WT_ROOT" rev-parse HEAD)"
   mkdir -p "$WT_STAMP_DIR"
   node - "$tier" "$sha" "$rc" "$WT_ROOT" ${files[@]+"${files[@]}"} <<'NODE' > "$WT_STAMP_DIR/$name.json"
@@ -529,6 +529,16 @@ std_bin() {
   local common; common="$(git rev-parse --git-common-dir)"
   case "$common" in /*) ;; *) common="$(cd "$common" && pwd)" ;; esac
   echo "$(cd "$common/.." && pwd)/../.github/standards/bin"
+}
+
+# heavy_run <label> <command...>: RUN-GUARD-01. Runs a heavy command (a gate, the beside tests) in one of the two machine-wide
+# heavy slots, at background priority, with a memory cap on its own process group (gate-lock.sh heavy). MAIPAI_HEAVY_MEM_GB
+# sets the cap (default: the gate-lock default); MAIPAI_HEAVY=0 runs the command directly.
+heavy_run() {
+  local label="$1"; shift
+  if [[ "${MAIPAI_HEAVY:-1}" == 0 || ! -f "$(std_bin)/gate-lock.sh" ]]; then "$@"; return $?; fi
+  local flags=(); [[ -n "${MAIPAI_HEAVY_MEM_GB:-}" ]] && flags=(--mem-gb "$MAIPAI_HEAVY_MEM_GB")
+  bash "$(std_bin)/gate-lock.sh" heavy "$label" ${flags[@]+"${flags[@]}"} -- "$@"
 }
 
 # Installs a pre-push hook that runs origin-guard.sh, so a push from a checkout whose origin names
