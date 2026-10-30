@@ -2,7 +2,7 @@
 // memory wait, the background priority, and the memory cap and cleanup on the run's own process group. Fake load, memory
 // and resident-size readers come through the script's env overrides; the state lives in a scratch XDG_STATE_HOME.
 import { describe, expect, test } from "bun:test";
-import { chmodSync, existsSync, mkdtempSync, readFileSync, writeFileSync } from "node:fs";
+import { chmodSync, existsSync, mkdirSync, mkdtempSync, readFileSync, realpathSync, writeFileSync } from "node:fs";
 import { tmpdir } from "node:os";
 import { join } from "node:path";
 
@@ -106,5 +106,58 @@ describe("memory cap and cleanup on the run's own group", () => {
     const pid = Number(readFileSync(pidFile, "utf8").trim());
     await Bun.sleep(300);
     expect(alive(pid)).toBe(false);
+  });
+});
+
+describe("reap (RELIABILITY-PREVENT-09)", () => {
+  const sleep = (cwd?: string) => Bun.spawn(["sleep", "300"], { cwd, stdout: "ignore", stderr: "ignore" });
+  const leakedGroup = () => Bun.spawn(["perl", "-e", 'setpgrp(0, 0); exec("sleep", "300")'], { stdout: "ignore", stderr: "ignore" });
+  async function reap(state: string, pids: number[], extra: Record<string, string> = {}) {
+    const p = Bun.spawn(["bash", GATE_LOCK, "reap"], {
+      env: base(state, { GATE_REAP_AGE_SECONDS: "0", GATE_REAP_MIN_KB: "1",
+        GATE_REAP_PS_CMD: `ps -o pid=,pgid=,etime=,rss=,command= -p ${pids.join(",")}`, ...extra }), stdout: "pipe", stderr: "pipe" });
+    const [out, err] = await Promise.all([new Response(p.stdout).text(), new Response(p.stderr).text()]);
+    await p.exited; return out + err;
+  }
+  const slot = (state: string, guardPid: number, pgid: number, at = Math.floor(Date.now() / 1000) - 7200) => {
+    const dir = join(state, "maipai", "heavy-slots");
+    mkdirSync(dir, { recursive: true });
+    writeFileSync(join(dir, "slot-1"), `bench\t${guardPid}\t2026-10-30T00:00:00Z\t${pgid}\t/x\t${at}\n`);
+    return join(dir, "slot-1");
+  };
+  const deadPid = async () => { const p = Bun.spawn(["true"]); await p.exited; return p.pid; };
+
+  test("a group left behind by a dead guard is stopped by its recorded group id; an unrelated process in a worktree is listed and never signalled", async () => {
+    const state = scratch(); const wt = join(realpathSync(scratch()), "wt", "demo-feature"); mkdirSync(wt, { recursive: true });
+    const leaked = leakedGroup(); const bystander = sleep(wt);
+    await Bun.sleep(300);
+    const file = slot(state, await deadPid(), leaked.pid);
+    const out = await reap(state, [leaked.pid, bystander.pid]);
+    await Bun.sleep(300);
+    expect(out).toContain(`stopping process group ${leaked.pid}`);
+    expect(alive(leaked.pid)).toBe(false);
+    expect(existsSync(file)).toBe(false);
+    expect(out).toContain(`left alone, for a person to decide: pid ${bystander.pid}`);
+    expect(out).toContain("in demo-feature");
+    expect(alive(bystander.pid)).toBe(true);
+    bystander.kill();
+  });
+
+  test("a record younger than the age limit, or whose guard is still running, is not touched", async () => {
+    const state = scratch();
+    const young = leakedGroup(); await Bun.sleep(300);
+    slot(state, await deadPid(), young.pid, Math.floor(Date.now() / 1000));
+    await reap(state, [young.pid], { GATE_REAP_AGE_SECONDS: "3600" });
+    expect(alive(young.pid)).toBe(true);
+    slot(state, process.pid, young.pid);
+    await reap(state, [young.pid]);
+    expect(alive(young.pid)).toBe(true);
+    young.kill(); process.kill(-young.pid, "SIGKILL");
+  });
+
+  test("a record for a group that is already gone is just cleared", async () => {
+    const state = scratch(); const file = slot(state, await deadPid(), await deadPid());
+    await reap(state, [process.pid]);
+    expect(existsSync(file)).toBe(false);
   });
 });

@@ -640,6 +640,8 @@ cmd_reap() {
     [[ -n "$pid" ]] && kill -0 "$pid" 2>/dev/null || rm -f "$f"
   done
   git -C "$WT_MAIN" worktree prune >/dev/null 2>&1 || true
+  # RELIABILITY-PREVENT-09: processes a heavy run leaked (stopped by recorded group id) and big or test-leftover processes in worktrees (listed only).
+  [[ ! -f "$(std_bin)/gate-lock.sh" ]] || bash "$(std_bin)/gate-lock.sh" reap >&2 || true
   # Worktrees this script did not create (older lane worktrees) are listed, never removed:
   # clean ones whose branch is already on origin/main are safe for a person to remove.
   local wpath wbranch

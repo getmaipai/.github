@@ -90,6 +90,7 @@ process group; stops that group, and nothing outside it, if its memory passes th
 `MAIPAI_HEAVY_MEM_GB` says otherwise; a bench sets its own); and stops whatever the run left in the group (headless browsers, dev servers)
 when it ends, printing the group's peak memory. `wt.sh check` runs its gates and tests through it. Run ad hoc `bun test`, benches,
 evaluations, `bun run screenshots` and Xcode builds the same way. Measured 2026-10-30 (Home's full gate through the backend, scripts and frontend legs up to the a11y step, load about 28): the group peaked at 3.0 GB, so the 8 GB default leaves the gate more than twice its need; a heavy run started inside a heavy run just runs.
+`wt.sh reap` also runs `gate-lock.sh reap` (RELIABILITY-PREVENT-09): it stops a process group a finished heavy run left behind (the slot record names the group id; the guard is gone and the record is over an hour old) by that group id and nothing else. It never matches by path or command name; a process over 12 GB or a `data-test/run-*` leftover that sits in a worktree or scratchpad is only listed, with pid, age, size and worktree, for a person to decide.
 
 ## Checks never change the machine; browsers are headless
 

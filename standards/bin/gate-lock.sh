@@ -418,6 +418,9 @@ _gl_heavy() {
   trap 'rm -f "$slot"' EXIT
   GATE_HEAVY_HELD=1 perl -e 'setpgrp(0, 0); my @c = @ARGV; if (my $tp = shift @c) { exec($tp, "-b", @c) if $tp ne "-" } exec(@c)' -- "$tp" "$@" &
   pid=$!; pgid=$pid
+  # The slot also names the run's own process group and where it started, so `reap` can stop a group this run leaked if the
+  # guard itself is killed. Fields: label, guard pid, time, group id, directory, epoch seconds.
+  printf '%s\t%s\t%s\t%s\t%s\t%s\n' "$label" "$$" "$(_gl_now)" "$pgid" "$PWD" "$(date +%s)" > "$slot" 2>/dev/null || true
   trap '_gh_stop_group "$pgid"; rm -f "$slot"; exit 130' INT TERM HUP
   while kill -0 "$pid" 2>/dev/null; do
     cur="$(_gh_group_rss_kb "$pgid")"
@@ -440,8 +443,43 @@ _gl_heavy() {
   return "$rc"
 }
 
+# RELIABILITY-PREVENT-09: gate-lock.sh reap. Stops only what a heavy run provably started: a slot whose guard has died but
+# whose recorded process group still has members, once that record is older than GATE_REAP_AGE_SECONDS (an hour). The group
+# is signalled by its recorded group id, never by matching a path or a command name. Everything else is only listed: a
+# process over GATE_REAP_MIN_KB (12 GB) or a data-test/run-* leftover, that sits in a worktree (wt/*) or a scratchpad,
+# with its pid, age, size and worktree, for a person to decide. The listing never signals anything.
+_gl_reap() {
+  local live_groups dir f pid pgid label at now min_age="${GATE_REAP_AGE_SECONDS:-3600}" min_kb="${GATE_REAP_MIN_KB:-12582912}"
+  dir="$(_gh_dir)"; now=$(date +%s); live_groups=" "
+  for f in "$dir"/slot-*; do
+    [ -f "$f" ] || continue
+    pid="$(cut -f2 "$f")"; pgid="$(cut -f4 "$f")"; label="$(cut -f1 "$f")"; at="$(cut -f6 "$f")"
+    if _gl_alive "$pid"; then live_groups="$live_groups$pgid "; continue; fi
+    case "$pgid" in ''|*[!0-9]*|0|1) rm -f "$f"; continue;; esac
+    if [ "$(_gh_group_rss_kb "$pgid")" = 0 ]; then rm -f "$f"; continue; fi
+    case "$at" in ''|*[!0-9]*) continue;; esac
+    [ $(( now - at )) -ge "$min_age" ] || continue
+    echo "gate-lock: stopping process group $pgid, left behind by the finished heavy run '$label' (its guard, pid $pid, is gone)"
+    _gh_stop_group "$pgid"; rm -f "$f"
+  done
+  local rows pids ids list
+  if [ -n "${GATE_REAP_PS_CMD:-}" ]; then rows="$(sh -c "$GATE_REAP_PS_CMD")"; else rows="$(ps -ax -o pid=,pgid=,etime=,rss=,command= 2>/dev/null)"; fi
+  # Candidates by size or by the test harness's run directory; their directory is read in one lsof call.
+  ids="$(printf '%s\n' "$rows" | awk -v m="$min_kb" -v live="$live_groups" '
+    { if (index(live, " " $2 " ")) next; if ($4 + 0 >= m || index($0, "data-test/run-")) printf "%s%s", (n++ ? "," : ""), $1 }')"
+  [ -n "$ids" ] || return 0
+  list="$(lsof -a -d cwd -Fpn -p "$ids" 2>/dev/null | awk '/^p/ {p = substr($0, 2)} /^n/ {print p "\t" substr($0, 2)}')"
+  printf '%s\n' "$rows" | GL_LIST="$list" awk -v m="$min_kb" '
+    BEGIN { n = split(ENVIRON["GL_LIST"], L, "\n"); for (i = 1; i <= n; i++) { split(L[i], F, "\t"); cwd[F[1]] = F[2] } }
+    { c = cwd[$1]; if (c == "" || (c !~ /\/wt\// && c !~ /scratchpad/)) next
+      if (!($4 + 0 >= m || index($0, "data-test/run-"))) next
+      w = c; if (match(c, /\/wt\/[^\/]+/)) w = substr(c, RSTART + 4, RLENGTH - 4)
+      cmd = $0; sub(/^ *[0-9]+ +[0-9]+ +[^ ]+ +[0-9]+ +/, "", cmd)
+      printf "gate-lock: left alone, for a person to decide: pid %s, running %s, %.1f GB, in %s: %s\n", $1, $3, $4 / 1048576, w, substr(cmd, 1, 70) }'
+}
+
 gate_lock() {
-  local usage="usage: gate-lock.sh acquire <label> [item] | release <label> | status | heavy <label> [--mem-gb N] -- <command...>"
+  local usage="usage: gate-lock.sh acquire <label> [item] | release <label> | status | heavy <label> [--mem-gb N] -- <command...> | reap"
   case "${1:-}" in
     acquire)
       [ -n "${2:-}" ] || { echo "$usage" >&2; return 2; }
@@ -461,6 +499,9 @@ gate_lock() {
     heavy)
       shift
       _gl_heavy "$@"
+      ;;
+    reap)
+      _gl_reap
       ;;
     *)
       echo "$usage" >&2
