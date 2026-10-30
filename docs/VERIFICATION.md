@@ -89,7 +89,7 @@ held, the load is over 20 or free memory is under 25 percent; starts the command
 process group; stops that group, and nothing outside it, if its memory passes the cap (8 GB unless `--mem-gb` or
 `MAIPAI_HEAVY_MEM_GB` says otherwise; a bench sets its own); and stops whatever the run left in the group (headless browsers, dev servers)
 when it ends, printing the group's peak memory. `wt.sh check` runs its gates and tests through it. Run ad hoc `bun test`, benches,
-evaluations, `bun run screenshots` and Xcode builds the same way; a heavy run started inside a heavy run just runs.
+evaluations, `bun run screenshots` and Xcode builds the same way. Measured 2026-10-30 (Home's full gate through the backend, scripts and frontend legs up to the a11y step, load about 28): the group peaked at 3.0 GB, so the 8 GB default leaves the gate more than twice its need; a heavy run started inside a heavy run just runs.
 
 ## Checks never change the machine; browsers are headless
 
