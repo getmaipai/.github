@@ -152,7 +152,7 @@ describe("reap (RELIABILITY-PREVENT-09)", () => {
     slot(state, process.pid, young.pid);
     await reap(state, [young.pid]);
     expect(alive(young.pid)).toBe(true);
-    young.kill(); process.kill(-young.pid, "SIGKILL");
+    young.kill();
   });
 
   test("a record for a group that is already gone is just cleared", async () => {
