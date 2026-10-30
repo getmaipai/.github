@@ -97,6 +97,8 @@ cmd_start() {
   [[ ! -e "$path" ]] || err "worktree path already exists: $path; choose another slug or clean up that worktree."
   ! git -C "$WT_MAIN" show-ref --verify --quiet "refs/heads/$branch" || err "branch already exists: $branch; choose another slug or remove the stale branch."
   mkdir -p "$(dirname "$path")"
+  # Spotlight must not index worktrees (every checkout is a copy of the same files); this marker is honored by mds.
+  [[ -e "$(dirname "$path")/.metadata_never_index" ]] || : > "$(dirname "$path")/.metadata_never_index" 2>/dev/null || true
   git -C "$WT_MAIN" worktree add -b "$branch" "$path" origin/main >&2 || err "could not create worktree from origin/main; inspect Git output and retry."
   # Pinned file dependencies and cross-repo doc links are relative to the repository's
   # parent. The workflow keeps worktrees one level deeper, so expose the sibling
