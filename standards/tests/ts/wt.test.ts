@@ -7,6 +7,8 @@ import { spawn, spawnSync } from "node:child_process";
 const scratch = mkdtempSync(join(tmpdir(), "maipai-wt-test-"));
 const repoRoot = join(import.meta.dir, "../../..");
 const script = join(repoRoot, "standards/bin/wt.sh");
+// These tests exercise wt.sh itself; the heavy-run guard (load wait, memory cap) has its own tests in heavyRun.test.ts.
+process.env.MAIPAI_HEAVY = "0";
 const repoEnv = { WT_T2_GLOBS: "backend/src/auth/* spec/schemas/*", WT_TEST_HOOK: "scripts/wt-tests.sh" };
 const fixture = join(scratch, "demo");
 const bare = join(scratch, "origin.git");
