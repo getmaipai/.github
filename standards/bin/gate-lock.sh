@@ -322,13 +322,14 @@ _gl_status() {
 # gate is one mutex above; every other heavy run (an ad hoc `bun test`, a
 # `--pre` run, a bench, an evaluation, `bun run screenshots`, an Xcode build)
 # goes through `heavy`, which holds one of GATE_HEAVY_SLOTS (2) machine-wide
-# slots under $GATE_LOCK_ROOT/heavy-slots/. On 2026-10-30 tests, installs,
+# slots (default 3) under $GATE_LOCK_ROOT/heavy-slots/. On 2026-10-30 tests, installs,
 # Playwright and Xcode running at once took the load to 65 and the Mac had to
 # be restarted. The run
-#   1. waits, with a plain message every 30 s, while both slots are held, the
-#      one-minute load average is over GATE_HEAVY_MAX_LOAD (20), or the free
-#      memory reported by memory_pressure is under GATE_HEAVY_MIN_FREE_PCT (25);
-#      it gives up after GATE_HEAVY_MAX_WAIT_SECONDS (900) with exit 75;
+#   1. waits in FIFO order for a slot, with a plain message every 60 s; low
+#      free memory (under GATE_HEAVY_MIN_FREE_PCT, 25) is a hard wait, while
+#      high one-minute load (over GATE_HEAVY_MAX_LOAD, 3 times core count) delays
+#      a run for at most GATE_HEAVY_LOAD_WAIT_SECONDS (120), then lets it start;
+#      it gives up after GATE_HEAVY_MAX_WAIT_SECONDS (3600) with exit 75;
 #   2. starts the command at background priority (`taskpolicy -b`) in its own
 #      process group, whose id is the one recorded pid the cap and the cleanup
 #      act on;
@@ -344,6 +345,55 @@ _gl_status() {
 # GATE_HEAVY_RSS_CMD, GATE_HEAVY_TASKPOLICY) for this script's tests.
 
 _gh_dir() { echo "$GATE_LOCK_ROOT/heavy-slots"; }
+_gh_waiters_dir() { echo "$GATE_LOCK_ROOT/heavy-waiters"; }
+_gh_mutex_lock() {
+  local dir="$(_gh_waiters_dir)"
+  mkdir -p "$dir" || return 1
+  exec 7>>"$dir/.mutex" || return 1
+  perl -MFcntl=:flock -e 'open(my $fh, ">&=", 7) or die; flock($fh, LOCK_EX) or die'
+}
+_gh_mutex_unlock() { exec 7>&-; }
+_gh_prune_waiters() {
+  local dir="$(_gh_waiters_dir)" f pid
+  mkdir -p "$dir" || return 1
+  for f in "$dir"/*; do
+    [ -f "$f" ] || continue
+    pid="${f##*:}"
+    _gl_alive "$pid" || rm -f "$f"
+  done
+}
+_gh_enqueue() {
+  local dir="$(_gh_waiters_dir)"
+  _gh_mutex_lock || return 1
+  _gh_prune_waiters || { _gh_mutex_unlock; return 1; }
+  local stamp
+  stamp="$(date +%s)"
+  while [ -e "$dir/$stamp:$$" ]; do stamp=$((stamp + 1)); done
+  : > "$dir/$stamp:$$"
+  _gh_mutex_unlock
+}
+_gh_remove_waiter() {
+  local f
+  _gh_mutex_lock || return 1
+  for f in "$(_gh_waiters_dir)"/*; do [ "${f##*:}" = "$$" ] && rm -f "$f"; done
+  _gh_prune_waiters
+  _gh_mutex_unlock
+}
+_gh_waiter_position() {
+  local dir="$(_gh_waiters_dir)" f n=0 self
+  _gh_mutex_lock || { echo 1; return; }
+  _gh_prune_waiters
+  self=""
+  for f in "$dir"/*; do [ "${f##*:}" = "$$" ] && self="$f"; done
+  for f in $(ls -1 "$dir" 2>/dev/null | sort -t: -k1,1n -k2,2n); do
+    f="$dir/$f"
+    [ -f "$f" ] || continue
+    n=$((n + 1))
+    [ "$f" = "$self" ] && { echo "$n"; _gh_mutex_unlock; return; }
+  done
+  _gh_mutex_unlock
+  echo 1
+}
 _gh_load() { if [ -n "${GATE_HEAVY_LOAD_CMD:-}" ]; then sh -c "$GATE_HEAVY_LOAD_CMD"; else sysctl -n vm.loadavg 2>/dev/null | awk '{print $2}'; fi; }
 _gh_free_pct() {
   if [ -n "${GATE_HEAVY_FREE_CMD:-}" ]; then sh -c "$GATE_HEAVY_FREE_CMD"; return; fi
@@ -358,8 +408,9 @@ _gh_group_rss_kb() {
 
 # Claims a free slot (reclaiming a dead owner's) and prints its path, or returns 1.
 _gh_claim() {
-  local dir n f pid slots="${GATE_HEAVY_SLOTS:-2}"
-  dir="$(_gh_dir)"; mkdir -p "$dir" || return 1
+  local dir n f pid slots="${GATE_HEAVY_SLOTS:-3}"
+  _gh_mutex_lock || return 1
+  dir="$(_gh_dir)"; mkdir -p "$dir" || { _gh_mutex_unlock; return 1; }
   for n in $(seq 1 "$slots"); do
     f="$dir/slot-$n"
     if [ -f "$f" ]; then
@@ -367,8 +418,9 @@ _gh_claim() {
       _gl_alive "$pid" && continue
       rm -f "$f"
     fi
-    if (set -o noclobber; printf '%s\t%s\t%s\n' "$1" "$$" "$(_gl_now)" > "$f") 2>/dev/null; then echo "$f"; return 0; fi
+    if (set -o noclobber; printf '%s\t%s\t%s\n' "$1" "$$" "$(_gl_now)" > "$f") 2>/dev/null; then _gh_mutex_unlock; echo "$f"; return 0; fi
   done
+  _gh_mutex_unlock
   return 1
 }
 
@@ -389,28 +441,48 @@ _gl_heavy() {
   [ "$#" -gt 0 ] || { echo "gate-lock: heavy needs a command after --" >&2; return 2; }
   if [ -n "${GATE_HEAVY_HELD:-}" ]; then "$@"; return $?; fi
 
-  local max_load="${GATE_HEAVY_MAX_LOAD:-20}" min_free="${GATE_HEAVY_MIN_FREE_PCT:-25}"
-  local max_wait="${GATE_HEAVY_MAX_WAIT_SECONDS:-900}" poll="${GATE_HEAVY_POLL_SECONDS:-5}" note_every="${GATE_HEAVY_NOTE_SECONDS:-30}"
+  local core_count max_load min_free="${GATE_HEAVY_MIN_FREE_PCT:-25}"
+  core_count="$(sysctl -n hw.ncpu 2>/dev/null || nproc 2>/dev/null || echo 8)"
+  case "$core_count" in ''|*[!0-9]*) core_count=8;; esac
+  max_load="${GATE_HEAVY_MAX_LOAD:-$((3 * core_count))}"
+  local max_wait="${GATE_HEAVY_MAX_WAIT_SECONDS:-3600}" load_wait="${GATE_HEAVY_LOAD_WAIT_SECONDS:-120}" poll="${GATE_HEAVY_POLL_SECONDS:-5}" note_every="${GATE_HEAVY_NOTE_SECONDS:-60}"
   local sample="${GATE_HEAVY_SAMPLE_SECONDS:-5}" tp="${GATE_HEAVY_TASKPOLICY:-taskpolicy}"
-  local start slot why load free last_note=-1 elapsed
+  local start slot why load free last_note=-1 elapsed=0 load_elapsed=0 load_was_high=0 position
   start=$(date +%s)
+  _gh_enqueue || { echo "gate-lock: cannot register heavy-run waiter" >&2; return 1; }
+  trap '_gh_remove_waiter' EXIT
+  [ "$_GL_SOURCED" = 1 ] || trap '_gh_remove_waiter; exit 130' INT TERM HUP
   while :; do
     load="$(_gh_load)"; free="$(_gh_free_pct)"; why=""
-    if awk -v l="${load:-0}" -v m="$max_load" 'BEGIN {exit !(l > m)}'; then why="the computer is busy (load $load, limit $max_load)"
-    elif awk -v f="${free:-100}" -v m="$min_free" 'BEGIN {exit !(f < m)}'; then why="the computer is low on free memory (${free}% free, need ${min_free}%)"; fi
-    if [ -z "$why" ] && slot="$(_gh_claim "$label")"; then break; fi
-    [ -n "$why" ] || why="both heavy-run slots are in use ($(cut -f1 "$(_gh_dir)"/slot-* 2>/dev/null | tr '\n' ' '))"
     elapsed=$(( $(date +%s) - start ))
+    if awk -v f="${free:-100}" -v m="$min_free" 'BEGIN {exit !(f < m)}'; then why="the computer is low on free memory (${free}% free, need ${min_free}%)"; fi
+    # A high load is a bounded delay (GATE_HEAVY_LOAD_WAIT_SECONDS), never a bar: after it the run only waits for memory and a slot.
+    if [ -z "$why" ] && awk -v l="${load:-0}" -v m="$max_load" 'BEGIN {exit !(l > m)}'; then
+      load_was_high=1; load_elapsed="$elapsed"
+      if [ "$elapsed" -lt "$load_wait" ]; then why="the computer is busy (load $load, limit $max_load)"; fi
+    fi
+    # FIFO: only the oldest live waiter claims a slot, so a newcomer never jumps the line.
+    if [ -z "$why" ] && [ "$(_gh_waiter_position)" = 1 ] && slot="$(_gh_claim "$label")"; then break; fi
+    if [ -z "$why" ]; then
+      position="$(_gh_waiter_position)"
+      why="all heavy-run slots are in use ($(cut -f1 "$(_gh_dir)"/slot-* 2>/dev/null | tr '\n' ' ')); $(( position - 1 )) ahead of it"
+    fi
     if [ "$elapsed" -ge "$max_wait" ]; then
       echo "gate-lock: gave up after ${elapsed}s: $why. Nothing was started; try again when the computer is quieter." >&2
+      _gh_remove_waiter; trap - EXIT INT TERM HUP
       return 75
     fi
     if [ $(( elapsed / note_every )) -gt "$last_note" ]; then
       last_note=$(( elapsed / note_every ))
-      echo "gate-lock: $label is waiting to start: $why. It starts by itself when that clears (gives up after ${max_wait}s)." >&2
+      echo "gate-lock: $label is waiting to start: $why; it starts by itself when a slot frees (gives up after ${max_wait}s)." >&2
     fi
     sleep "$poll"
   done
+  _gh_remove_waiter
+  trap - EXIT INT TERM HUP
+  if [ "$load_was_high" = 1 ] && awk -v l="${load:-0}" -v m="$max_load" 'BEGIN {exit !(l > m)}'; then
+    echo "gate-lock: starting although the computer is busy (load $load, limit $max_load) after ${load_elapsed}s" >&2
+  fi
 
   local pid pgid rc=0 peak=0 cur capped=0 cap_kb
   cap_kb=$(awk -v g="$cap_gb" 'BEGIN {printf "%d", g * 1048576}')

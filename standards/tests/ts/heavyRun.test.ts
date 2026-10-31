@@ -10,7 +10,7 @@ const GATE_LOCK = join(import.meta.dir, "..", "..", "bin", "gate-lock.sh");
 const scratch = () => mkdtempSync(join(tmpdir(), "heavy-run-test-"));
 const base = (state: string, extra: Record<string, string> = {}) => ({
   ...process.env, XDG_STATE_HOME: state, GATE_HEAVY_POLL_SECONDS: "0.2", GATE_HEAVY_SAMPLE_SECONDS: "0.2", GATE_HEAVY_NOTE_SECONDS: "1",
-  GATE_HEAVY_LOAD_CMD: "echo 1", GATE_HEAVY_FREE_CMD: "echo 80", ...extra,
+  GATE_HEAVY_LOAD_CMD: "echo 1", GATE_HEAVY_FREE_CMD: "echo 80", GATE_HEAVY_TASKPOLICY: "-", ...extra,
 }) as Record<string, string>;
 const heavy = (state: string, label: string, cmd: string[], extra: Record<string, string> = {}, flags: string[] = []) =>
   Bun.spawn(["bash", GATE_LOCK, "heavy", label, ...flags, "--", ...cmd], { env: base(state, extra), stdout: "pipe", stderr: "pipe" });
@@ -23,7 +23,7 @@ const alive = (pid: number) => { try { process.kill(pid, 0); return true; } catc
 describe("waiting", () => {
   test("a busy computer holds the run back with a plain message, and gives up without starting it", async () => {
     const state = scratch(); const marker = join(state, "ran");
-    const r = await done(heavy(state, "t-load", ["touch", marker], { GATE_HEAVY_LOAD_CMD: "echo 31", GATE_HEAVY_MAX_WAIT_SECONDS: "2" }));
+    const r = await done(heavy(state, "t-load", ["touch", marker], { GATE_HEAVY_LOAD_CMD: "echo 31", GATE_HEAVY_MAX_LOAD: "20", GATE_HEAVY_LOAD_WAIT_SECONDS: "100", GATE_HEAVY_MAX_WAIT_SECONDS: "2" }));
     expect(r.code).toBe(75);
     expect(r.err).toContain("the computer is busy (load 31, limit 20)");
     expect(r.err).toContain("Nothing was started");
@@ -40,22 +40,46 @@ describe("waiting", () => {
   test("it starts by itself once the load clears", async () => {
     const state = scratch(); const flag = join(state, "load");
     writeFileSync(flag, "40");
-    const proc = heavy(state, "t-clear", ["echo", "ran"], { GATE_HEAVY_LOAD_CMD: `cat ${flag}`, GATE_HEAVY_MAX_WAIT_SECONDS: "20" });
-    await Bun.sleep(700); writeFileSync(flag, "2");
+    const proc = heavy(state, "t-clear", ["echo", "ran"], { GATE_HEAVY_LOAD_CMD: `cat ${flag}`, GATE_HEAVY_MAX_LOAD: "20", GATE_HEAVY_LOAD_WAIT_SECONDS: "20", GATE_HEAVY_MAX_WAIT_SECONDS: "20" });
+    await Bun.sleep(1300); writeFileSync(flag, "2");
     const r = await done(proc);
     expect(r.code).toBe(0); expect(r.out).toContain("ran"); expect(r.err).toContain("is waiting to start");
   });
 
-  test("only two run at once machine-wide; a third waits for a slot", async () => {
+  test("only three run at once machine-wide; a fourth waits for a slot", async () => {
     const state = scratch();
-    const a = heavy(state, "t-a", ["sleep", "4"]); const b = heavy(state, "t-b", ["sleep", "4"]);
+    const a = heavy(state, "t-a", ["sleep", "4"]); const b = heavy(state, "t-b", ["sleep", "4"]); const first = heavy(state, "t-first", ["sleep", "4"]);
     await Bun.sleep(800);
     const c = await done(heavy(state, "t-c", ["true"], { GATE_HEAVY_MAX_WAIT_SECONDS: "1" }));
-    expect(c.code).toBe(75); expect(c.err).toContain("both heavy-run slots are in use");
-    a.kill(); b.kill(); await a.exited; await b.exited;
+    expect(c.code).toBe(75); expect(c.err).toContain("all heavy-run slots are in use");
+    a.kill(); b.kill(); first.kill(); await a.exited; await b.exited; await first.exited;
     const d = await done(heavy(state, "t-d", ["echo", "after"]));
     expect(d.code).toBe(0);
   });
+
+  test("starts after the bounded soft load delay", async () => {
+    const state = scratch(); const marker = join(state, "ran"); const begin = Date.now();
+    const r = await done(heavy(state, "t-soft-load", ["touch", marker], { GATE_HEAVY_LOAD_CMD: "echo 31", GATE_HEAVY_MAX_LOAD: "20", GATE_HEAVY_LOAD_WAIT_SECONDS: "1" }));
+    expect(r.code).toBe(0); expect(existsSync(marker)).toBe(true); expect(Date.now() - begin).toBeGreaterThanOrEqual(500);
+    expect(r.err).toContain("starting although the computer is busy");
+  });
+
+  test("waiters start in FIFO order and report their position", async () => {
+    const state = scratch(); const order = join(state, "order");
+    const one = { GATE_HEAVY_SLOTS: "1" };
+    const holder = heavy(state, "t-holder", ["sleep", "30"], one);
+    await Bun.sleep(500);
+    const first = heavy(state, "t-wait-1", ["sh", "-c", `echo first >> ${order}`], one);
+    await Bun.sleep(500);
+    const second = heavy(state, "t-wait-2", ["sh", "-c", `echo second >> ${order}`], one);
+    await Bun.sleep(500);
+    expect(existsSync(join(state, "maipai", "heavy-waiters"))).toBe(true);
+    holder.kill(); await holder.exited;
+    const [r1, r2] = await Promise.all([done(first), done(second)]);
+    expect(r1.code).toBe(0); expect(r2.code).toBe(0);
+    expect(readFileSync(order, "utf8").trim().split("\n")).toEqual(["first", "second"]);
+    expect(r2.err).toContain("1 ahead of it");
+  }, 20000);
 });
 
 describe("priority and exit codes", () => {
