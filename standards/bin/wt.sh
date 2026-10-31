@@ -469,7 +469,7 @@ NODE
 # uncommitted or untracked file. A failed fetch judges against the last known origin/main, which can only refuse more.
 refuse_unlanded() {
   local branch="$1" path="$2" removing=0 deleting=0 tip cherry_line cherry_sha commits="" dirty="" msg
-  [[ "$path" != "$WT_MAIN" ]] && git -C "$WT_MAIN" worktree list --porcelain | grep -Fqx "worktree $path" && removing=1
+  [[ "$path" != "$(cd "$WT_MAIN" && pwd -P)" ]] && git -C "$WT_MAIN" worktree list --porcelain | grep -Fqx "worktree $path" && removing=1
   [[ "$branch" == wt/* ]] && git -C "$WT_MAIN" show-ref --verify --quiet "refs/heads/$branch" && deleting=1
   (( removing || deleting )) || return 0
   git -C "$WT_MAIN" fetch origin >/dev/null 2>&1 || echo "wt: could not fetch origin; judging against the last known origin/main." >&2
@@ -514,10 +514,16 @@ cmd_done() {
   elif [[ -f "$f" ]]; then
     branch="$(read_json "$f" branch)"; path="$(read_json "$f" path)"; tmuxname="$(read_json "$f" tmux)"
   else branch="$(git -C "$WT_ROOT" branch --show-current)"; path="$WT_ROOT"; tmuxname=""; fi
+  # The recorded path may differ from the path git reports only in symlink or trailing-slash form; compare real paths.
+  [[ -d "$path" ]] && path="$(cd "$path" && pwd -P)"
   (( abandon )) || refuse_unlanded "$branch" "$path"
   if [[ -n "$tmuxname" ]] && command -v tmux >/dev/null 2>&1; then tmux_cmd kill-session -t "$tmuxname" >/dev/null 2>&1 || true; fi
-  if [[ "$path" != "$WT_MAIN" ]] && git -C "$WT_MAIN" worktree list --porcelain | grep -Fqx "worktree $path"; then git -C "$WT_MAIN" worktree remove --force "$path" || err "could not remove worktree '$path'; resolve its Git state and retry wt.sh done."; fi
-  if [[ "$branch" == wt/* ]] && git -C "$WT_MAIN" show-ref --verify --quiet "refs/heads/$branch"; then git -C "$WT_MAIN" branch -D "$branch" >/dev/null || err "could not delete branch '$branch'; remove it manually after checking its work is landed."; fi
+  if [[ "$path" != "$(cd "$WT_MAIN" && pwd -P)" ]] && git -C "$WT_MAIN" worktree list --porcelain | grep -Fqx "worktree $path"; then git -C "$WT_MAIN" worktree remove --force "$path" || err "could not remove worktree '$path'; resolve its Git state and retry wt.sh done."; fi
+  if [[ "$branch" == wt/* ]] && git -C "$WT_MAIN" show-ref --verify --quiet "refs/heads/$branch"; then
+    local del_err
+    del_err="$(git -C "$WT_MAIN" branch -D "$branch" 2>&1 >/dev/null)" || err "could not delete branch '$branch': ${del_err:-git gave no reason}
+It may still be checked out in a worktree (see: git worktree list); remove that worktree, or check its work is landed and delete the branch by hand."
+  fi
   rm -f "$f"
   find "$WT_PORT_DIR" -type f -name '*.lease' -exec grep -lF "$name" {} \; -delete 2>/dev/null || true
 }

@@ -1,7 +1,7 @@
 import { afterAll, beforeAll, describe, expect, test } from "bun:test";
-import { existsSync, mkdtempSync, mkdirSync, readFileSync, rmSync, writeFileSync } from "node:fs";
+import { existsSync, mkdtempSync, mkdirSync, readFileSync, rmSync, symlinkSync, writeFileSync } from "node:fs";
 import { tmpdir } from "node:os";
-import { join } from "node:path";
+import { basename, dirname, join } from "node:path";
 import { spawn, spawnSync } from "node:child_process";
 
 const scratch = mkdtempSync(join(tmpdir(), "maipai-wt-test-"));
@@ -724,6 +724,52 @@ describe("wt.sh done never discards unlanded work", () => {
     expect(s.hasWorktree()).toBe(false);
     expect(s.hasBranch()).toBe(false);
   }, 30000);
+
+  // The recorded session path can differ from the path git reports only in symlink or trailing-slash form.
+  const recordAltPath = (s: { path: string; name: string }, form: "slash" | "symlink") => {
+    const file = join(data, "sessions", `${s.name}.json`);
+    const rec = JSON.parse(readFileSync(file, "utf8"));
+    if (form === "slash") rec.path = `${s.path}/`;
+    else {
+      const link = join(scratch, `link-${s.name}`);
+      symlinkSync(dirname(s.path), link);
+      rec.path = join(link, basename(s.path));
+    }
+    writeFileSync(file, JSON.stringify(rec));
+  };
+
+  for (const form of ["slash", "symlink"] as const) {
+    test(`a rebased commit with the recorded path in ${form} form: done removes the worktree, then the branch`, () => {
+      const s = session(`rebased${form}`);
+      const original = s.commit(`rebased${form}.txt`);
+      expect(spawnSync("git", ["-C", s.path, "push", "origin", `HEAD:refs/heads/src-${form}`]).status).toBe(0);
+      const clone = join(scratch, `rebased-main-${form}`);
+      expect(spawnSync("git", ["clone", bare, clone], { encoding: "utf8" }).status).toBe(0);
+      spawnSync("git", ["-C", clone, "config", "user.name", "Test User"]);
+      spawnSync("git", ["-C", clone, "config", "user.email", "test@example.invalid"]);
+      expect(spawnSync("git", ["-C", clone, "cherry-pick", original], { encoding: "utf8" }).status).toBe(0);
+      expect(spawnSync("git", ["-C", clone, "push", "origin", "HEAD:main"], { encoding: "utf8" }).status).toBe(0);
+      recordAltPath(s, form);
+      const r = s.sh(["done"]);
+      expect(r.stderr).not.toContain("cannot delete branch");
+      expect(r.status).toBe(0);
+      expect(s.hasWorktree()).toBe(false);
+      expect(s.hasBranch()).toBe(false);
+    }, 30000);
+
+    test(`an unlanded commit with the recorded path in ${form} form is still refused`, () => {
+      const s = session(`unlanded${form}`);
+      const sha = s.commit(`unlanded${form}.txt`);
+      recordAltPath(s, form);
+      const r = s.sh(["done"]);
+      expect(r.status).not.toBe(0);
+      expect(r.stderr).toContain("done refused");
+      expect(r.stderr).toContain(sha);
+      expect(s.hasWorktree()).toBe(true);
+      expect(s.hasBranch()).toBe(true);
+      expect(s.sh(["done", "--abandon"]).status).toBe(0);
+    });
+  }
 
   test("land with an untracked file: lands, keeps the worktree, and says so", () => {
     const s = session("landuntracked");
