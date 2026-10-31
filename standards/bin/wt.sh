@@ -469,7 +469,9 @@ NODE
 # uncommitted or untracked file. A failed fetch judges against the last known origin/main, which can only refuse more.
 refuse_unlanded() {
   local branch="$1" path="$2" removing=0 deleting=0 tip cherry_line cherry_sha commits="" dirty="" msg
-  [[ "$path" != "$(cd "$WT_MAIN" && pwd -P)" ]] && git -C "$WT_MAIN" worktree list --porcelain | grep -Fqx "worktree $path" && removing=1
+  # Capture the listing before grepping: `grep -q` exits at the first match, git then gets SIGPIPE, and pipefail turns a true match false on long listings.
+  local listing; listing="$(git -C "$WT_MAIN" worktree list --porcelain)"
+  [[ "$path" != "$(cd "$WT_MAIN" && pwd -P)" ]] && grep -Fqx "worktree $path" <<< "$listing" && removing=1
   [[ "$branch" == wt/* ]] && git -C "$WT_MAIN" show-ref --verify --quiet "refs/heads/$branch" && deleting=1
   (( removing || deleting )) || return 0
   git -C "$WT_MAIN" fetch origin >/dev/null 2>&1 || echo "wt: could not fetch origin; judging against the last known origin/main." >&2
@@ -518,7 +520,8 @@ cmd_done() {
   [[ -d "$path" ]] && path="$(cd "$path" && pwd -P)"
   (( abandon )) || refuse_unlanded "$branch" "$path"
   if [[ -n "$tmuxname" ]] && command -v tmux >/dev/null 2>&1; then tmux_cmd kill-session -t "$tmuxname" >/dev/null 2>&1 || true; fi
-  if [[ "$path" != "$(cd "$WT_MAIN" && pwd -P)" ]] && git -C "$WT_MAIN" worktree list --porcelain | grep -Fqx "worktree $path"; then git -C "$WT_MAIN" worktree remove --force "$path" || err "could not remove worktree '$path'; resolve its Git state and retry wt.sh done."; fi
+  local listing; listing="$(git -C "$WT_MAIN" worktree list --porcelain)"
+  if [[ "$path" != "$(cd "$WT_MAIN" && pwd -P)" ]] && grep -Fqx "worktree $path" <<< "$listing"; then git -C "$WT_MAIN" worktree remove --force "$path" || err "could not remove worktree '$path'; resolve its Git state and retry wt.sh done."; fi
   if [[ "$branch" == wt/* ]] && git -C "$WT_MAIN" show-ref --verify --quiet "refs/heads/$branch"; then
     local del_err
     del_err="$(git -C "$WT_MAIN" branch -D "$branch" 2>&1 >/dev/null)" || err "could not delete branch '$branch': ${del_err:-git gave no reason}

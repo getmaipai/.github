@@ -706,6 +706,31 @@ describe("wt.sh done never discards unlanded work", () => {
     expect(s.hasBranch()).toBe(false);
   });
 
+  test("a long worktree listing (over 64 KiB): done still removes the worktree and its branch under pipefail", () => {
+    const s = session("longlist");
+    s.commit("longlist.txt");
+    expect(spawnSync("git", ["-C", s.path, "push", "origin", "HEAD:main"]).status).toBe(0);
+    const base = join(scratch, "x".repeat(120), "y".repeat(120));
+    mkdirSync(base, { recursive: true });
+    const fillers: string[] = [];
+    for (let i = 0; i < 300; i++) {
+      const p = join(base, `${"z".repeat(100)}-${i}`);
+      fillers.push(p);
+      expect(spawnSync("git", ["-C", fixture, "worktree", "add", "--detach", p, "main"], { env: gitEnv }).status).toBe(0);
+    }
+    try {
+      const listing = spawnSync("git", ["-C", fixture, "worktree", "list", "--porcelain"], { encoding: "utf8", maxBuffer: 1 << 26 }).stdout;
+      expect(listing.length).toBeGreaterThan(65536);
+      const r = s.sh(["done"]);
+      expect(r.stderr).not.toContain("cannot delete branch");
+      expect(r.status).toBe(0);
+      expect(s.hasWorktree()).toBe(false);
+      expect(s.hasBranch()).toBe(false);
+    } finally {
+      for (const p of fillers) spawnSync("git", ["-C", fixture, "worktree", "remove", "--force", p]);
+    }
+  }, 300000);
+
   test("a rebased equivalent commit on main: done removes the worktree without --abandon", () => {
     const s = session("rebased");
     const original = s.commit("rebased.txt");
