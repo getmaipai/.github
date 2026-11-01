@@ -56,6 +56,18 @@ check, a model download).
   guaranteed. Even then ddgs is a second source beside SearXNG, never the
   only one. The privacy page row shows only while the helper runs and
   DuckDuckGo is picked.
+- **Max research mode may read the open web for people who hold the Max
+  grant (owner's ruling, 2026-11-01).** Only adults hold the Max grant;
+  teens and children get no Max, so this path never runs for them. It
+  counts as an allowed search, so it is not phone-home. Each question gets
+  a budget: at most 12 searches and 40 pages, 4 pages per site, 3 seconds
+  between requests to one site, and it stops at the first 403 or 429 from
+  a site (`THIRD-PARTY-SERVICES.md`). An admin off switch, the setting
+  `research.max_web`, turns it off; off means Max research uses the
+  offline reference library only. Page text is read to write the answer
+  and is not stored beyond the cited sources kept with that message. A
+  query carries only the person's own question text, with no household
+  data added. The privacy page row names the setting and shows the state.
 - **Every product keeps a user-tier privacy page** with the "what leaves the
   house" table: each outbound connection, when it happens, what it carries,
   and who receives it. Plain dad-test language. Adding or changing an

@@ -57,6 +57,19 @@ dark for a day. These rules exist so that never repeats, on any service.
   every fetch, and a back-off on the first signal from any host. Why:
   an answer grounded in the pages is the point of the search, and a
   fixed cap keeps it a person's few tabs, never a crawl.
+- **Max research mode may fetch from the open web, inside a fixed budget
+  (owner's ruling, 2026-11-01).** It runs only for people who hold the Max
+  grant (adults; teens and children get no Max), as an allowed search that
+  reads result pages for the answer. Per question: at most 12 searches and
+  40 pages, at most 4 pages from any one site, and 3 seconds between
+  requests to one site. The first 403 or 429 from a site stops all requests
+  to that site for the rest of the question, with no retry through it. An
+  admin can switch it off with `research.max_web`; off means the offline
+  reference library only. Page text is read for the answer and is not
+  stored beyond the cited sources kept with the message. Queries carry only
+  the person's own question text, with no household data added. Why: deep
+  research needs more pages than an ordinary search, and a fixed budget
+  keeps it a person's open tabs, never a crawl.
 - **Look like the user's client, honestly.** Real user agents, the client's
   own headers, one identity per household session. No header spoofing tricks
   beyond what the platform's own app sends, no rotating identities, no
