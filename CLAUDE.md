@@ -98,7 +98,7 @@ Everything else, the turn pipeline, wire shapes, spec records and pins included,
 the real network or wall-clock timing live in the bench lane (`check.sh --bench`, on demand), never in the gate. A gate stamp is good for 4 hours.
 
 Secrets scan and PII wordlist run on every change. Rollout: until the hooks follow this table, the hooks' stricter checks apply.
-"Verified" means exercised for real, not "it compiles". Never hand Jesse something you have not checked, and never ask him to run
+"Verified" means exercised for real, not "it compiles"; a feature that ends on screen is verified only when the chain to the displayed result ran. Never hand Jesse something you have not checked, and never ask him to run
 what you can run. Every real failure becomes a regression test first. Evidence matches the claim: the flow exercised and the
 screenshot opened, or measured numbers. Load `docs/VERIFICATION.md` before gating, benching, writing tests or claiming done.
 

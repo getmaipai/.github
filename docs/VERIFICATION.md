@@ -168,6 +168,21 @@ twice before the real cause, a second forced model round with the
 wrong prompt entirely, was found by reading the actual stored turn
 directly).
 
+## The displayed result is the acceptance test (2026-11-01)
+
+A feature that ends on screen is done only when the real chain has run to the displayed object, not when its pieces pass.
+2026-10-31 and 2026-11-01, library pictures in chat: selection and fetch tests passed, a gallery block was never built from
+a library set, and the answer-block schema (absolute `source.url` only) dropped it silently; Jesse retested four times.
+
+- Run the whole path to what the person sees (selection, block, the block filter, the route that serves the bytes), against the
+  real dependency read-only or on the dev hub, and open the screenshot.
+- A fake of an external server is built from a probe of the real server, and its test names the probe. A fake that mirrors your
+  own assumption proves nothing (the Kiwix image route was faked as `/raw/`, which the real server 404s).
+- After a ship, in a separate step, re-read the live tag and grep the installed file for the change before saying "live";
+  another session's rollback can undo it.
+- When a live turn shows nothing, read its stored trace first (Home: `hub-last-turn '<user text>'`, a read-only copy of hub.db).
+  A guessed cause stays labeled a guess. The "second try it again" rule above applies from the first retest.
+
 ## Clean-clone build at release
 
 At release time, the release skill additionally does a **clean-clone build**
