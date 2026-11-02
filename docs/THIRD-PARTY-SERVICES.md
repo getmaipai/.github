@@ -62,8 +62,9 @@ dark for a day. These rules exist so that never repeats, on any service.
   grant (adults; teens and children get no Max), as an allowed search that
   reads result pages for the answer. Per question: at most 12 searches and
   40 pages, at most 4 pages from any one site, and 3 seconds between
-  requests to one site. The first 403 or 429 from a site stops all requests
-  to that site for the rest of the question, with no retry through it. An
+  requests to one site. The first 403, 429 or robots.txt refusal from a site stops all requests
+  to that site for the rest of the question, with no retry through it; the
+  other sites are still read (owner's second answer, 2026-11-01). An
   admin can switch it off with `research.max_web`; off means the offline
   reference library only. Page text is read for the answer and is not
   stored beyond the cited sources kept with the message. Queries carry only

@@ -68,8 +68,9 @@ check, a model download).
   teens and children get no Max, so this path never runs for them. It
   counts as an allowed search, so it is not phone-home. Each question gets
   a budget: at most 12 searches and 40 pages, 4 pages per site, 3 seconds
-  between requests to one site, and it stops at the first 403 or 429 from
-  a site (`THIRD-PARTY-SERVICES.md`). An admin off switch, the setting
+  between requests to one site, and a site that answers 403 or 429 is
+  skipped for the rest of the question while the other sites are still
+  read (`THIRD-PARTY-SERVICES.md`). An admin off switch, the setting
   `research.max_web`, turns it off; off means Max research uses the
   offline reference library only. Page text is read to write the answer
   and is not stored beyond the cited sources kept with that message. A
