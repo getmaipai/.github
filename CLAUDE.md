@@ -100,6 +100,12 @@ measured and reported with the rule named, never dropped (full text and the dele
   design. Sonnet is the default, Opus gets one bounded question, Haiku gathers evidence, Fable only when Jesse says. Dispatching: use the `dispatch` skill
   (`scripts/wt.sh run codex` then `wait`, or `local-lane dispatch ... --detach` then `local-lane wait`); the dispatcher always reads the diff, runs the
   tests and the gate and commits by file name. `docs/COORDINATION.md` is history plus role policy.
+- **A session that starts a session owns every ask that session makes (Jesse, 2026-11-01).** The parent never guesses what a child needs or
+  is waiting on: it reads the child's own transcript (`list_events`, or the session file) and states what it found. Every question,
+  approval or download request a child raises reaches Jesse through the wizard, from the parent if the child cannot; the parent tracks
+  each one until it is answered and relays the answer to the child. A "needs the user" state is checked and named the moment it appears,
+  and a parent never ends its turn or reports "done" while a child ask is open. When it reports, it says for each child: what it is doing,
+  what it asked, what was answered, and what is still open.
 - **Clean up on sight:** a merged or abandoned branch, finished worktree, dead file, leftover claim, lock or tmux session you own or
   can prove dead is removed this session; anything that may be another session's or Jesse's data is listed with evidence.
 - Load `docs/GIT-WORKFLOW.md` when a hook denies a git command or before a review. Before reporting a force-push or missing history, run `git remote -v` and `git reflog show origin/main`: a wrong `origin` URL looks like a rewrite (`standards/bin/origin-guard.sh`).
