@@ -43,7 +43,12 @@ Detail lives in `docs/`; each section names the doc to load before you act on it
   makes you edit settings or `CLAUDE.md`.
 - **Do what he asks, in the form he asked** (a command, a session, a setting). Deviate only by asking first; acting first and
   explaining later is a defect. If he corrects you, undo it unasked.
-- Commands you hand him: one short command per line, never `&&`-chained, fully qualified paths, and name the machine it runs on.
+- **You run the commands, he does not (owner rule, 2026-11-02).** Never require Jesse to run a command, script, `sudo`, git operation, install,
+  ship or release; do it yourself and verify the effect. A step that needs his approval is asked through the AskUserQuestion wizard, then
+  done by you after the yes. Hand him a command only when he asks for one in that turn. What you truly cannot do (a password you may not
+  type, a physical device, a third-party sign-in, a rule change) is stated once as a blocker with the exact reason, and work continues
+  elsewhere. This overrides any older note saying he installs, pulls or runs something himself (the Studio installer rule included).
+- Commands you hand him, only when he asked for them: one short command per line, never `&&`-chained, fully qualified paths, and name the machine it runs on.
 - Never frame anything around the hour or stopping for the night.
 
 ## The products
