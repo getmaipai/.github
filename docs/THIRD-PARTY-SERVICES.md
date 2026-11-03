@@ -82,3 +82,36 @@ dark for a day. These rules exist so that never repeats, on any service.
   states its request budget in the PR/commit message and is checked against
   the limiter; any block seen in prod is written up (cause, budget, fix) in
   the repo's dev docs so the lesson stays.
+
+## Style (LoRA) sources: Hugging Face and Civitai (VIDEO-LORA-DOC-01, 2026-11-02)
+
+Read this before writing `lib/loras/source.ts` in Home or the `video.lora.install` job in the Stack (home `docs/design/video-loras-2026-11-02.md`
+sections 5.2, 5.3 and 15). These are model hosts, not live video services, but the same rules apply: a person's pace, only what an admin asked for,
+back off on the first signal, honest client, cache like a client.
+
+| | Hugging Face | Civitai |
+|---|---|---|
+| Default | On for owner and admin | Off until an admin turns it on and reads the notice |
+| Hosts allowed | `huggingface.co` (API and `/resolve/` files) and its file CDN hosts | `civitai.com` (API and `/api/download/models/`) and the download host its redirect names |
+| Calls | `GET /api/models?filter=lora&search=...` (cursor from the `Link` header), `?blobs=true` for file size and LFS sha256, then the file | `GET /api/v1/models` (`types=LORA`, `baseModels`, `query`, `sort`, `cursor`, `limit`, `nsfw=false` unless an unlocked admin asks for adult results), `GET /api/v1/models/{id}`, then the file |
+| Auth | Bearer token only for files that ask for accepted terms, from the existing household secret; sent to `huggingface.co` hosts only | A personal API key the admin saved, as a Bearer header (never a query string), sent to `civitai.com` hosts only |
+| Sent | Typed search words, filters, repo and file names | Typed search words, filters, model and version ids |
+| Never sent | Household, people, prompts, chat or companion text, any id of ours | Same |
+| Documented limit | 500 API calls and 3,000 file requests per 5 minutes per anonymous IP, 1,000 and 5,000 with a free token ([rate limits page](https://huggingface.co/docs/hub/rate-limits), read 2026-11-02); a 429 carries `RateLimit` headers | No published numbers; Cloudflare edge limits and 429 |
+
+**Our budget (the same for both, enforced by one limiter per host at `lib/loras/source.ts`):** one request per 2 seconds per host, at most 60 browse requests per
+hour per household, at most one download at a time, a 5-minute cache of search responses (memory only), preview pictures cached 24 hours
+and fetched only for results the viewer may see, the lazy Hugging Face `?blobs=true` call only for a repo that is on screen (one per repo, cached),
+at most 1,000 results deep. The first 429, 5xx or sign-in demand stops that host for 1 minute, doubling to 30 minutes, for user-initiated requests only.
+Nothing runs in the background and nothing checks for newer versions; "Check for a newer version" is a button. A 4 GB cap, HTTPS only, and a redirect to any host outside
+the allow list is refused. The client sends one honest user agent that names MaiPai Home and its version, with no rotation.
+
+**Terms.** The Hugging Face rate limits above were read on 2026-11-02; its Terms of Service were not read in this slice and need a person's read before release.
+**The Civitai Terms of Service are unread**: `civitai.com/content/tos` answered 403 to the fetcher on 2026-11-02 (and on the earlier design pass).
+Civitai therefore stays off by default and must not ship enabled until an owner or admin has read the terms and this section records what they say about
+API use and automated downloads. Facts recorded elsewhere, not terms: real-person likeness content has been banned there since 2025-05-22 and the site has restricted
+UK visitors; some downloads need an API key (whether one works without a key is unverified). Hugging Face and file import must work fully with Civitai off.
+
+**Adult data.** Both sites' own fields are used as-is (Civitai `nsfw` flag and per-image `nsfwLevel`, Hugging Face tag `not-for-all-audiences`); no word list reads a name,
+description or tag. Adult and unsure results are not drawn without the Adult unlock.
+
