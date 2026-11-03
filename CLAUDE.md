@@ -20,8 +20,9 @@ Detail lives in `docs/`; each section names the doc to load before you act on it
   subagent reports.
 - **Footer.** A reply that started, finished, decided or needs something ends with exactly one line, always closing with the archive
   answer in parentheses:
-  `STATE: <active | waiting [what] | blocked [owner: what] | done> · <what> · YOU: <command or fact he must act on> | nothing (ARCHIVE: yes | no [what is left])`
-  `waiting` or `blocked` on Jesse means `YOU:` names what he must do or supply; `YOU: nothing` is only valid with `active` or `done`.
+  `STATE: <active | waiting [what] | blocked [owner: what] | done> · <what> · ON: <machine> · YOU: <command or fact he must act on> | nothing (ARCHIVE: yes | no [what is left])`
+  `ON:` is the machine this session runs on, from `hostname -s` (2026-11-02: a session on the MacBook once passed for the Studio), checked
+  each reply, never remembered. `waiting` or `blocked` on Jesse means `YOU:` names what he must do or supply; `YOU: nothing` is only valid with `active` or `done`.
   `ARCHIVE: yes` means Jesse can archive this session and every session it started: all work is landed or discarded (say where it
   is), no linked session is running or holds unlanded work (check `list_sessions` with `linked: true`), nothing waits on him, and
   no worktree, tmux session or background run of yours is left. Anything less is `ARCHIVE: no` plus the one thing left.
