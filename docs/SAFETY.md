@@ -123,14 +123,19 @@ Adult freedom comes with three standing pieces:
   minor's gate, and it chooses between two checked modes; nothing turns
   the gate off.
 
-- **Making a voice from a clip is for an owner or an admin, and it is unrestricted (owner's ruling, 2026-10-18).** "Admin can create
-  a voice with whatever they want, no limitations." An owner or admin can make a voice from any recording of 6 to 30 seconds:
-  no consent step, no attestation, no confirmation and no content check on the clip; the screen says "You are responsible for
-  having the right to use this voice." and nothing more. A member, teen or child cannot make one. A child or teen never lists,
-  picks or hears a voice made from a clip, and a robot that belongs to a child speaks a preset only. Making a voice leaves one
-  line in the hub log (who made it, with which settings, never the name of the voice or the clip). Everything a made voice
-  says is held by the same text floors as every other voice. Why: the person who runs the home answers for what they put
-  in it, and a consent ceremony protects no one when the owner is the one recording.
+- **Every member may make a voice from a clip (owner's ruling, 2026-11-05, widening the 2026-10-18 ruling).** "Voice cloning for
+  everyone is fine", then "everyone means everyone not just adult". An owner, admin, adult, teen or child can make a voice from any
+  recording of 6 to 30 seconds, and can list, hear and pick any voice made at home, as an adult does. There is no consent step, no
+  attestation and no content check on the clip; the screen says "You are responsible for having the right to use this voice."
+  for an adult and, for a teen or child, "Only use your own voice, or the voice of someone who said yes." A guest cannot make or use one.
+  For a minor these stay exactly as before: the content floors on everything
+  the voice says (a child's per sentence, a teen's at the configured grain) and on any typed script or translation; no model, tier or
+  temperature choice and no pitch choice beyond Inspired voice's own limited controls (an owner or admin only); the band gates on shared surfaces and for an unknown speaker. A child still does not
+  choose their own voice (a parent does), and a child's robot may speak any voice chosen for it on the robot, under the same floors. A parent
+  or admin can see, listen to and delete a minor's voices in the Voices manager; that is the voice only, and the minor's other settings
+  stay private. Making, renaming or deleting a voice leaves one line in the hub log (the maker's role and the settings only; never a
+  person id or name, a voice id, or the name of the voice or the clip). Why: a voice is the person's own to make, the words it says are
+  held by the same floors as every voice, and a parent can always see and remove what a child made.
 
 - **Web search for child and teen controls runs through SafeSearch, safe
   engines only, a pinned adult-site host list and the page-text cleaning
