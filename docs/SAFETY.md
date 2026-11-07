@@ -70,6 +70,20 @@ controls, they are architecture:
   removed on purpose and can be added back later. Home's
   `docs/design/likeness-consent-2026-10-17.md` is the earlier design, now
   superseded where it differs.
+  Synths (Home's artificial beings, `home/docs/design/talent-2026-11-07.md`)
+  are the one exception to the teen and child line (Owner-approved:
+  2026-11-07): an adult may base a synth on a real person outside the
+  household and choose its audience (adult by default, teen or all allowed); a
+  teen or child may chat with or fork a real-person synth whose audience allows
+  them, under the per-child parental control `synths.real_people` (`off | ask
+  | all`, only a parent or admin changes it: a child's every real-person synth
+  request is an Ask a parent allows or denies, an Allow lasting for that synth;
+  a teen may be pre-approved for all or approved synth by synth), with every
+  stored fact, phrase and life line floored at that audience, and a synth based
+  on a real minor carries the minor fact into the CSAM check on every surface.
+  A household member gets no consent prompt for a synth of them, but a
+  per-person switch (`synths.of_me`, a parent sets it for a child) turns such
+  synths off.
 
 Marketing and copy rule (all tiers, all repos): never pitch generation
 features as "uncensored", "unfiltered", "no restrictions", or any
