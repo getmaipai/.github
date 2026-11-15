@@ -8,7 +8,7 @@ product, with the product's glyph inside the smile. All PNGs are transparent.
 `maipai-<product>-<kind>-<background>.png`
 
 - `<product>`: `brand` (the org/master mark), `home`, `desktop`, `go`, `bot`,
-  `stack`
+  `stack`, `stackchan`
 - `<kind>`: `icon` (mark only) or `logo` (mark + wordmark)
 - `<background>`: `light` (dark glyph/text, for light backgrounds) or `dark`
   (white glyph/text, for dark backgrounds). The org `brand-icon` works on
@@ -24,6 +24,7 @@ product, with the product's glyph inside the smile. All PNGs are transparent.
 | Desktop | Pink | monitor + cursor |
 | Go | Green | wifi |
 | Bot | Blue | robot face |
+| StackChan | Blue | robot face on a stand (the standalone StackChan firmware; no dark icon, so `icon-light` is used on both backgrounds) |
 | Stack | Orange | three stacked layers (purple, blue, green); the mark has no white or black, so `icon-dark` and `icon-light` are the same file |
 
 ## Rules
