@@ -174,7 +174,9 @@ Adult freedom comes with three standing pieces:
   and a shared screen with a child possibly present counts as shared;
   and the turn's record says when reasoning was withheld and why. This is
   the default of the child and teen roles; reasoning is a feature an admin's
-  access override may allow for one person (ruling of 2026-11-16).
+  access override may allow, for one person or the household (ruling of
+  2026-11-16). No voice, glance or shared-screen surface shows reasoning,
+  whatever the override says.
 - **The output gate's grain follows the person (owner's ruling,
   2026-10-02).** For a child, and for every spoken turn, each sentence
   is checked before it is released, and no setting loosens that. For an
