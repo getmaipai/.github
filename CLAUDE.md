@@ -164,7 +164,7 @@ edit; not on a status-row edit. Only Jesse changes a rule; such a commit carries
 - **Privacy architecture** (`docs/PRIVACY.md`): zero phone-home; load before adding an outbound connection.
 - **Third-party services** (`docs/THIRD-PARTY-SERVICES.md`): behave as the user would; before code that fetches from one.
 - **Credentials** (`docs/CREDENTIALS.md`): before auth, tokens, OAuth, API keys, cookies.
-- **Safety** (`docs/SAFETY.md`): child protections are non-removable; before generation, chat, child profiles or adult unlock.
+- **Safety** (`docs/SAFETY.md`): a role's protections are defaults a household admin may override; nothing sexual involving a minor and crisis handling are fixed for everyone; load before generation, chat, child profiles, ratings, access or adult unlock.
 - **Rules and learned components** (`docs/RULES-AND-LEARNED-COMPONENTS.md`): before editing a rule, word list or classifier in a turn pipeline.
 - **Trademarks** (`docs/TRADEMARKS.md`), **Licensing** (`docs/LICENSING.md`, AGPL-3.0), **Training models** (`docs/TRAINING-MODELS.md`).
 - **Dependencies and releases** (`docs/RELEASES-AND-DEPENDENCIES.md`): download, don't vendor; before adding a dependency or cutting a release.

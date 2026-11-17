@@ -5,27 +5,82 @@ section. Load this whenever a session
 touches generation, chat, child profiles, or anything gated by an adult
 acknowledgment.
 
-MaiPai gives adults full control of their own local AI. Two things are not
-controls, they are architecture:
+## Roles are presets an admin controls (owner's ruling, 2026-11-16)
 
-- **Child-safety protections on generation and chat are non-removable for
-  children and teens, and on every generation.** An adult's typed
+This ruling governs everything below it. Each person has one role (child, teen,
+adult, guest). A role is a set of controls, not an age: it sets default access
+to features and default rating ceilings for content (a child G, a teen PG-13,
+an adult X). A household admin may override any access or any rating ceiling,
+in either direction, for one person or for the whole household, for one kind
+of content or for all. Precedence: the person's override, then the household's
+override, then the role's default. Only an admin, or a parent through a
+per-child setting a parent sets today, sets an override; a person may lower
+their own ceiling and raise it back no higher than their role and overrides
+give. A guest's default is set when the guest is created.
+
+So: wherever this page says a protection for a child or a teen is
+non-removable, absolute, or beyond any admin setting, read it as the default
+of that role. The defaults are exactly the protections described below, and a
+household that changes nothing has all of them.
+
+Two things stay fixed for everyone, with no role, override, setting, flag or
+mode:
+
+- **Nothing sexual involving a minor is made or shown, to anyone.** It is the
+  top of the rating scale (Prohibited). Its checks fail closed as described
+  below, and code review treats any change that makes it bypassable as a
+  correctness bug of the highest severity.
+- **Crisis handling.** Crisis resources and the crisis overlay are not
+  configurable off.
+
+The non-content protections (prompt injection, jailbreak, the credential and
+private-data catches, technical validation, quotas) and the per-sentence check
+of every spoken turn are not role protections and are not overridable either.
+
+A person is never told they are filtered: content over their ceiling is left
+out, a feature they may not use is absent, and a direct request gets a
+redirect with no mention of age, role or filtering. An admin sees each
+person's role, ceilings and overrides, and household counts of what was held
+back that name no person and no item. An Ask flow an admin chose (a child
+asking a parent for a real-person synth, or for a media title) stays: it is a
+control the admin set, not a filter notice.
+
+Why (the owner's words): "users are assigned to a single role that gets
+assigned access and ratings. an admin can add overrides per user for that
+access or rating or globally for all access and all ratings"; asked what an
+admin may not override: "its those type of static rules that bloat this
+project. and no restrictions on the child or teen role. maybe the person has
+roommates and they want to put them in teen and guests in child". Design
+record: Home `docs/design/content-ratings-and-access-2026-11-16.md` and its
+RULES area "Content filter and feature access".
+
+Public documentation describes these protections as defaults a household's
+admin controls, with the two fixed lines above, and no longer as
+non-removable.
+
+## The defaults, as built
+
+MaiPai gives adults full control of their own local AI. The protections below
+are the defaults of the child and teen roles (and, where a bullet says
+everyone, of every role):
+
+- **Child-safety protections on generation and chat are on by default for
+  the child and teen roles, and the Prohibited check is on every generation.** An adult's typed
   message and the assistant's reply to an adult have no word rule; what
   stops production there is the model's own refusal, and no setting
   disables the generation checks. An adult's discussion of the subject (a
   film, the news, fiction, a conviction, health, advice) is not filtered
   (owner's ruling, 2026-10-19, amended the same day). No
-  admin setting, config flag, environment variable, or "advanced mode" may
-  disable or weaken the protections that remain, including for the
-  household's own admin. Code review treats any change that makes a
-  protection bypassable, or that reinstates a word-pair filter on adult
+  config flag, environment variable or "advanced mode" changes a role's
+  protections: the only way is an admin's override, made in Settings, recorded,
+  and visible to every admin. Code review treats any other path that weakens a
+  role's default, or that reinstates a word-pair filter on adult
   discussion, as a correctness bug of the highest severity. These
   protections and their design may be documented publicly; they are a
-  feature, not a liability. The one named exception is the teen setting in
-  the output-gate bullet below, which picks between two modes that are both
-  checked; the child's mode and everything for a child stays absolute.
+  feature, not a liability. The teen setting in the output-gate bullet below picks between two modes
+  that are both checked.
 - **Child profiles are restricted by default.** Unrestricted generation and
-  chat are unlocked per-user by an adult, never inherited, never the default
+  chat are unlocked per-user by an admin's override, never inherited, never the default
   for a new profile. Safe-by-default, adult-opt-in.
   Two named lanes, owner-approved 2026-10-17 and extended to songs 2026-10-18,
   are restricted modes rather than unrestricted generation: a teen may make
@@ -37,8 +92,7 @@ controls, they are architecture:
   song as sung, on by default with a switch for the home and one per child). A
   child's request that is too scary or too adult is rewritten into a
   kid-friendly version, not refused. Both lanes are held by the same
-  finished-item check and the same minor line; every other child
-  protection stays non-removable.
+  finished-item check and the same minor line.
 - **One set of content protections per person, by age, for everything Home
   makes** (owner's ruling, 2026-10-18): chat, search, pictures, videos and
   songs read the same definition (swearing, drugs, gambling, gore and the
@@ -119,8 +173,8 @@ Adult freedom comes with three standing pieces:
   recalled memory quoted in the thinking included; no voice, glance or shared-screen surface shows reasoning,
   and a shared screen with a child possibly present counts as shared;
   and the turn's record says when reasoning was withheld and why. This is
-  architecture, not a setting: no admin switch, flag or mode may send a
-  child a reasoning stream.
+  the default of the child and teen roles; reasoning is a feature an admin's
+  access override may allow for one person (ruling of 2026-11-16).
 - **The output gate's grain follows the person (owner's ruling,
   2026-10-02).** For a child, and for every spoken turn, each sentence
   is checked before it is released, and no setting loosens that. For an
@@ -174,8 +228,9 @@ Adult freedom comes with three standing pieces:
   adult, 988), staying safe with other people, even-handed beliefs, the hard
   lines (no sexual content or romance role-play, no steps for weapons, drugs,
   crime or dangerous stunts, no extremist praise or recruitment, no
-  weight-loss coaching) and the crisis overlay are the same for every minor
-  and no setting or override reaches them; a safety emergency is always answered with
+  weight-loss coaching) are defaults of the child and teen roles that an admin's override may change
+  (ruling of 2026-11-16); the crisis overlay is the same for everyone and no
+  setting or override reaches it; a safety emergency is always answered with
   "get an adult or call for help" at any level. For a child, family stories
   (Santa Claus, the Tooth Fairy, the Easter Bunny and any a parent adds) are
   never confirmed or denied unless a parent turns that off. No word list or
