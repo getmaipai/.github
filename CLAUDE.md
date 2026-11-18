@@ -99,6 +99,7 @@ measured and reported with the rule named, never dropped (full text and the dele
 - **No pull requests** (only `catalog` takes community PRs). Land directly on `main`; push at natural boundaries; deploys and releases
   need Jesse's word in the moment. Commit only completed, verified work, one logical change per commit, by file name, never
   `git add -A` or `.`. Author identity is the GitHub noreply address.
+- **Routing is a hard rule (Jesse, 2026-11-15, after a parent ran Sonnet agents on test fixing and a flash while Codex was free): (1) Claude cloud, (2) Codex, (3) our local coder (`local-lane`), (4) Claude agents on this machine. A Claude agent here for edits, tests, builds or flashing needs a written reason steps 1 to 3 could not do it.**
 - **Parallel work, in this order (Jesse, 2026-10-19):** (1) Codex first for decided, verifiable work (GPT-6 Luna, low effort, high when needed); (2) the
   local lane second for small and medium decided tasks (one to about six files, a test that can fail) and whenever Codex is limited: OpenCode against the
   household's own coding model through `local-lane dispatch` (`~/.local/bin/local-lane`, setup in `data-scratch/reports/opencode-local-setup.md`; guardrails
@@ -106,6 +107,11 @@ measured and reported with the rule named, never dropped (full text and the dele
   design. Sonnet is the default, Opus gets one bounded question, Haiku gathers evidence, Fable only when Jesse says. Dispatching: use the `dispatch` skill
   (`scripts/wt.sh run codex` then `wait`, or `local-lane dispatch ... --detach` then `local-lane wait`); the dispatcher always reads the diff, runs the
   tests and the gate and commits by file name. `docs/COORDINATION.md` is history plus role policy.
+- **Keep workers busy (Jesse, 2026-11-18; docs-backed: Stop hooks are capped at 8 continuations, `notify_when_idle` works only for plain local sessions, a cloud session cannot message back).** A coordinator
+  keeps a queue file (in its notes folder) with at least two ready briefs per track. Each worker's turn-end note is the trigger: on every note, read the result, send that worker its
+  next queue item in the same turn, and refill the queue. Never answer a note with "waiting". A worker that finishes with nothing queued gets the next plan step, not silence.
+  Cloud workers send no end note, so on every other note check their branch for new commits and push the next brief through `SendMessage`. No Stop hook that blocks idling.
+  Before a coordinator ends its own turn it lists each worker as working or idle; an idle worker with open plan steps is a defect to fix first. A worker's "done" is checked against its diff and checks, never taken as given.
 - **A session that starts a session owns every ask that session makes (Jesse, 2026-11-01).** The parent never guesses what a child needs or
   is waiting on: it reads the child's own transcript (`list_events`, or the session file) and states what it found. Every question,
   approval or download request a child raises reaches Jesse through the wizard, from the parent if the child cannot; the parent tracks
