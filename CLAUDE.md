@@ -99,8 +99,8 @@ measured and reported with the rule named, never dropped (full text and the dele
 - **No pull requests** (only `catalog` takes community PRs). Land directly on `main`; push at natural boundaries; deploys and releases
   need Jesse's word in the moment. Commit only completed, verified work, one logical change per commit, by file name, never
   `git add -A` or `.`. Author identity is the GitHub noreply address.
-- **Routing is a hard rule (Jesse, 2026-11-15, after a parent ran Sonnet agents on test fixing and a flash while Codex was free): (1) Claude cloud, (2) Codex, (3) our local coder (`local-lane`), (4) Claude agents on this machine. A Claude agent here for edits, tests, builds or flashing needs a written reason steps 1 to 3 could not do it.**
-- **Parallel work, in this order (Jesse, 2026-10-19):** (1) Codex first for decided, verifiable work (GPT-6 Luna, low effort, high when needed); (2) the
+- **Routing is a hard rule (Jesse, 2026-11-15; "cloud" redefined 2026-11-18): (1) Claude API sessions ("cloud" means the Claude API, billed to the organization credits on platform.claude.com, started with the `api` session preset; never the subscription and never the Claude Code web sessions), (2) Codex, (3) our local coder (`local-lane`), (4) Claude subscription sessions on this machine (weekly plan limits). A subscription session for edits, tests, builds or flashing needs a written reason steps 1 to 3 could not do it. A session that finishes a turn on the subscription hands its next piece to step 1.**
+- **Parallel work, in this order (Jesse, 2026-10-19):** (0) Claude API first (see Routing); (1) Codex first for decided, verifiable work (GPT-6 Luna, low effort, high when needed); (2) the
   local lane second for small and medium decided tasks (one to about six files, a test that can fail) and whenever Codex is limited: OpenCode against the
   household's own coding model through `local-lane dispatch` (`~/.local/bin/local-lane`, setup in `data-scratch/reports/opencode-local-setup.md`; guardrails
   and receipts built in; Studio only; files the hub's safety floor refuses are skipped); (3) Claude subagents and this session for what needs judgment or
