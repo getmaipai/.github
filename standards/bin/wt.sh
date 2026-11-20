@@ -608,42 +608,89 @@ live_reason() {
   lsout="$(lsof -d cwd -Fn 2>/dev/null)" || lsrc=$?
   if (( lsrc != 0 )) && [[ -z "$lsout" ]]; then echo "lsof failed, cannot rule out a running process"; return; fi
   printf '%s\n' "$lsout" | WT_P="$real" awk 'substr($0,1,1)=="n" {d=substr($0,2); p=ENVIRON["WT_P"]; if (d==p || index(d, p "/")==1) f=1} END {exit !f}' && { echo "a process has its working directory inside"; return; }
-  porcelain="$(git -C "$path" status --porcelain --ignored 2>/dev/null)" || { echo "git status failed"; return; }
-  porcelain="$(printf '%s\n' "$porcelain" | grep -Ev '^!! (.*/)?(node_modules|__pycache__|\.pytest_cache|\.ruff_cache|\.turbo|\.vite)/$|^!! (.*/)?\.DS_Store$' || true)"
+  porcelain="$(git -C "$path" status --porcelain 2>/dev/null)" || { echo "git status failed"; return; }
   [[ -z "$porcelain" ]] || { echo "uncommitted, untracked or ignored files ($(printf '%s\n' "$porcelain" | wc -l | tr -d ' ') paths; removal would delete them)"; return; }
-  git -C "$WT_MAIN" merge-base --is-ancestor "$(read_json "$(session_file "$name")" branch)" origin/main 2>/dev/null || { echo "branch has commits not on origin/main"; return; }
 }
 
-# The reaper is report-only except for one case: a worktree that is provably dead (see live_reason) is removed
-# with `git worktree remove` (no --force) and its merged branch deleted. It never adds, commits, stashes,
-# resets or creates a ref in anyone's worktree. Candidates it keeps are listed in reaped.md with the evidence.
+# ignored_reason <path>: allow only known disposable ignored files and directories.
+ignored_reason() {
+  local path="$1" entry rel reason=""
+  git -C "$path" status --porcelain --ignored --untracked-files=all -z >/dev/null 2>&1 || { echo "ignored files could not be checked"; return; }
+  while IFS= read -r -d '' entry; do
+    [[ "${entry:0:2}" == '!!' ]] || continue
+    rel="${entry:3}"
+    case "$rel" in
+      data|data/*|ort|ort/*|gate-stamps|gate-stamps/*|node_modules|node_modules/*|*/node_modules|*/node_modules/*|.cache|.cache/*|*/.cache|*/.cache/*|dist|dist/*|*/dist|*/dist/*|coverage|coverage/*|*/coverage|*/coverage/*|.turbo|.turbo/*|*/.turbo|*/.turbo/*) ;;
+      .eslintcache|*.log) ;;
+      *) reason+="${reason:+, }$rel";;
+    esac
+  done < <(git -C "$path" status --porcelain --ignored --untracked-files=all -z 2>/dev/null)
+  [[ -z "$reason" ]] || echo "unknown ignored paths ($reason)"
+}
+
+# The reaper removes only a landed, clean and idle worktree with disposable ignored files. It never adds,
+# commits, stashes, resets or creates a ref in anyone's worktree. Candidates it keeps are listed in reaped.md.
 cmd_reap() {
+  local dry_run=0
+  if [[ "${1:-}" == "--dry-run" ]]; then dry_run=1; shift; fi
+  [[ $# == 0 ]] || err "reap takes only --dry-run when requested." 2
+  # A fetch makes the ancestry check reflect the current remote tip. A failure keeps all worktrees.
+  if ! git -C "$WT_MAIN" fetch origin >/dev/null 2>&1; then
+    echo "wt: could not fetch origin/main; no worktrees were reaped." >&2
+    return 0
+  fi
   mkdir -p "$WT_SESSION_DIR" "$WT_PORT_DIR"
-  local f name pid tmuxname path branch created age reason
+  local f name pid tmuxname path branch created age reason head real current main_real
+  main_real="$(cd "$WT_MAIN" 2>/dev/null && pwd -P)"
   shopt -s nullglob
   for f in "$WT_SESSION_DIR"/*.json; do
     name="$(basename "$f" .json)"
     if ! session_usable "$f"; then
       # Cannot prove it dead, so its worktree is never touched; list the file for a person.
-      mkdir -p "$WT_DATA"
-      grep -qF "| $name | $f | kept: session file unreadable" "$WT_DATA/reaped.md" 2>/dev/null || \
-        printf '%s | %s | %s | kept: session file unreadable (empty, truncated or not JSON)\n' "$(date -u +%Y-%m-%dT%H:%M:%SZ)" "$name" "$f" >> "$WT_DATA/reaped.md"
+      if (( dry_run )); then
+        echo "wt: keep session $f: unreadable (empty, truncated or not JSON)" >&2
+      else
+        mkdir -p "$WT_DATA"
+        grep -qF "| $name | $f | kept: session file unreadable" "$WT_DATA/reaped.md" 2>/dev/null || \
+          printf '%s | %s | %s | kept: session file unreadable (empty, truncated or not JSON)\n' "$(date -u +%Y-%m-%dT%H:%M:%SZ)" "$name" "$f" >> "$WT_DATA/reaped.md"
+      fi
       continue
     fi
     pid="$(read_json "$f" pid)"; tmuxname="$(read_json "$f" tmux)"; path="$(read_json "$f" path)"; branch="$(read_json "$f" branch)"
     created="$(read_json "$f" created)"
     age=$(( $(date +%s) - $(date -u -j -f '%Y-%m-%dT%H:%M:%S' "${created%.*}" +%s 2>/dev/null || date -u -d "$created" +%s 2>/dev/null || echo 0) ))
     (( age >= ${MAIPAI_WT_REAP_AGE:-14400} )) || continue
-    if [[ ! -e "$path/.git" ]]; then rm -f "$f" "$WT_SESSION_DIR/$name.beat"; continue; fi
-    reason="$(live_reason "$name" "$path" "$pid" "$tmuxname")"
-    if [[ -z "$reason" ]]; then
-      git -C "$WT_MAIN" worktree remove "$path" >/dev/null 2>&1 && { git -C "$WT_MAIN" branch -d "$branch" >/dev/null 2>&1 || true; rm -f "$f" "$WT_SESSION_DIR/$name.beat"; }
+    if [[ ! -e "$path/.git" ]]; then (( dry_run )) || rm -f "$f" "$WT_SESSION_DIR/$name.beat"; continue; fi
+    real="$(cd "$path" 2>/dev/null && pwd -P)" || real=""
+    current="$(pwd -P)"
+    if [[ -z "$real" || "$real" == "$main_real" || "$current" == "$real" || "$current" == "$real/"* ]]; then
+      reason="main checkout or current-directory worktree"
     else
-      mkdir -p "$WT_DATA"
-      grep -qF "| $name | $path | kept: $reason" "$WT_DATA/reaped.md" 2>/dev/null || \
-        printf '%s | %s | %s | kept: %s\n' "$(date -u +%Y-%m-%dT%H:%M:%SZ)" "$name" "$path" "$reason" >> "$WT_DATA/reaped.md"
+      head="$(git -C "$path" rev-parse HEAD 2>/dev/null)" || head=""
+      if [[ -z "$head" ]] || ! git -C "$WT_MAIN" merge-base --is-ancestor "$head" origin/main 2>/dev/null; then
+        reason="branch has commits not on origin/main"
+      fi
+    fi
+    if [[ -z "$reason" ]]; then reason="$(live_reason "$name" "$path" "$pid" "$tmuxname")"; fi
+    if [[ -z "$reason" ]]; then reason="$(ignored_reason "$path")"; fi
+    if [[ -z "$reason" ]]; then
+      if (( dry_run )); then
+        echo "wt: would remove worktree $path (clean, landed on origin/main, idle; ignored content is disposable)" >&2
+      elif git -C "$WT_MAIN" worktree remove --force "$path" >/dev/null 2>&1; then
+        git -C "$WT_MAIN" merge-base --is-ancestor "$branch" origin/main 2>/dev/null && git -C "$WT_MAIN" branch -d "$branch" >/dev/null 2>&1 || true
+        rm -f "$f" "$WT_SESSION_DIR/$name.beat"
+      fi
+    else
+      if (( dry_run )); then
+        echo "wt: keep worktree $path: $reason" >&2
+      else
+        mkdir -p "$WT_DATA"
+        grep -qF "| $name | $path | kept: $reason" "$WT_DATA/reaped.md" 2>/dev/null || \
+          printf '%s | %s | %s | kept: %s\n' "$(date -u +%Y-%m-%dT%H:%M:%SZ)" "$name" "$path" "$reason" >> "$WT_DATA/reaped.md"
+      fi
     fi
   done
+  if (( dry_run )); then return 0; fi
   for f in "$WT_PORT_DIR"/*.lease; do
     pid="$(awk 'NR==1 {print $1}' "$f" 2>/dev/null || true)"
     [[ -n "$pid" ]] && kill -0 "$pid" 2>/dev/null || rm -f "$f"
@@ -659,7 +706,9 @@ cmd_reap() {
       "worktree "*) wpath="${line#worktree }"; wbranch="";;
       "branch "*) wbranch="${line#branch refs/heads/}";;
       "")
-        [[ -n "${wpath:-}" && "$wpath" != "$WT_MAIN" && "$wbranch" != wt/* && -n "$wbranch" ]] || { wpath=""; continue; }
+        local main_real; main_real="$(cd "$WT_MAIN" 2>/dev/null && pwd -P)"
+        local listed_real; listed_real="$(cd "$wpath" 2>/dev/null && pwd -P)"
+        [[ -n "${wpath:-}" && "$listed_real" != "$main_real" && "$wbranch" != wt/* && -n "$wbranch" ]] || { wpath=""; continue; }
         if [[ -z "$(git -C "$wpath" status --porcelain 2>/dev/null)" ]] && git -C "$WT_MAIN" merge-base --is-ancestor "$wbranch" origin/main 2>/dev/null; then
           echo "wt: removable worktree (clean, branch $wbranch already on origin/main): git -C $WT_MAIN worktree remove $wpath" >&2
         fi
@@ -771,6 +820,6 @@ case "${1:-}" in
   tier) shift; cmd_tier "$@";;
   land) shift; cmd_land "$@";;
   done) shift; cmd_done "$@";;
-  reap) shift; [[ $# == 0 ]] || err "reap takes no arguments; use: wt.sh reap." 2; cmd_reap;;
+  reap) shift; cmd_reap "$@";;
   *) err "unknown or missing command '${1:-}'; use start, tmux, run, wait, port, check, land, done, or reap." 2;;
 esac
