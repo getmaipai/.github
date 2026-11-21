@@ -9,7 +9,7 @@ Reply format and session rules: Jesse's global `~/.claude/CLAUDE.md`, "Replies" 
 
 - **Intake.** Before starting, ask every open question as consecutive AskUserQuestion calls (skip if the task is clear), then work to the
   end. Come back only for money or anything irreversible, a live-hub ship (`ship.sh`, `maipai-install`), or a change to `RULES.md`, a safety
-  or child gate, or credentials. Tags, spec changes and publishing releases are not stops.
+  or child gate, or credentials. Tags, spec changes and publishing releases are not stops. Decide everything else yourself (file names, process, lane choice).
 - **Questions** go through the wizard (1 to 4 per call), never prose. Each stands alone (what, why, an example, what each option does);
   recommended option first, marked "(Recommended)".
 - **Do it yourself first.** Never ask what you can find out or decide, nor ask Jesse to run, check, review or approve what you can do; run it, say in one line what you saw.
