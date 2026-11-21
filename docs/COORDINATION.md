@@ -418,3 +418,30 @@ Why: sessions wrote decision records without checking earlier ones, and 22 contr
 - **A second "fixed, try again" needs re-read proof:** read the stored record or real output yourself before telling Jesse to retry.
 - **Tests:** use the repo's framework (pytest, `bun:test`), copy a nearby test's structure, stay deterministic and offline, name each test for the promise
   it checks. Every real failure becomes a regression test first, in the exact inputs that broke it. A weakened test is a finding, not a step.
+
+### Routing, parallel work, workers and child asks (full text, moved from CLAUDE.md 2026-11-21)
+
+The org CLAUDE.md keeps a short form of each rule; this is the complete wording.
+
+- **Routing is a hard rule (Jesse, 2026-11-15; "cloud" redefined 2026-11-18): (1) Claude API sessions ("cloud" means the Claude API, billed to the organization credits on platform.claude.com, run with `~/.local/bin/api-worker start <slug> <worktree> <brief.md>` (OpenCode on the owner's API key in its own tmux session); never the subscription and never the Claude Code web sessions), (2) Codex, (3) our local coder (`local-lane`), (4) Claude subscription sessions on this machine (weekly plan limits). A subscription session for edits, tests, builds or flashing needs a written reason steps 1 to 3 could not do it. A session that finishes a turn on the subscription hands its next piece to step 1.**
+
+- **Parallel work, in this order (Jesse, 2026-10-19):** (0) Claude API first (see Routing); (1) Codex first for decided, verifiable work (GPT-6 Luna, low effort, high when needed); (2) the
+  local lane second for small and medium decided tasks (one to about six files, a test that can fail) and whenever Codex is limited: OpenCode against the
+  household's own coding model through `local-lane dispatch` (`~/.local/bin/local-lane`, setup in `data-scratch/reports/opencode-local-setup.md`; guardrails
+  and receipts built in; Studio only; files the hub's safety floor refuses are skipped); (3) Claude subagents and this session for what needs judgment or
+  design. Sonnet is the default, Opus gets one bounded question, Haiku gathers evidence, Fable only when Jesse says. Dispatching: use the `dispatch` skill
+  (`scripts/wt.sh run codex` then `wait`, or `local-lane dispatch ... --detach` then `local-lane wait`); the dispatcher always reads the diff, runs the
+  tests and the gate and commits by file name. `docs/COORDINATION.md` is history plus role policy.
+
+- **Keep workers busy (Jesse, 2026-11-18; docs-backed: Stop hooks are capped at 8 continuations, `notify_when_idle` works only for plain local sessions, a cloud session cannot message back).** A coordinator
+  keeps a queue file (in its notes folder) with at least two ready briefs per track. Each worker's turn-end note is the trigger: on every note, read the result, send that worker its
+  next queue item in the same turn, and refill the queue. Never answer a note with "waiting". A worker that finishes with nothing queued gets the next plan step, not silence.
+  Cloud workers send no end note, so on every other note check their branch for new commits and push the next brief through `SendMessage`. No Stop hook that blocks idling.
+  Before a coordinator ends its own turn it lists each worker as working or idle; an idle worker with open plan steps is a defect to fix first. A worker's "done" is checked against its diff and checks, never taken as given.
+
+- **A session that starts a session owns every ask that session makes (Jesse, 2026-11-01).** The parent never guesses what a child needs or
+  is waiting on: it reads the child's own transcript (`list_events`, or the session file) and states what it found. Every question,
+  approval or download request a child raises reaches Jesse through the wizard, from the parent if the child cannot; the parent tracks
+  each one until it is answered and relays the answer to the child. A "needs the user" state is checked and named the moment it appears,
+  and a parent never ends its turn or reports "done" while a child ask is open. When it reports, it says for each child: what it is doing,
+  what it asked, what was answered, and what is still open.
